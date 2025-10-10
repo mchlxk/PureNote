@@ -1,6 +1,7 @@
 #include <QtWidgets>
 
 #include "Mainwindow.h"
+#include "MouseEvent.h"
 
 MainWindow::MainWindow()
 : textEdit(new QPlainTextEdit)
@@ -39,16 +40,7 @@ MainWindow::MainWindow()
 
     readSettings();
 
-    connect(textEdit->document(), &QTextDocument::contentsChanged,
-            this, &MainWindow::documentWasModified);
-
-/*
-#ifndef QT_NO_SESSIONMANAGER
-    QGuiApplication::setFallbackSessionManagementEnabled(false);
-    connect(qApp, &QGuiApplication::commitDataRequest,
-            this, &MainWindow::commitData);
-#endif
-*/
+    connect(textEdit->document(), &QTextDocument::contentsChanged, this, &MainWindow::at_document_contentsChanged);
 
     setCurrentFile(QString());
     setUnifiedTitleAndToolBarOnMac(true);
@@ -66,93 +58,37 @@ void MainWindow::closeEvent(QCloseEvent *event)
 }
 
 
-bool is_alt_lmb_press(const QEvent* evt)
-{
-    if (evt->type() != QEvent::MouseButtonPress)
-        return false;
-    const QMouseEvent* mouseEvt = static_cast<const QMouseEvent*>(evt);
-    if (mouseEvt->modifiers() != Qt::AltModifier)
-        return false;
-    if (mouseEvt->button() != Qt::MouseButton::LeftButton)
-        return false;
-    return true;
-}
-
-bool is_lmb_release(QEvent* evt)
-{
-    return evt->type() == QEvent::MouseButtonRelease
-        && static_cast<QMouseEvent*>(evt)->button() == Qt::MouseButton::LeftButton;
-}
-
-bool is_alt_rmb_press(const QEvent* evt)
-{
-    if (evt->type() != QEvent::MouseButtonPress)
-        return false;
-    const QMouseEvent* mouseEvt = static_cast<const QMouseEvent*>(evt);
-    if (mouseEvt->modifiers() != Qt::AltModifier)
-        return false;
-    if (mouseEvt->button() != Qt::MouseButton::RightButton)
-        return false;
-    return true;
-}
-
-bool is_rmb_release(QEvent* evt)
-{
-    return evt->type() == QEvent::MouseButtonRelease
-        && static_cast<QMouseEvent*>(evt)->button() == Qt::MouseButton::RightButton;
-}
-
-bool is_mmb_press(QEvent* evt)
-{
-    return evt->type() == QEvent::MouseButtonPress
-        && static_cast<QMouseEvent*>(evt)->button() == Qt::MouseButton::MiddleButton;
-}
-
-bool is_mmb_release(QEvent* evt)
-{
-    return evt->type() == QEvent::MouseButtonRelease
-        && static_cast<QMouseEvent*>(evt)->button() == Qt::MouseButton::MiddleButton;
-}
-
-enum class MouseActionE
-{
-    None,
-    MoveMmb,
-    MoveAltLmb,
-    ResizeAltRmb
-};
-
 bool MainWindow::eventFilter(QObject* obj, QEvent* evt)
 {
     static QPoint startPos;
     static QSize startSize;
     static QPoint mouseStartPos;
-    static MouseActionE action{ MouseActionE::None };
+    static MouseEvent::ActionE action{ MouseEvent::ActionE::None };
 
-    if (is_mmb_press(evt))
+    if (MouseEvent::is_mmb_press(evt))
     {
         QMouseEvent* mouseEvent = static_cast<QMouseEvent*>(evt);
         mouseStartPos = mouseEvent->globalPos();
         startPos = pos();
-        action = MouseActionE::MoveMmb;
+        action = MouseEvent::ActionE::MoveMmb;
         return true;
     }
 
-    if (is_alt_lmb_press(evt))
+    if (MouseEvent::is_alt_lmb_press(evt))
     {
         QMouseEvent* mouseEvent = static_cast<QMouseEvent*>(evt);
         mouseStartPos = mouseEvent->globalPos();
         startPos = pos();
-        action = MouseActionE::MoveAltLmb;
+        action = MouseEvent::ActionE::MoveAltLmb;
         return true;
     }
 
-    if (is_alt_rmb_press(evt))
+    if (MouseEvent::is_alt_rmb_press(evt))
     {
         QMouseEvent* mouseEvent = static_cast<QMouseEvent*>(evt);
         mouseStartPos = mouseEvent->globalPos();
         startSize = size();
-        action = MouseActionE::ResizeAltRmb;
+        action = MouseEvent::ActionE::ResizeAltRmb;
         return true;
     }
 
@@ -160,18 +96,18 @@ bool MainWindow::eventFilter(QObject* obj, QEvent* evt)
     {
         switch (action)
         {
-            case MouseActionE::None:
+            case MouseEvent::ActionE::None:
                 break;
 
-            case MouseActionE::MoveMmb:
-            case MouseActionE::MoveAltLmb:
+            case MouseEvent::ActionE::MoveMmb:
+            case MouseEvent::ActionE::MoveAltLmb:
             {
                 QMouseEvent* mouseEvent = static_cast<QMouseEvent*> (evt);
                 move(startPos + (mouseEvent->globalPos() - mouseStartPos));
                 return true;
             }
 
-            case MouseActionE::ResizeAltRmb:
+            case MouseEvent::ActionE::ResizeAltRmb:
             {
                 QMouseEvent* mouseEvent = static_cast<QMouseEvent*> (evt);
                 const auto sizeChange = mouseEvent->globalPos() - mouseStartPos;
@@ -182,26 +118,65 @@ bool MainWindow::eventFilter(QObject* obj, QEvent* evt)
 
     }
 
-    if (is_lmb_release(evt) && action == MouseActionE::MoveAltLmb)
+    if (MouseEvent::is_lmb_release(evt) && action == MouseEvent::ActionE::MoveAltLmb)
     {
-        action = MouseActionE::None;
+        action = MouseEvent::ActionE::None;
         return true;
     }
 
-    if (is_mmb_release(evt) && action == MouseActionE::MoveMmb)
+    if (MouseEvent::is_mmb_release(evt) && action == MouseEvent::ActionE::MoveMmb)
     {
-        action = MouseActionE::None;
+        action = MouseEvent::ActionE::None;
         return true;
     }
 
-    if (is_rmb_release(evt) && action == MouseActionE::ResizeAltRmb)
+    if (MouseEvent::is_rmb_release(evt) && action == MouseEvent::ActionE::ResizeAltRmb)
     {
-        action = MouseActionE::None;
+        action = MouseEvent::ActionE::None;
         return true;
     }
+
+    if (MouseEvent::is_rmb_press(evt))
+    {
+        ShowContextMenu(static_cast<QMouseEvent*>(evt)->globalPos());
+        return true;
+    }
+        
 
     return false;
 }
+
+
+void MainWindow::ShowContextMenu(const QPoint& pos)
+{
+    QMenu* menu = new QMenu;
+
+    QAction* saveAction = new QAction("Save", this);
+    menu->addAction(saveAction);
+    // save
+    // save-as
+    // new note
+    // (un)lock
+    // display on top
+    // set transparent
+    // next color scheme
+
+    menu->addSeparator();
+
+    // defaults -> submenu
+
+    menu->addSeparator();
+
+    // text edit actions
+
+    menu->addSeparator();
+
+    QAction* exitAction = new QAction("Exit", this);
+    menu->addAction(exitAction);
+
+    menu->exec(pos);
+}
+
 
 void MainWindow::newFile()
 {
@@ -252,7 +227,7 @@ void MainWindow::about()
                "toolbars, and a status bar."));
 }
 
-void MainWindow::documentWasModified()
+void MainWindow::at_document_contentsChanged()
 {
     setWindowModified(textEdit->document()->isModified());
 }

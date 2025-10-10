@@ -1,3 +1,5 @@
+#pragma once
+
 #include <QMainWindow>
 #include <QPlainTextEdit>
 
@@ -22,13 +24,8 @@ private slots:
     bool save();
     bool saveAs();
     void about();
-    void documentWasModified();
 
-/*
-#ifndef QT_NO_SESSIONMANAGER
-    void commitData(QSessionManager &);
-#endif
-*/
+    void at_document_contentsChanged();
 
 private:
     void createActions();
@@ -39,6 +36,8 @@ private:
     bool saveFile(const QString &fileName);
     void setCurrentFile(const QString &fileName);
     QString strippedName(const QString &fullFileName);
+
+    void ShowContextMenu(const QPoint& pos);
 
     QPlainTextEdit *textEdit;
     QString curFile;
