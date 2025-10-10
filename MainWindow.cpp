@@ -31,7 +31,7 @@ MainWindow::MainWindow()
 
     */
 
-    SetOnTop(true);
+    SetupWindowFlags(true);
 
     
     textEdit->setStyleSheet("QPlainTextEdit{font-size: 18px; color: #5a5255; background: #fae0ad}");
@@ -157,7 +157,7 @@ void MainWindow::at_customContextMenuRequested(const QPoint& pos)
     menu->addAction(saveAction);
 
 
-    QAction* toggleOnTopAction = new QAction("Display On Top", this);
+    QAction* toggleOnTopAction = new QAction("Stay On Top", this);
     toggleOnTopAction->setCheckable(true);
     toggleOnTopAction->setChecked(IsOnTop());
     connect(toggleOnTopAction, &QAction::triggered, this, &MainWindow::at_contextMenu_toggleOnTop);
@@ -198,7 +198,7 @@ void MainWindow::at_contextMenu_exit()
 
 void MainWindow::at_contextMenu_toggleOnTop()
 {
-    SetOnTop(!IsOnTop());
+    SetupWindowFlags(!IsOnTop());
 }
 
 void MainWindow::newFile()
@@ -215,7 +215,7 @@ void MainWindow::open()
     if (maybeSave()) {
         QString fileName = QFileDialog::getOpenFileName(this);
         if (!fileName.isEmpty())
-            loadFile(fileName);
+            LoadFile(fileName);
     }
 }
 
@@ -347,7 +347,7 @@ bool MainWindow::maybeSave()
 }
 
  
- void MainWindow::loadFile(const QString &fileName)
+ void MainWindow::LoadFile(const QString &fileName)
 {
     QFile file(fileName);
     if (!file.open(QFile::ReadOnly | QFile::Text)) {
@@ -420,20 +420,17 @@ QString MainWindow::strippedName(const QString &fullFileName)
     return QFileInfo(fullFileName).fileName();
 }
 
-
 bool MainWindow::IsOnTop()
 {
     return windowFlags() & Qt::WindowStaysOnTopHint;
 }
 
-void MainWindow::SetOnTop(bool enabled)
+void MainWindow::SetupWindowFlags(bool onTop)
 {
-    if(enabled)
+    if(onTop)
         setWindowFlags(Qt::WindowStaysOnTopHint | Qt::FramelessWindowHint);
     else
-    {
-        setWindowFlags(((windowFlags() & Qt::WindowStaysOnTopHint) ^ Qt::WindowStaysOnTopHint));
-        raise();
-    }
+        setWindowFlags(Qt::FramelessWindowHint);
+    show();
 }
 

@@ -30,12 +30,9 @@ int main(int argc, char *argv[])
 
 int main(int argc, char* argv[])
 {
-//    Q_INIT_RESOURCE(application);
-
-
     QApplication app(argc, argv);
-    QCoreApplication::setOrganizationName("QtProject");
-    QCoreApplication::setApplicationName("Application Example");
+    QCoreApplication::setOrganizationName("PureNote");
+    QCoreApplication::setApplicationName("PureNote");
     QCoreApplication::setApplicationVersion(QT_VERSION_STR);
     QCommandLineParser parser;
     parser.setApplicationDescription(QCoreApplication::applicationName());
@@ -46,7 +43,7 @@ int main(int argc, char* argv[])
 
     MainWindow mainWin;
     if (!parser.positionalArguments().isEmpty())
-        mainWin.loadFile(parser.positionalArguments().first());
+        mainWin.LoadFile(parser.positionalArguments().first());
     mainWin.show();
     return app.exec();
 }

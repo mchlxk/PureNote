@@ -10,7 +10,7 @@ class MainWindow : public QMainWindow
 public:
     MainWindow();
 
-    void loadFile(const QString &fileName);
+    void LoadFile(const QString &fileName);
 
 protected:
     void closeEvent(QCloseEvent *event) override;
@@ -44,7 +44,7 @@ private:
     bool HasFile() { return !curFile.isEmpty(); }
 
     bool IsOnTop();
-    void SetOnTop(bool enabled);
+    void SetupWindowFlags(bool enabled);
 
     QPlainTextEdit *textEdit;
     QString curFile;
