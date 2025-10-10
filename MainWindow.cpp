@@ -5,6 +5,8 @@
 MainWindow::MainWindow()
 : textEdit(new QPlainTextEdit)
 {
+    QCoreApplication::instance()->installEventFilter(this);
+
     setContentsMargins(0, 0, 0, 0);
     setStyleSheet("QMainWindow{font-size: 18px; color: #5a5255; background: #fae0ad}");
     setCentralWidget(textEdit);
@@ -61,6 +63,144 @@ void MainWindow::closeEvent(QCloseEvent *event)
     } else {
         event->ignore();
     }
+}
+
+
+bool is_alt_lmb_press(const QEvent* evt)
+{
+    if (evt->type() != QEvent::MouseButtonPress)
+        return false;
+    const QMouseEvent* mouseEvt = static_cast<const QMouseEvent*>(evt);
+    if (mouseEvt->modifiers() != Qt::AltModifier)
+        return false;
+    if (mouseEvt->button() != Qt::MouseButton::LeftButton)
+        return false;
+    return true;
+}
+
+bool is_lmb_release(QEvent* evt)
+{
+    return evt->type() == QEvent::MouseButtonRelease
+        && static_cast<QMouseEvent*>(evt)->button() == Qt::MouseButton::LeftButton;
+}
+
+bool is_alt_rmb_press(const QEvent* evt)
+{
+    if (evt->type() != QEvent::MouseButtonPress)
+        return false;
+    const QMouseEvent* mouseEvt = static_cast<const QMouseEvent*>(evt);
+    if (mouseEvt->modifiers() != Qt::AltModifier)
+        return false;
+    if (mouseEvt->button() != Qt::MouseButton::RightButton)
+        return false;
+    return true;
+}
+
+bool is_rmb_release(QEvent* evt)
+{
+    return evt->type() == QEvent::MouseButtonRelease
+        && static_cast<QMouseEvent*>(evt)->button() == Qt::MouseButton::RightButton;
+}
+
+bool is_mmb_press(QEvent* evt)
+{
+    return evt->type() == QEvent::MouseButtonPress
+        && static_cast<QMouseEvent*>(evt)->button() == Qt::MouseButton::MiddleButton;
+}
+
+bool is_mmb_release(QEvent* evt)
+{
+    return evt->type() == QEvent::MouseButtonRelease
+        && static_cast<QMouseEvent*>(evt)->button() == Qt::MouseButton::MiddleButton;
+}
+
+enum class MouseActionE
+{
+    None,
+    MoveMmb,
+    MoveAltLmb,
+    ResizeAltRmb
+};
+
+bool MainWindow::eventFilter(QObject* obj, QEvent* evt)
+{
+    static QPoint startPos;
+    static QSize startSize;
+    static QPoint mouseStartPos;
+    static MouseActionE action{ MouseActionE::None };
+
+    if (is_mmb_press(evt))
+    {
+        QMouseEvent* mouseEvent = static_cast<QMouseEvent*>(evt);
+        mouseStartPos = mouseEvent->globalPos();
+        startPos = pos();
+        action = MouseActionE::MoveMmb;
+        return true;
+    }
+
+    if (is_alt_lmb_press(evt))
+    {
+        QMouseEvent* mouseEvent = static_cast<QMouseEvent*>(evt);
+        mouseStartPos = mouseEvent->globalPos();
+        startPos = pos();
+        action = MouseActionE::MoveAltLmb;
+        return true;
+    }
+
+    if (is_alt_rmb_press(evt))
+    {
+        QMouseEvent* mouseEvent = static_cast<QMouseEvent*>(evt);
+        mouseStartPos = mouseEvent->globalPos();
+        startSize = size();
+        action = MouseActionE::ResizeAltRmb;
+        return true;
+    }
+
+    if (evt->type() == QEvent::MouseMove)
+    {
+        switch (action)
+        {
+            case MouseActionE::None:
+                break;
+
+            case MouseActionE::MoveMmb:
+            case MouseActionE::MoveAltLmb:
+            {
+                QMouseEvent* mouseEvent = static_cast<QMouseEvent*> (evt);
+                move(startPos + (mouseEvent->globalPos() - mouseStartPos));
+                return true;
+            }
+
+            case MouseActionE::ResizeAltRmb:
+            {
+                QMouseEvent* mouseEvent = static_cast<QMouseEvent*> (evt);
+                const auto sizeChange = mouseEvent->globalPos() - mouseStartPos;
+                resize(startSize.width() + sizeChange.x(), startSize.height() + sizeChange.y());
+                return true;
+            }
+        }
+
+    }
+
+    if (is_lmb_release(evt) && action == MouseActionE::MoveAltLmb)
+    {
+        action = MouseActionE::None;
+        return true;
+    }
+
+    if (is_mmb_release(evt) && action == MouseActionE::MoveMmb)
+    {
+        action = MouseActionE::None;
+        return true;
+    }
+
+    if (is_rmb_release(evt) && action == MouseActionE::ResizeAltRmb)
+    {
+        action = MouseActionE::None;
+        return true;
+    }
+
+    return false;
 }
 
 void MainWindow::newFile()
