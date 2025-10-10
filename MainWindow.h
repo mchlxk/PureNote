@@ -28,8 +28,18 @@ private slots:
     void at_document_contentsChanged();
     void at_customContextMenuRequested(const QPoint&);
 
-    void at_contextMenu_exit();
-    void at_contextMenu_toggleOnTop();
+    void at_actionSaveAs_triggered();
+    void at_actionExit_triggered();
+    void at_actionToggleOnTop_triggered();
+    void at_actionToggleLock_triggered();
+    void at_actionSave_triggered();
+    void at_actionUndo_triggered();
+    void at_actionRedo_triggered();
+    void at_actionCut_triggered();
+    void at_actionCopy_triggered();
+    void at_actionPaste_triggered();
+    void at_actionSelectAll_triggered();
+
 
 private:
     void createActions();
@@ -42,9 +52,22 @@ private:
     QString strippedName(const QString &fullFileName);
 
     bool HasFile() { return !curFile.isEmpty(); }
+    bool HasUnsavedChanges() { return textEdit->document()->isModified(); }
 
     bool IsOnTop();
     void SetupWindowFlags(bool enabled);
+    void SetLocked(bool locked) { textEdit->setReadOnly(locked); }
+    bool IsLocked() { return textEdit->isReadOnly(); }
+
+    void UpdateWindowTitle();
+
+    QAction* actionSave;
+    QAction* actionUndo;
+    QAction* actionRedo;
+    QAction* actionCut;
+    QAction* actionCopy;
+    QAction* actionPaste;
+    QAction* actionSelectAll;
 
     QPlainTextEdit *textEdit;
     QString curFile;

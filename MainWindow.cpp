@@ -1,4 +1,5 @@
 #include <QtWidgets>
+#include <QTextDocument>
 
 #include "Mainwindow.h"
 #include "MouseEvent.h"
@@ -13,6 +14,7 @@ MainWindow::MainWindow()
     setCentralWidget(textEdit);
     
     setContextMenuPolicy(Qt::CustomContextMenu);
+    
     connect(this, &MainWindow::customContextMenuRequested, this, &MainWindow::at_customContextMenuRequested);
 
     /*
@@ -34,13 +36,30 @@ MainWindow::MainWindow()
     SetupWindowFlags(true);
 
     
-    textEdit->setStyleSheet("QPlainTextEdit{font-size: 18px; color: #5a5255; background: #fae0ad}");
+    //textEdit->setStyleSheet("QPlainTextEdit{font-size: 18px; color: #5a5255; background: #fae0ad}");
+    textEdit->setStyleSheet("QPlainTextEdit{font-size: 18px; color: #dddddd; background: #5a5255}");
+    
+    
     textEdit->document()->setDocumentMargin(10);
 
     createActions();
     createStatusBar();
 
     readSettings();
+
+
+    actionSave = new QAction("Save", this);
+    actionSave->setShortcut(QKeySequence("Ctrl+S"));
+    connect(actionSave, &QAction::triggered, this, &MainWindow::at_actionSave_triggered);
+
+    actionUndo = new QAction("Undo", this);
+    actionUndo->setShortcut(QKeySequence("Ctrl+Z"));
+    connect(actionUndo, &QAction::triggered, this, &MainWindow::at_actionUndo_triggered);
+
+    actionRedo = new QAction("Redo", this);
+    actionRedo->setShortcut(QKeySequence("Ctrl+Shift+Y"));
+    connect(actionRedo, &QAction::triggered, this, &MainWindow::at_actionRedo_triggered);
+
 
     connect(textEdit->document(), &QTextDocument::contentsChanged, this, &MainWindow::at_document_contentsChanged);
 
@@ -143,7 +162,6 @@ bool MainWindow::eventFilter(QObject* obj, QEvent* evt)
         emit customContextMenuRequested(static_cast<QMouseEvent*>(evt)->globalPos());
         return true;
     }
-        
 
     return false;
 }
@@ -152,16 +170,27 @@ void MainWindow::at_customContextMenuRequested(const QPoint& pos)
 {
     QMenu* menu = new QMenu;
 
-    QAction* saveAction = new QAction("Save", this);
-    saveAction->setEnabled(textEdit->document()->isModified() && HasFile());
-    menu->addAction(saveAction);
+    actionSave->setEnabled(textEdit->document()->isModified() && HasFile());
+    connect(actionSave, &QAction::triggered, this, &MainWindow::at_actionSave_triggered);
+    menu->addAction(actionSave);
 
+    QAction* actionSaveAs = new QAction("Save As...", this);
+    connect(actionSaveAs, &QAction::triggered, this, &MainWindow::at_actionSaveAs_triggered);
+    menu->addAction(actionSaveAs);
 
-    QAction* toggleOnTopAction = new QAction("Stay On Top", this);
-    toggleOnTopAction->setCheckable(true);
-    toggleOnTopAction->setChecked(IsOnTop());
-    connect(toggleOnTopAction, &QAction::triggered, this, &MainWindow::at_contextMenu_toggleOnTop);
-    menu->addAction(toggleOnTopAction);
+    menu->addSeparator();
+
+    // defaults -> submenu
+
+    // Text edit actions
+    menu->addSeparator();
+
+    actionUndo->setEnabled(!IsLocked() && textEdit->document()->isUndoAvailable());
+    menu->addAction(actionUndo);
+
+    actionRedo->setEnabled(!IsLocked() && textEdit->document()->isRedoAvailable());
+    menu->addAction(actionRedo);
+
 
 
     // save
@@ -172,34 +201,80 @@ void MainWindow::at_customContextMenuRequested(const QPoint& pos)
     // set transparent
     // next color scheme
 
-    menu->addSeparator();
-
-    // defaults -> submenu
 
     menu->addSeparator();
 
-    // text edit actions
+    QAction* actionToggleOnTop = new QAction("Stay On Top", this);
+    actionToggleOnTop->setCheckable(true);
+    actionToggleOnTop->setChecked(IsOnTop());
+    connect(actionToggleOnTop, &QAction::triggered, this, &MainWindow::at_actionToggleOnTop_triggered);
+    menu->addAction(actionToggleOnTop);
 
-    menu->addSeparator();
+    QAction* actionToggleLock = new QAction("Lock Edits", this);
+    actionToggleLock->setCheckable(true);
+    actionToggleLock->setChecked(IsLocked());
+    connect(actionToggleLock, &QAction::triggered, this, &MainWindow::at_actionToggleLock_triggered);
+    menu->addAction(actionToggleLock);
 
-    QAction* exitAction = new QAction("Exit", this);
-    connect(exitAction, &QAction::triggered, this, &MainWindow::at_contextMenu_exit);
-    menu->addAction(exitAction);
+    QAction* actionExit = new QAction("Exit", this);
+    connect(actionExit, &QAction::triggered, this, &MainWindow::at_actionExit_triggered);
+    menu->addAction(actionExit);
 
     menu->exec(pos);
 }
 
 
-void MainWindow::at_contextMenu_exit()
+void MainWindow::at_actionSave_triggered()
+{
+// TBD
+}
+
+void MainWindow::at_actionSaveAs_triggered()
+{
+    // TBD
+}
+
+
+
+void MainWindow::at_actionExit_triggered()
 {
     emit close();
 }
 
 
-void MainWindow::at_contextMenu_toggleOnTop()
+void MainWindow::at_actionToggleOnTop_triggered()
 {
     SetupWindowFlags(!IsOnTop());
 }
+
+void MainWindow::at_actionToggleLock_triggered()
+{
+    SetLocked(!IsLocked());
+}
+
+
+void MainWindow::at_actionUndo_triggered()
+{
+    if(IsLocked())
+        return;
+    textEdit->document()->undo();
+}
+
+void MainWindow::at_actionRedo_triggered()
+{
+    if (IsLocked())
+        return;
+    textEdit->document()->redo();
+}
+
+
+void MainWindow::at_actionCut_triggered() {}
+void MainWindow::at_actionCopy_triggered() {}
+void MainWindow::at_actionPaste_triggered() {}
+void MainWindow::at_actionSelectAll_triggered() {}
+
+
+
 
 void MainWindow::newFile()
 {
@@ -408,12 +483,23 @@ void MainWindow::setCurrentFile(const QString &fileName)
     curFile = fileName;
     textEdit->document()->setModified(false);
     setWindowModified(false);
-
-    QString shownName = curFile;
-    if (curFile.isEmpty())
-        shownName = "untitled.txt";
-    setWindowFilePath(shownName);
+    UpdateWindowTitle();
 }
+
+void MainWindow::UpdateWindowTitle()
+{
+    QString title = curFile.isEmpty()
+        ? "Untitled"
+        : curFile;
+
+    if (HasUnsavedChanges())
+        title += "*";
+
+    title += " [PureNote]";
+
+    setWindowTitle(title);
+}
+
 
 QString MainWindow::strippedName(const QString &fullFileName)
 {
