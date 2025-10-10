@@ -11,7 +11,9 @@ MainWindow::MainWindow()
     setContentsMargins(0, 0, 0, 0);
     setStyleSheet("QMainWindow{font-size: 18px; color: #5a5255; background: #fae0ad}");
     setCentralWidget(textEdit);
-
+    
+    setContextMenuPolicy(Qt::CustomContextMenu);
+    connect(this, &MainWindow::customContextMenuRequested, this, &MainWindow::at_customContextMenuRequested);
 
     /*
     #f0adb0 	(240,173,176)
@@ -29,7 +31,7 @@ MainWindow::MainWindow()
 
     */
 
-    setWindowFlags(Qt::WindowStaysOnTopHint | Qt::FramelessWindowHint);
+    SetOnTop(true);
 
     
     textEdit->setStyleSheet("QPlainTextEdit{font-size: 18px; color: #5a5255; background: #fae0ad}");
@@ -138,7 +140,7 @@ bool MainWindow::eventFilter(QObject* obj, QEvent* evt)
 
     if (MouseEvent::is_rmb_press(evt))
     {
-        ShowContextMenu(static_cast<QMouseEvent*>(evt)->globalPos());
+        emit customContextMenuRequested(static_cast<QMouseEvent*>(evt)->globalPos());
         return true;
     }
         
@@ -146,13 +148,22 @@ bool MainWindow::eventFilter(QObject* obj, QEvent* evt)
     return false;
 }
 
-
-void MainWindow::ShowContextMenu(const QPoint& pos)
+void MainWindow::at_customContextMenuRequested(const QPoint& pos)
 {
     QMenu* menu = new QMenu;
 
     QAction* saveAction = new QAction("Save", this);
+    saveAction->setEnabled(textEdit->document()->isModified() && HasFile());
     menu->addAction(saveAction);
+
+
+    QAction* toggleOnTopAction = new QAction("Display On Top", this);
+    toggleOnTopAction->setCheckable(true);
+    toggleOnTopAction->setChecked(IsOnTop());
+    connect(toggleOnTopAction, &QAction::triggered, this, &MainWindow::at_contextMenu_toggleOnTop);
+    menu->addAction(toggleOnTopAction);
+
+
     // save
     // save-as
     // new note
@@ -172,11 +183,23 @@ void MainWindow::ShowContextMenu(const QPoint& pos)
     menu->addSeparator();
 
     QAction* exitAction = new QAction("Exit", this);
+    connect(exitAction, &QAction::triggered, this, &MainWindow::at_contextMenu_exit);
     menu->addAction(exitAction);
 
     menu->exec(pos);
 }
 
+
+void MainWindow::at_contextMenu_exit()
+{
+    emit close();
+}
+
+
+void MainWindow::at_contextMenu_toggleOnTop()
+{
+    SetOnTop(!IsOnTop());
+}
 
 void MainWindow::newFile()
 {
@@ -380,7 +403,6 @@ bool MainWindow::maybeSave()
 
 
 
-
 void MainWindow::setCurrentFile(const QString &fileName)
 {
     curFile = fileName;
@@ -393,10 +415,25 @@ void MainWindow::setCurrentFile(const QString &fileName)
     setWindowFilePath(shownName);
 }
 
-
-
 QString MainWindow::strippedName(const QString &fullFileName)
 {
     return QFileInfo(fullFileName).fileName();
+}
+
+
+bool MainWindow::IsOnTop()
+{
+    return windowFlags() & Qt::WindowStaysOnTopHint;
+}
+
+void MainWindow::SetOnTop(bool enabled)
+{
+    if(enabled)
+        setWindowFlags(Qt::WindowStaysOnTopHint | Qt::FramelessWindowHint);
+    else
+    {
+        setWindowFlags(((windowFlags() & Qt::WindowStaysOnTopHint) ^ Qt::WindowStaysOnTopHint));
+        raise();
+    }
 }
 

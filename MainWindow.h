@@ -26,6 +26,10 @@ private slots:
     void about();
 
     void at_document_contentsChanged();
+    void at_customContextMenuRequested(const QPoint&);
+
+    void at_contextMenu_exit();
+    void at_contextMenu_toggleOnTop();
 
 private:
     void createActions();
@@ -37,7 +41,10 @@ private:
     void setCurrentFile(const QString &fileName);
     QString strippedName(const QString &fullFileName);
 
-    void ShowContextMenu(const QPoint& pos);
+    bool HasFile() { return !curFile.isEmpty(); }
+
+    bool IsOnTop();
+    void SetOnTop(bool enabled);
 
     QPlainTextEdit *textEdit;
     QString curFile;
