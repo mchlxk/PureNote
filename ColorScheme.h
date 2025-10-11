@@ -16,12 +16,14 @@ namespace std {
 
 namespace ColorScheme
 {
-	using T = std::tuple<QString, QString>;
+	using T = std::tuple<QString, QString, QString>;
 	
 	static inline QString& fg(T& op) { return std::get<0>(op); }
 	static inline const QString& fg(const  T& op) { return std::get<0>(op); }
 	static inline QString& bg(T& op) { return std::get<1>(op); }
 	static inline const QString& bg(const  T& op) { return std::get<1>(op); }
+	static inline QString& highlighted(T& op) { return std::get<2>(op); }
+	static inline const QString& highlighted(const  T& op) { return std::get<2>(op); }
 
 	extern const std::unordered_map<QString, T> schemas;
 }
