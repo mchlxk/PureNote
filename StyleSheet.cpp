@@ -2,7 +2,11 @@
 
 QString StyleSheet::format_global(const color_scheme_t& scheme, uint32_t fontSize)
 {
-    return format_main_window(scheme, fontSize) + format_scrollbar(scheme) + format_push_button() + format_menu();
+    return format_main_window(scheme, fontSize) 
+        + format_scrollbar(scheme) 
+        + format_push_button() 
+        + format_menu()
+        + format_message_box();
 }
 
 
@@ -59,22 +63,36 @@ QString StyleSheet::format_menu()
     return QString(
         "QMenu{border: 0; color: %1; background-color: %2} "
         "QMenu::separator{height: 15px; background: %2; margin-left: 0px; margin-right: 0px; } "
-        "QMenu::item{ padding: 2 25px 2 20px; border: 0; } QMenu::item:selected{ background: %3; }").arg(
+        "QMenu::item{ padding: 2 25px 2 20px; border: 0; } "
+        "QMenu::item:selected{ background: %3; }"
+        "QMenu::item:disabled{ color: %4 }" ).arg(
             ColorScheme::Ui::color,
             ColorScheme::Ui::background,
-            ColorScheme::Ui::highlighted);
+            ColorScheme::Ui::highlighted,
+            ColorScheme::Ui::dimmed);
 }
 
 
 QString StyleSheet::format_push_button()
 {
     return QString(
-        "QPushButton{border: 0; font: bold; color: %1; background-color: %2; padding: 5 25px 5 25px;}"
-        "QPushButton:hover{background-color: %3;}"
-        "QPushButton:pressed{background-color: %2;}" ).arg(
+        "QPushButton{border: 0; color: %1; background-color: %3; padding: 5 25px 5 25px;}"
+        "QPushButton:hover{color: %4;}"
+        "QPushButton:pressed{color: %4; background-color: %2;}" ).arg(
             ColorScheme::Ui::color,
             ColorScheme::Ui::background,
-			ColorScheme::Ui::highlighted);
+			ColorScheme::Ui::highlighted,
+            ColorScheme::Ui::dimmed);
 }
+
+QString StyleSheet::format_message_box()
+{
+    return QString(
+        "QMessageBox{ color: %1; background: %2;}" 
+        "QMessageBox QLabel{ color: %1;}" ).arg(
+            ColorScheme::Ui::color,
+			ColorScheme::Ui::background );
+}
+
 
 

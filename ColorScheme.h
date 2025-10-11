@@ -24,6 +24,7 @@ namespace ColorScheme
 	namespace Ui
 	{
 		extern const QString color;
+		extern const QString dimmed;
 		extern const QString background;
 		extern const QString highlighted;
 	}

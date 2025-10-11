@@ -98,6 +98,7 @@
     <ClCompile Include="MainWindow.cpp" />
     <ClCompile Include="MouseEvent.cpp" />
     <ClCompile Include="SchemeIcon.cpp" />
+    <ClCompile Include="Style.cpp" />
     <ClCompile Include="StyleSheet.cpp" />
     <QtRcc Include="qml.qrc" />
     <None Include="main.qml" />
@@ -110,6 +111,7 @@
     <ClInclude Include="HashQString.h" />
     <ClInclude Include="MouseEvent.h" />
     <ClInclude Include="SchemeIcon.h" />
+    <ClInclude Include="Style.h" />
     <ClInclude Include="StyleSheet.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

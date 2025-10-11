@@ -4,7 +4,7 @@
 #include <QPlainTextEdit>
 #include <QLabel>
 
-using style_t = std::tuple<QString, uint32_t>;
+#include "Style.h"
 
 class MainWindow : public QMainWindow
 {
@@ -41,12 +41,13 @@ private slots:
     void at_actionPaste_triggered();
     void at_actionSelectAll_triggered();
     void at_actionSetColorScheme_triggered();
+    void at_actionSetFontSize_triggered();
 
 
 private:
     void readSettings();
     void writeSettings();
-    bool maybeSave();
+    bool ResolveUnsavedChanges();
     bool saveFile(const QString &fileName);
     void setCurrentFile(const QString &fileName);
     QString strippedName(const QString &fullFileName);
@@ -87,5 +88,6 @@ private:
     QString curFile;
     QString title;
 
-    style_t m_style{ "Flamingo", 18 };
+    style_t m_style{ Style::defaults };
 };
+

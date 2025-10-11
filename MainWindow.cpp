@@ -9,10 +9,19 @@
 #include "SchemeIcon.h"
 
 
-namespace ColorSchemeProperty
+namespace Property
 {
-	static void set(QObject* obj, const QString& scheme) { obj->setProperty("color_scheme", scheme); }
-	static QString get(QObject* obj) { return obj->property("color_scheme").toString(); }
+    namespace ColorScheme
+    {
+        static void set(QObject* obj, const QString& scheme) { obj->setProperty("color_scheme", scheme); }
+        static QString get(QObject* obj) { return obj->property("color_scheme").toString(); }
+    }
+
+    namespace FontSize
+    {
+        static void set(QObject* obj, uint32_t size) { obj->setProperty("font_size", size); }
+        static uint32_t get(QObject* obj) { return obj->property("font_size").toUInt(); }
+    }
 }
 
 MainWindow::MainWindow()
@@ -138,10 +147,13 @@ void MainWindow::createActions()
 
 void MainWindow::closeEvent(QCloseEvent *event)
 {
-    if (maybeSave()) {
+    if (ResolveUnsavedChanges()) 
+    {
         writeSettings();
         event->accept();
-    } else {
+    }
+    else 
+    {
         event->ignore();
     }
 }
@@ -277,12 +289,28 @@ void MainWindow::at_customContextMenuRequested(const QPoint& pos)
     {
         const QString name = scheme.first;
         QAction* actionScheme = new QAction(name);
-        ColorSchemeProperty::set(actionScheme, name);
+        Property::ColorScheme::set(actionScheme, name);
         connect(actionScheme, &QAction::triggered, this, &MainWindow::at_actionSetColorScheme_triggered);
+        if (name == Style::color_scheme(m_style))
+            actionScheme->setEnabled(false);
         actionScheme->setIcon(SchemeIcon::get(scheme.second, 24));
         colorSchemesSubmenu->addAction(actionScheme);
     }
     menu->addMenu(colorSchemesSubmenu);
+
+
+    QMenu* fontSizeSubmenu = new QMenu("Select Font Size", this);
+    fontSizeSubmenu->setWindowFlags(fontSizeSubmenu->windowFlags() | Qt::NoDropShadowWindowHint);
+    for (const uint32_t size : Style::font_sizes)
+    {
+        QAction* actionSize = new QAction(QString::number(size));
+        Property::FontSize::set(actionSize, size);
+        connect(actionSize, &QAction::triggered, this, &MainWindow::at_actionSetFontSize_triggered);
+        if (size == Style::font_size(m_style))
+            actionSize->setEnabled(false);
+        fontSizeSubmenu->addAction(actionSize);
+    }
+    menu->addMenu(fontSizeSubmenu);
 
     menu->addSeparator();
 
@@ -350,9 +378,16 @@ void MainWindow::at_actionSelectAll_triggered() {}
 
 void MainWindow::at_actionSetColorScheme_triggered()
 {
-    const QString schemeName = ColorSchemeProperty::get(sender());
+    const QString schemeName = Property::ColorScheme::get(sender());
     SetStyle({schemeName, std::get<1>(m_style)});
 }
+
+void MainWindow::at_actionSetFontSize_triggered()
+{
+    const uint32_t size = Property::FontSize::get(sender());
+    SetStyle({std::get<0>(m_style), size});
+}
+
 
 
 void MainWindow::SetStyle(const style_t& style)
@@ -380,20 +415,22 @@ void MainWindow::UpdatePerStyle()
 
 void MainWindow::newFile()
 {
-    if (maybeSave()) {
-        textEdit->clear();
-        setCurrentFile(QString());
-    }
+    if (!ResolveUnsavedChanges())
+        return;
+
+	textEdit->clear();
+	setCurrentFile(QString());
 }
 
 
 void MainWindow::open()
 {
-    if (maybeSave()) {
-        QString fileName = QFileDialog::getOpenFileName(this);
-        if (!fileName.isEmpty())
-            LoadFile(fileName);
-    }
+    if (!ResolveUnsavedChanges())
+        return;
+
+	QString fileName = QFileDialog::getOpenFileName(this);
+	if (!fileName.isEmpty())
+		LoadFile(fileName);
 }
 
 
@@ -458,23 +495,27 @@ void MainWindow::at_document_contentsChanged()
 
 
 
-bool MainWindow::maybeSave()
+bool MainWindow::ResolveUnsavedChanges()
 {
-    if (!textEdit->document()->isModified())
+    if (!HasUnsavedChanges())
         return true;
-    const QMessageBox::StandardButton ret
-        = QMessageBox::warning(this, tr("Application"),
-                               tr("The document has been modified.\n"
-                                  "Do you want to save your changes?"),
-                               QMessageBox::Save | QMessageBox::Discard | QMessageBox::Cancel);
 
-    switch (ret) {
-    case QMessageBox::Save:
-        return save();
-    case QMessageBox::Cancel:
-        return false;
-    default:
-        break;
+    QMessageBox msgBox(this);
+    msgBox.setWindowTitle("PureNote");
+    msgBox.setText("The document has been modified.\nDo you want to save your changes?");
+    msgBox.setStandardButtons(QMessageBox::Save | QMessageBox::Discard | QMessageBox::Cancel);
+    msgBox.setWindowFlags(msgBox.windowFlags() | Qt::FramelessWindowHint);
+
+    const auto ret = msgBox.exec();
+
+    switch (ret) 
+    {
+		case QMessageBox::Save:
+			return save();
+		case QMessageBox::Cancel:
+			return false;
+		default:
+			break;
     }
     return true;
 }
