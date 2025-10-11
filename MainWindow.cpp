@@ -10,7 +10,15 @@ MainWindow::MainWindow()
     QCoreApplication::instance()->installEventFilter(this);
 
     setContentsMargins(0, 0, 0, 0);
-    setStyleSheet("QMainWindow{font-size: 18px; color: #5a5255; background: #fae0ad}");
+
+    //setStyleSheet("QMainWindow{font-size: 18px; color: #5a5255; background: #fae0ad}");
+    setStyleSheet("QMainWindow{font-size: 18px; color: #ff8d48; background-color: #232323}");
+    textEdit->setStyleSheet("QPlainTextEdit{font-size: 18px; color: #ff8d48; background-color: #232323}");
+
+    //textEdit->setStyleSheet("QPlainTextEdit{font-size: 18px; color: #5a5255; background: #fae0ad}");
+    //textEdit->setStyleSheet("QPlainTextEdit{font-size: 18px; color: #dddddd; background: #5a5255}");
+
+
     setCentralWidget(textEdit);
 
     statusBar()->setStyleSheet("QStatusBar{font-size: 18px; color: #5a5255; background: #fae0ad}");
@@ -27,6 +35,14 @@ MainWindow::MainWindow()
 	#c6d7b2 	(198,215,178)
 	#c4def0 	(196,222,240)
     
+    dark:
+    #dddddd
+    #5a5255
+
+    milanote:
+    #ff8d48
+    #232323
+
     
     QLabel {
         background-image: url(dense6pattern.png);
@@ -38,9 +54,6 @@ MainWindow::MainWindow()
 
     SetupWindowFlags(true);
 
-    
-    //textEdit->setStyleSheet("QPlainTextEdit{font-size: 18px; color: #5a5255; background: #fae0ad}");
-    textEdit->setStyleSheet("QPlainTextEdit{font-size: 18px; color: #dddddd; background: #5a5255}");
     
     
     textEdit->document()->setDocumentMargin(10);
