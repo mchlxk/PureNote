@@ -39,6 +39,7 @@ private slots:
     void at_actionCopy_triggered();
     void at_actionPaste_triggered();
     void at_actionSelectAll_triggered();
+    void at_actionSetColorScheme_triggered();
 
 
 private:
@@ -60,6 +61,7 @@ private:
 
     void SetupActions();
     void UpdatePerFile();
+    void SetColorScheme(const QString& name);
 
     QAction* actionSave;
     QAction* actionSaveAs;

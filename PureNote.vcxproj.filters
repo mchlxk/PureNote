@@ -34,6 +34,12 @@
     <ClCompile Include="MouseEvent.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="ColorScheme.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="StyleSheet.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <QtMoc Include="MainWindow.h">
@@ -42,6 +48,12 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="MouseEvent.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ColorScheme.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="StyleSheet.h">
       <Filter>Source Files</Filter>
     </ClInclude>
   </ItemGroup>

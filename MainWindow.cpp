@@ -4,62 +4,37 @@
 #include "Mainwindow.h"
 #include "MouseEvent.h"
 
+#include "StyleSheet.h"
+#include "ColorScheme.h"
+
+
+static void store_color_scheme(QObject* obj, const QString& scheme) { obj->setProperty("color_scheme", scheme); }
+static QString extract_color_scheme(QObject* obj) { return obj->property("color_scheme").toString(); }
+
+
 MainWindow::MainWindow()
 : textEdit(new QPlainTextEdit)
 {
+
     QCoreApplication::instance()->installEventFilter(this);
 
     setContentsMargins(0, 0, 0, 0);
 
-    //setStyleSheet("QMainWindow{font-size: 18px; color: #5a5255; background: #fae0ad}");
-    setStyleSheet("QMainWindow{font-size: 18px; color: #ff8d48; background-color: #232323}");
-    textEdit->setStyleSheet("QPlainTextEdit{font-size: 18px; color: #ff8d48; background-color: #232323}");
-
-    //textEdit->setStyleSheet("QPlainTextEdit{font-size: 18px; color: #5a5255; background: #fae0ad}");
-    //textEdit->setStyleSheet("QPlainTextEdit{font-size: 18px; color: #dddddd; background: #5a5255}");
-
+    SetColorScheme("Flamingo");
 
     setCentralWidget(textEdit);
 
-    statusBar()->setStyleSheet("QStatusBar{font-size: 18px; color: #5a5255; background: #fae0ad}");
  
     
     setContextMenuPolicy(Qt::CustomContextMenu);
     
     connect(this, &MainWindow::customContextMenuRequested, this, &MainWindow::at_customContextMenuRequested);
 
-    /*
-    #f0adb0 	(240,173,176)
-	#f5c2ab 	(245,194,171)
-	#fae0ad 	(250,224,173)
-	#c6d7b2 	(198,215,178)
-	#c4def0 	(196,222,240)
-    
-    dark:
-    #dddddd
-    #5a5255
-
-    milanote:
-    #ff8d48
-    #232323
-
-    
-    QLabel {
-        background-image: url(dense6pattern.png);
-        background-repeat: repeat-xy;
-    }
-
-
-    */
-
     SetupWindowFlags(true);
 
-    
-    
     textEdit->document()->setDocumentMargin(10);
 
     SetupActions();
-
 
     readSettings();
 
@@ -275,6 +250,19 @@ void MainWindow::at_customContextMenuRequested(const QPoint& pos)
 
     menu->addSeparator();
 
+    QMenu* colorSchemesSubmenu = new QMenu("Select Color Scheme");
+    for (const auto& scheme : ColorScheme::schemas)
+    {
+        const QString name = scheme.first;
+        QAction* actionScheme = new QAction(name);
+        store_color_scheme(actionScheme, name);
+        connect(actionScheme, &QAction::triggered, this, &MainWindow::at_actionSetColorScheme_triggered);
+        colorSchemesSubmenu->addAction(actionScheme);
+    }
+    menu->addMenu(colorSchemesSubmenu);
+
+    menu->addSeparator();
+
     actionToggleOnTop->setChecked(IsOnTop());
     menu->addAction(actionToggleOnTop);
 
@@ -337,6 +325,21 @@ void MainWindow::at_actionPaste_triggered() {}
 void MainWindow::at_actionSelectAll_triggered() {}
 
 
+void MainWindow::at_actionSetColorScheme_triggered()
+{
+    const QString schemeName = extract_color_scheme(sender());
+    SetColorScheme(schemeName);
+}
+
+
+void MainWindow::SetColorScheme(const QString& name)
+{
+    if (!ColorScheme::schemas.count(name))
+        return;
+    setStyleSheet(StyleSheet::format_main_window(ColorScheme::schemas.at(name), 18));
+    textEdit->setStyleSheet(StyleSheet::format_text_edit(ColorScheme::schemas.at(name), 18));
+    statusBar()->setStyleSheet(StyleSheet::format_status_bar(ColorScheme::schemas.at(name), 18));
+}
 
 
 void MainWindow::newFile()
