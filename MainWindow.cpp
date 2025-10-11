@@ -343,7 +343,7 @@ void MainWindow::SetColorScheme(const QString& name)
 {
     if (!ColorScheme::schemas.count(name))
         return;
-    setStyleSheet(StyleSheet::format_main_window(ColorScheme::schemas.at(name), 18));
+    setStyleSheet(StyleSheet::format_global(ColorScheme::schemas.at(name), 18));
     textEdit->setStyleSheet(StyleSheet::format_text_edit(ColorScheme::schemas.at(name), 18));
     statusBar()->setStyleSheet(StyleSheet::format_status_bar(ColorScheme::schemas.at(name), 18));
 }
