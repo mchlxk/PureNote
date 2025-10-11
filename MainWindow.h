@@ -42,8 +42,6 @@ private slots:
 
 
 private:
-    void createActions();
-    void createStatusBar();
     void readSettings();
     void writeSettings();
     bool maybeSave();
@@ -51,24 +49,31 @@ private:
     void setCurrentFile(const QString &fileName);
     QString strippedName(const QString &fullFileName);
 
-    bool HasFile() { return !curFile.isEmpty(); }
-    bool HasUnsavedChanges() { return textEdit->document()->isModified(); }
+    bool HasFile() const { return !curFile.isEmpty(); }
+    bool HasUnsavedChanges() const { return textEdit->document()->isModified(); }
+    bool HasTitle() const { return !title.isEmpty(); }
 
     bool IsOnTop();
     void SetupWindowFlags(bool enabled);
     void SetLocked(bool locked) { textEdit->setReadOnly(locked); }
     bool IsLocked() { return textEdit->isReadOnly(); }
 
-    void UpdateWindowTitle();
+    void SetupActions();
+    void UpdatePerFile();
 
     QAction* actionSave;
+    QAction* actionSaveAs;
     QAction* actionUndo;
     QAction* actionRedo;
     QAction* actionCut;
     QAction* actionCopy;
     QAction* actionPaste;
     QAction* actionSelectAll;
+    QAction* actionToggleOnTop;
+    QAction* actionToggleLock;
+    QAction* actionExit;
 
     QPlainTextEdit *textEdit;
     QString curFile;
+    QString title;
 };

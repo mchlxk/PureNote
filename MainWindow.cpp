@@ -12,6 +12,9 @@ MainWindow::MainWindow()
     setContentsMargins(0, 0, 0, 0);
     setStyleSheet("QMainWindow{font-size: 18px; color: #5a5255; background: #fae0ad}");
     setCentralWidget(textEdit);
+
+    statusBar()->setStyleSheet("QStatusBar{font-size: 18px; color: #5a5255; background: #fae0ad}");
+ 
     
     setContextMenuPolicy(Qt::CustomContextMenu);
     
@@ -42,15 +45,26 @@ MainWindow::MainWindow()
     
     textEdit->document()->setDocumentMargin(10);
 
-    createActions();
-    createStatusBar();
+    SetupActions();
+
 
     readSettings();
 
+    connect(textEdit->document(), &QTextDocument::contentsChanged, this, &MainWindow::at_document_contentsChanged);
+
+    setCurrentFile(QString());
+    setUnifiedTitleAndToolBarOnMac(true);
+}
+
+void MainWindow::SetupActions()
+{
 
     actionSave = new QAction("Save", this);
     actionSave->setShortcut(QKeySequence("Ctrl+S"));
     connect(actionSave, &QAction::triggered, this, &MainWindow::at_actionSave_triggered);
+
+    actionSaveAs = new QAction("Save As...", this);
+    connect(actionSaveAs, &QAction::triggered, this, &MainWindow::at_actionSaveAs_triggered);
 
     actionUndo = new QAction("Undo", this);
     actionUndo->setShortcut(QKeySequence("Ctrl+Z"));
@@ -60,12 +74,58 @@ MainWindow::MainWindow()
     actionRedo->setShortcut(QKeySequence("Ctrl+Shift+Y"));
     connect(actionRedo, &QAction::triggered, this, &MainWindow::at_actionRedo_triggered);
 
+    actionToggleOnTop = new QAction("Stay On Top", this);
+    actionToggleOnTop->setCheckable(true);
+    actionToggleOnTop->setChecked(IsOnTop());
+    connect(actionToggleOnTop, &QAction::triggered, this, &MainWindow::at_actionToggleOnTop_triggered);
 
-    connect(textEdit->document(), &QTextDocument::contentsChanged, this, &MainWindow::at_document_contentsChanged);
+    actionToggleLock = new QAction("Lock Edits", this);
+    actionToggleLock->setCheckable(true);
+    actionToggleLock->setChecked(IsLocked());
+    connect(actionToggleLock, &QAction::triggered, this, &MainWindow::at_actionToggleLock_triggered);
 
-    setCurrentFile(QString());
-    setUnifiedTitleAndToolBarOnMac(true);
+    actionExit = new QAction("Exit", this);
+    actionExit->setShortcut(QKeySequence("Ctrl+X"));
+    connect(actionExit, &QAction::triggered, this, &MainWindow::at_actionExit_triggered);
 }
+
+
+/*
+void MainWindow::createActions()
+{
+    QMenu *fileMenu = menuBar()->addMenu(tr("&File"));
+    QToolBar *fileToolBar = addToolBar(tr("File"));
+    const QIcon newIcon = QIcon::fromTheme("document-new", QIcon(":/images/new.png"));
+    QAction *newAct = new QAction(newIcon, tr("&New"), this);
+    newAct->setShortcuts(QKeySequence::New);
+    newAct->setStatusTip(tr("Create a new file"));
+    connect(newAct, &QAction::triggered, this, &MainWindow::newFile);
+    fileMenu->addAction(newAct);
+    fileToolBar->addAction(newAct);
+
+    const QIcon openIcon = QIcon::fromTheme("document-open", QIcon(":/images/open.png"));
+    QAction *openAct = new QAction(openIcon, tr("&Open..."), this);
+    openAct->setShortcuts(QKeySequence::Open);
+    openAct->setStatusTip(tr("Open an existing file"));
+    connect(openAct, &QAction::triggered, this, &MainWindow::open);
+    fileMenu->addAction(openAct);
+    fileToolBar->addAction(openAct);
+    */
+
+    /*
+    QAction *aboutQtAct = helpMenu->addAction(tr("About &Qt"), qApp, &QApplication::aboutQt);
+    aboutQtAct->setStatusTip(tr("Show the Qt library's About box")) ;
+
+
+    #ifndef QT_NO_CLIPBOARD
+    cutAct->setEnabled(false);
+    copyAct->setEnabled(false);
+    connect(textEdit, &QPlainTextEdit::copyAvailable, cutAct, &QAction::setEnabled);
+    connect(textEdit, &QPlainTextEdit::copyAvailable, copyAct, &QAction::setEnabled);
+#endif // !QT_NO_CLIPBOARD
+}
+*/
+
 
 
 void MainWindow::closeEvent(QCloseEvent *event)
@@ -174,8 +234,6 @@ void MainWindow::at_customContextMenuRequested(const QPoint& pos)
     connect(actionSave, &QAction::triggered, this, &MainWindow::at_actionSave_triggered);
     menu->addAction(actionSave);
 
-    QAction* actionSaveAs = new QAction("Save As...", this);
-    connect(actionSaveAs, &QAction::triggered, this, &MainWindow::at_actionSaveAs_triggered);
     menu->addAction(actionSaveAs);
 
     menu->addSeparator();
@@ -204,20 +262,12 @@ void MainWindow::at_customContextMenuRequested(const QPoint& pos)
 
     menu->addSeparator();
 
-    QAction* actionToggleOnTop = new QAction("Stay On Top", this);
-    actionToggleOnTop->setCheckable(true);
     actionToggleOnTop->setChecked(IsOnTop());
-    connect(actionToggleOnTop, &QAction::triggered, this, &MainWindow::at_actionToggleOnTop_triggered);
     menu->addAction(actionToggleOnTop);
 
-    QAction* actionToggleLock = new QAction("Lock Edits", this);
-    actionToggleLock->setCheckable(true);
     actionToggleLock->setChecked(IsLocked());
-    connect(actionToggleLock, &QAction::triggered, this, &MainWindow::at_actionToggleLock_triggered);
     menu->addAction(actionToggleLock);
 
-    QAction* actionExit = new QAction("Exit", this);
-    connect(actionExit, &QAction::triggered, this, &MainWindow::at_actionExit_triggered);
     menu->addAction(actionExit);
 
     menu->exec(pos);
@@ -330,52 +380,7 @@ void MainWindow::at_document_contentsChanged()
     setWindowModified(textEdit->document()->isModified());
 }
 
- 
-void MainWindow::createActions()
-{
-    /*
-    QMenu *fileMenu = menuBar()->addMenu(tr("&File"));
-    QToolBar *fileToolBar = addToolBar(tr("File"));
-    const QIcon newIcon = QIcon::fromTheme("document-new", QIcon(":/images/new.png"));
-    QAction *newAct = new QAction(newIcon, tr("&New"), this);
-    newAct->setShortcuts(QKeySequence::New);
-    newAct->setStatusTip(tr("Create a new file"));
-    connect(newAct, &QAction::triggered, this, &MainWindow::newFile);
-    fileMenu->addAction(newAct);
-    fileToolBar->addAction(newAct);
 
-    const QIcon openIcon = QIcon::fromTheme("document-open", QIcon(":/images/open.png"));
-    QAction *openAct = new QAction(openIcon, tr("&Open..."), this);
-    openAct->setShortcuts(QKeySequence::Open);
-    openAct->setStatusTip(tr("Open an existing file"));
-    connect(openAct, &QAction::triggered, this, &MainWindow::open);
-    fileMenu->addAction(openAct);
-    fileToolBar->addAction(openAct);
-    */
-
-    /*
-    QAction *aboutQtAct = helpMenu->addAction(tr("About &Qt"), qApp, &QApplication::aboutQt);
-    aboutQtAct->setStatusTip(tr("Show the Qt library's About box")) ;
-    
-    
-    #ifndef QT_NO_CLIPBOARD
-    cutAct->setEnabled(false); 
-    copyAct->setEnabled(false);
-    connect(textEdit, &QPlainTextEdit::copyAvailable, cutAct, &QAction::setEnabled);
-    connect(textEdit, &QPlainTextEdit::copyAvailable, copyAct, &QAction::setEnabled);
-#endif // !QT_NO_CLIPBOARD
-    */
-}
-
-
-void MainWindow::createStatusBar()
-{
-    statusBar()->showMessage(tr("Ready"));
-    statusBar()->setStyleSheet("QStatusBar{font-size: 18px; color: #5a5255; background: #fae0ad}");
-}
-
-
- 
  void MainWindow::readSettings()
 {
      /*
@@ -442,7 +447,6 @@ bool MainWindow::maybeSave()
 #endif
 
     setCurrentFile(fileName);
-    statusBar()->showMessage(tr("File loaded"), 2000);
 }
 
  
@@ -472,7 +476,6 @@ bool MainWindow::maybeSave()
     }
 
     setCurrentFile(fileName);
-    statusBar()->showMessage(tr("File saved"), 2000);
     return true;
 }
 
@@ -483,21 +486,25 @@ void MainWindow::setCurrentFile(const QString &fileName)
     curFile = fileName;
     textEdit->document()->setModified(false);
     setWindowModified(false);
-    UpdateWindowTitle();
+    UpdatePerFile();
 }
 
-void MainWindow::UpdateWindowTitle()
+void MainWindow::UpdatePerFile()
 {
-    QString title = curFile.isEmpty()
-        ? "Untitled"
-        : curFile;
+    const QString tit = HasTitle()
+        ? title
+        : (HasFile() ? QFileInfo(curFile).fileName() : "Untitled");
 
-    if (HasUnsavedChanges())
-        title += "*";
+    const QString filePath = HasFile()
+        ? curFile
+        : "[No file]";
 
-    title += " [PureNote]";
+    const QString unsavedTag = (HasUnsavedChanges() || !HasFile())
+        ? "*"
+        : "";
 
-    setWindowTitle(title);
+    setWindowTitle(tit + unsavedTag + " [PureNote]");
+    statusBar()->showMessage(filePath + unsavedTag);
 }
 
 
@@ -519,4 +526,5 @@ void MainWindow::SetupWindowFlags(bool onTop)
         setWindowFlags(Qt::FramelessWindowHint);
     show();
 }
+
 
