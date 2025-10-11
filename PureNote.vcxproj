@@ -107,6 +107,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ColorScheme.h" />
+    <ClInclude Include="HashQString.h" />
     <ClInclude Include="MouseEvent.h" />
     <ClInclude Include="SchemeIcon.h" />
     <ClInclude Include="StyleSheet.h" />

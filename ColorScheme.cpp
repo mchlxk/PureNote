@@ -9,3 +9,7 @@ const std::unordered_map<QString, ColorScheme::T> ColorScheme::schemas = {
 	,{ "Dark", { "#dddddd", "#5a5255", "#6a6366"} }
 };
 
+const QString ColorScheme::Menu::color{"#dddddd"};
+const QString ColorScheme::Menu::background{"#6a6366"};
+const QString ColorScheme::Menu::highlighted{"#5a5255"};
+

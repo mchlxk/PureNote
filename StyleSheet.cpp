@@ -26,7 +26,16 @@ QString StyleSheet::format_text_edit(const color_scheme_t& scheme, uint32_t font
 
 QString StyleSheet::format_status_bar(const color_scheme_t& scheme, uint32_t fontSize)
 {
-    return QString("QStatusBar{font-size: %1px; color: %2; background: %3}").arg(
+    return QString("QStatusBar{border: 0;font-size: %1px; color: %2; background: %3}").arg(
+        QString::number(fontSize),
+        ColorScheme::fg(scheme),
+        ColorScheme::highlighted(scheme) );
+}
+
+
+QString StyleSheet::format_status_label(const color_scheme_t& scheme, uint32_t fontSize)
+{
+    return QString("QLabel{border: 0; font-size: %1px; color: %2; background: %3}").arg(
         QString::number(fontSize),
         ColorScheme::fg(scheme),
         ColorScheme::highlighted(scheme) );
@@ -51,13 +60,21 @@ QString StyleSheet::format_scrollbar(const color_scheme_t& scheme)
         "QScrollBar::handle:vertical{"
         "background-color: %2;"
         "min-height: 10px;"
-        "}").arg(ColorScheme::bg(scheme), ColorScheme::highlighted(scheme));
+        "}").arg(
+            ColorScheme::bg(scheme), 
+            ColorScheme::highlighted(scheme));
 }
 
 
 QString StyleSheet::format_menu()
 {
-    return QString("QMenu{border: 0; color: #dddddd; background-color: #6a6366} QMenu::separator{height: 15px; background: #6a6366; margin-left: 0px; margin-right: 0px; } QMenu::item{ padding: 2px 25px 2px 20px; border: 0; } QMenu::item:selected{ background: #5a5255; }");
+    return QString(
+        "QMenu{border: 0; color: %1; background-color: %2} "
+        "QMenu::separator{height: 15px; background: %2; margin-left: 0px; margin-right: 0px; } "
+        "QMenu::item{ padding: 2 25px 2 20px; border: 0; } QMenu::item:selected{ background: %3; }").arg(
+            ColorScheme::Menu::color,
+            ColorScheme::Menu::background,
+            ColorScheme::Menu::highlighted);
 }
 
 

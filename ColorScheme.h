@@ -6,13 +6,7 @@
 #include <QString>
 #include <QHash>
 
-namespace std {
-  template<> struct hash<QString> {
-    std::size_t operator()(const QString& s) const noexcept {
-      return (size_t) qHash(s);
-    }
-  };
-}
+#include "HashQString.h"
 
 namespace ColorScheme
 {
@@ -26,21 +20,14 @@ namespace ColorScheme
 	static inline const QString& highlighted(const  T& op) { return std::get<2>(op); }
 
 	extern const std::unordered_map<QString, T> schemas;
+
+	namespace Menu
+	{
+		extern const QString color;
+		extern const QString background;
+		extern const QString highlighted;
+	}
 }
 
 using color_scheme_t = ColorScheme::T;
 
-
-/*
-
-"#f0adb0"
-"#f5c2ab"
-"#fae0ad"
-"#c6d7b2"
-"#c4def0"
-
-dark:
-#dddddd
-#5a5255
-
-*/

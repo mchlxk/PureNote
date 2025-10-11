@@ -15,37 +15,25 @@ static QString extract_color_scheme(QObject* obj) { return obj->property("color_
 
 MainWindow::MainWindow()
 : textEdit(new QPlainTextEdit)
+, statusLabel (new QLabel)
 {
-
     QCoreApplication::instance()->installEventFilter(this);
-
     setContentsMargins(0, 0, 0, 0);
-
-    SetColorScheme("Flamingo");
-
-    setCentralWidget(textEdit);
-
- 
-    statusLabel = new QLabel(this);
-    statusBar()->addPermanentWidget(statusLabel);
-
-    
-    setContextMenuPolicy(Qt::CustomContextMenu);
-    
-    connect(this, &MainWindow::customContextMenuRequested, this, &MainWindow::at_customContextMenuRequested);
+    SetupTextEdit();
+    UpdatePerStyle();
 
     SetupWindowFlags(true);
-
-    textEdit->document()->setDocumentMargin(10);
-
+    SetupStatusLabel();
     SetupActions();
+
 
     readSettings();
 
-    connect(textEdit->document(), &QTextDocument::contentsChanged, this, &MainWindow::at_document_contentsChanged);
+    setUnifiedTitleAndToolBarOnMac(true);
+
+    SetupContextMenu();
 
     setCurrentFile(QString());
-    setUnifiedTitleAndToolBarOnMac(true);
 }
 
 void MainWindow::SetupActions()
@@ -87,6 +75,27 @@ void MainWindow::SetupActions()
     connect(actionExit, &QAction::triggered, this, &MainWindow::at_actionExit_triggered);
     addAction(actionExit);
 }
+
+
+void MainWindow::SetupStatusLabel()
+{
+    statusLabel->setAlignment(Qt::AlignLeft);
+    statusBar()->addPermanentWidget(statusLabel, 100);
+}
+
+void MainWindow::SetupTextEdit()
+{
+    setCentralWidget(textEdit);
+    textEdit->document()->setDocumentMargin(10);
+    connect(textEdit->document(), &QTextDocument::contentsChanged, this, &MainWindow::at_document_contentsChanged);
+}
+
+void MainWindow::SetupContextMenu()
+{
+    setContextMenuPolicy(Qt::CustomContextMenu);
+    connect(this, &MainWindow::customContextMenuRequested, this, &MainWindow::at_customContextMenuRequested);
+}
+
 
 
 /*
@@ -344,18 +353,31 @@ void MainWindow::at_actionSelectAll_triggered() {}
 void MainWindow::at_actionSetColorScheme_triggered()
 {
     const QString schemeName = extract_color_scheme(sender());
-    SetColorScheme(schemeName);
+    SetStyle({schemeName, std::get<1>(m_style)});
 }
 
 
-void MainWindow::SetColorScheme(const QString& name)
+void MainWindow::SetStyle(const style_t& style)
 {
-    if (!ColorScheme::schemas.count(name))
+    if (m_style == style)
         return;
-    setStyleSheet(StyleSheet::format_global(ColorScheme::schemas.at(name), 18));
-    textEdit->setStyleSheet(StyleSheet::format_text_edit(ColorScheme::schemas.at(name), 18));
-    statusBar()->setStyleSheet(StyleSheet::format_status_bar(ColorScheme::schemas.at(name), 18));
+    m_style = style;
+    UpdatePerStyle();
 }
+
+void MainWindow::UpdatePerStyle()
+{
+    const QString& schema = std::get<0>(m_style);
+    const uint32_t fontSize = std::get<1>(m_style);
+
+    if (!ColorScheme::schemas.count(schema))
+        return;
+    setStyleSheet(StyleSheet::format_global(ColorScheme::schemas.at(schema), fontSize));
+    textEdit->setStyleSheet(StyleSheet::format_text_edit(ColorScheme::schemas.at(schema), fontSize));
+    statusBar()->setStyleSheet(StyleSheet::format_status_bar(ColorScheme::schemas.at(schema), fontSize));
+    statusLabel->setStyleSheet(StyleSheet::format_status_label(ColorScheme::schemas.at(schema), fontSize));
+}
+
 
 
 void MainWindow::newFile()

@@ -4,6 +4,8 @@
 #include <QPlainTextEdit>
 #include <QLabel>
 
+using style_t = std::tuple<QString, uint32_t>;
+
 class MainWindow : public QMainWindow
 {
     Q_OBJECT
@@ -15,9 +17,7 @@ public:
 
 protected:
     void closeEvent(QCloseEvent *event) override;
-
     bool eventFilter(QObject* obj, QEvent* e) override;
- 
 
 private slots:
     void newFile();
@@ -61,23 +61,31 @@ private:
     bool IsLocked() { return textEdit->isReadOnly(); }
 
     void SetupActions();
+    void SetupStatusLabel();
+    void SetupTextEdit();
+    void SetupContextMenu();
+
     void UpdatePerFile();
-    void SetColorScheme(const QString& name);
+    void SetStyle(const style_t& style);
+    void UpdatePerStyle();
 
-    QAction* actionSave;
-    QAction* actionSaveAs;
-    QAction* actionUndo;
-    QAction* actionRedo;
-    QAction* actionCut;
-    QAction* actionCopy;
-    QAction* actionPaste;
-    QAction* actionSelectAll;
-    QAction* actionToggleOnTop;
-    QAction* actionToggleLock;
-    QAction* actionExit;
+    QAction* actionSave{ nullptr };
+    QAction* actionSaveAs{ nullptr };
+    QAction* actionUndo{ nullptr };
+    QAction* actionRedo{ nullptr };
+    QAction* actionCut{ nullptr };
+    QAction* actionCopy{ nullptr };
+    QAction* actionPaste{ nullptr };
+    QAction* actionSelectAll{ nullptr };
+    QAction* actionToggleOnTop{ nullptr };
+    QAction* actionToggleLock{ nullptr };
+    QAction* actionExit{ nullptr };
 
-    QPlainTextEdit *textEdit;
-    QLabel* statusLabel;
+    QPlainTextEdit *textEdit{ nullptr };
+    QLabel* statusLabel{ nullptr };
+
     QString curFile;
     QString title;
+
+    style_t m_style{ "Flamingo", 18 };
 };
