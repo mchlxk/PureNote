@@ -6,6 +6,7 @@
 
 #include "StyleSheet.h"
 #include "ColorScheme.h"
+#include "SchemeIcon.h"
 
 
 static void store_color_scheme(QObject* obj, const QString& scheme) { obj->setProperty("color_scheme", scheme); }
@@ -262,6 +263,7 @@ void MainWindow::at_customContextMenuRequested(const QPoint& pos)
         QAction* actionScheme = new QAction(name);
         store_color_scheme(actionScheme, name);
         connect(actionScheme, &QAction::triggered, this, &MainWindow::at_actionSetColorScheme_triggered);
+        actionScheme->setIcon(SchemeIcon::get(scheme.second, 24));
         colorSchemesSubmenu->addAction(actionScheme);
     }
     menu->addMenu(colorSchemesSubmenu);
