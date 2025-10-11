@@ -220,6 +220,7 @@ bool MainWindow::eventFilter(QObject* obj, QEvent* evt)
 void MainWindow::at_customContextMenuRequested(const QPoint& pos)
 {
     QMenu* menu = new QMenu;
+    menu->setStyleSheet(StyleSheet::format_menu());
 
     actionSave->setEnabled(textEdit->document()->isModified() && HasFile());
     connect(actionSave, &QAction::triggered, this, &MainWindow::at_actionSave_triggered);
@@ -254,6 +255,7 @@ void MainWindow::at_customContextMenuRequested(const QPoint& pos)
     menu->addSeparator();
 
     QMenu* colorSchemesSubmenu = new QMenu("Select Color Scheme");
+    colorSchemesSubmenu->setStyleSheet(StyleSheet::format_menu());
     for (const auto& scheme : ColorScheme::schemas)
     {
         const QString name = scheme.first;
