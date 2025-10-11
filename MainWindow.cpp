@@ -25,6 +25,9 @@ MainWindow::MainWindow()
     setCentralWidget(textEdit);
 
  
+    statusLabel = new QLabel(this);
+    statusBar()->addPermanentWidget(statusLabel);
+
     
     setContextMenuPolicy(Qt::CustomContextMenu);
     
@@ -520,7 +523,8 @@ void MainWindow::UpdatePerFile()
         : "";
 
     setWindowTitle(tit + unsavedTag + " [PureNote]");
-    statusBar()->showMessage(filePath + unsavedTag);
+    //statusBar()->showMessage(filePath + unsavedTag);
+    statusLabel->setText(filePath + unsavedTag);
 }
 
 

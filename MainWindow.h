@@ -2,6 +2,7 @@
 
 #include <QMainWindow>
 #include <QPlainTextEdit>
+#include <QLabel>
 
 class MainWindow : public QMainWindow
 {
@@ -76,6 +77,7 @@ private:
     QAction* actionExit;
 
     QPlainTextEdit *textEdit;
+    QLabel* statusLabel;
     QString curFile;
     QString title;
 };
