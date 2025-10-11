@@ -216,7 +216,7 @@ bool MainWindow::eventFilter(QObject* obj, QEvent* evt)
         return true;
     }
 
-    if (MouseEvent::is_rmb_press(evt))
+    if (MouseEvent::is_rmb_release(evt) && action == MouseEvent::ActionE::None)
     {
         emit customContextMenuRequested(static_cast<QMouseEvent*>(evt)->globalPos());
         return true;
