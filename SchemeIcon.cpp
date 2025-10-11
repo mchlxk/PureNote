@@ -11,7 +11,7 @@ QIcon SchemeIcon::get(const color_scheme_t& scheme, const uint32_t size)
 	QPainter painter(&pixmap);
 	painter.setRenderHint(QPainter::Antialiasing);
 	painter.setRenderHint(QPainter::HighQualityAntialiasing);
-	painter.setBrush(QBrush(QColor(ColorScheme::bg(scheme))));
+	painter.setBrush(QBrush(QColor(ColorScheme::background(scheme))));
 	painter.drawEllipse(0, 0, size, size);
 	return QIcon(pixmap);
 }

@@ -11,5 +11,6 @@ namespace StyleSheet
 	QString format_status_label(const color_scheme_t& scheme, uint32_t fontSize);
 	QString format_scrollbar(const color_scheme_t& scheme);
 	QString format_menu();
+	QString format_push_button();
 }
 

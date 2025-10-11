@@ -2,7 +2,7 @@
 
 QString StyleSheet::format_global(const color_scheme_t& scheme, uint32_t fontSize)
 {
-    return format_main_window(scheme, fontSize)+format_scrollbar(scheme);
+    return format_main_window(scheme, fontSize) + format_scrollbar(scheme) + format_push_button() + format_menu();
 }
 
 
@@ -10,16 +10,16 @@ QString StyleSheet::format_main_window(const color_scheme_t& scheme, uint32_t fo
 {
     return QString("QMainWindow{font-size: %1px; color: %2; background-color: %3}").arg(
         QString::number(fontSize),
-        ColorScheme::fg(scheme),
-        ColorScheme::bg(scheme) );
+        ColorScheme::color(scheme),
+        ColorScheme::background(scheme) );
 }
 
 QString StyleSheet::format_text_edit(const color_scheme_t& scheme, uint32_t fontSize)
 {
     return QString("QPlainTextEdit{border: 0; font-size: %1px; color: %2; background-color: %3; selection-color: %2; selection-background-color: %4}").arg(
         QString::number(fontSize),
-        ColorScheme::fg(scheme),
-        ColorScheme::bg(scheme),
+        ColorScheme::color(scheme),
+        ColorScheme::background(scheme),
         ColorScheme::highlighted(scheme));
 }
 
@@ -28,7 +28,7 @@ QString StyleSheet::format_status_bar(const color_scheme_t& scheme, uint32_t fon
 {
     return QString("QStatusBar{border: 0;font-size: %1px; color: %2; background: %3}").arg(
         QString::number(fontSize),
-        ColorScheme::fg(scheme),
+        ColorScheme::color(scheme),
         ColorScheme::highlighted(scheme) );
 }
 
@@ -37,7 +37,7 @@ QString StyleSheet::format_status_label(const color_scheme_t& scheme, uint32_t f
 {
     return QString("QLabel{border: 0; font-size: %1px; color: %2; background: %3}").arg(
         QString::number(fontSize),
-        ColorScheme::fg(scheme),
+        ColorScheme::color(scheme),
         ColorScheme::highlighted(scheme) );
 }
 
@@ -45,23 +45,11 @@ QString StyleSheet::format_status_label(const color_scheme_t& scheme, uint32_t f
 QString StyleSheet::format_scrollbar(const color_scheme_t& scheme)
 {
     return QString(
-		"QScrollBar::sub-page:vertical {"
-		"background: %1;"
-		"}"
-		"QScrollBar::add-page:vertical {"
-		"background: %1;"
-		"}"
-        "QScrollBar:vertical{"
-        "border: 0;"
-        "background-color: %1;"
-        //"background: solid;"
-        "width: 10px;"
-        "}"
-        "QScrollBar::handle:vertical{"
-        "background-color: %2;"
-        "min-height: 10px;"
-        "}").arg(
-            ColorScheme::bg(scheme), 
+		"QScrollBar::sub-page:vertical {background: %1;}"
+		"QScrollBar::add-page:vertical {background: %1;}"
+        "QScrollBar:vertical{border: 0;background-color: %1;width: 10px;}"
+        "QScrollBar::handle:vertical{background-color: %2;min-height: 10px;}").arg(
+            ColorScheme::background(scheme), 
             ColorScheme::highlighted(scheme));
 }
 
@@ -72,9 +60,21 @@ QString StyleSheet::format_menu()
         "QMenu{border: 0; color: %1; background-color: %2} "
         "QMenu::separator{height: 15px; background: %2; margin-left: 0px; margin-right: 0px; } "
         "QMenu::item{ padding: 2 25px 2 20px; border: 0; } QMenu::item:selected{ background: %3; }").arg(
-            ColorScheme::Menu::color,
-            ColorScheme::Menu::background,
-            ColorScheme::Menu::highlighted);
+            ColorScheme::Ui::color,
+            ColorScheme::Ui::background,
+            ColorScheme::Ui::highlighted);
+}
+
+
+QString StyleSheet::format_push_button()
+{
+    return QString(
+        "QPushButton{border: 0; font: bold; color: %1; background-color: %2; padding: 5 25px 5 25px;}"
+        "QPushButton:hover{background-color: %3;}"
+        "QPushButton:pressed{background-color: %2;}" ).arg(
+            ColorScheme::Ui::color,
+            ColorScheme::Ui::background,
+			ColorScheme::Ui::highlighted);
 }
 
 

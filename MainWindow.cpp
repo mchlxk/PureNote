@@ -9,9 +9,11 @@
 #include "SchemeIcon.h"
 
 
-static void store_color_scheme(QObject* obj, const QString& scheme) { obj->setProperty("color_scheme", scheme); }
-static QString extract_color_scheme(QObject* obj) { return obj->property("color_scheme").toString(); }
-
+namespace ColorSchemeProperty
+{
+	static void set(QObject* obj, const QString& scheme) { obj->setProperty("color_scheme", scheme); }
+	static QString get(QObject* obj) { return obj->property("color_scheme").toString(); }
+}
 
 MainWindow::MainWindow()
 : textEdit(new QPlainTextEdit)
@@ -26,7 +28,6 @@ MainWindow::MainWindow()
     SetupStatusLabel();
     SetupActions();
 
-
     readSettings();
 
     setUnifiedTitleAndToolBarOnMac(true);
@@ -38,7 +39,6 @@ MainWindow::MainWindow()
 
 void MainWindow::SetupActions()
 {
-
     actionSave = new QAction("Save", this);
     actionSave->setShortcut(QKeySequence("Ctrl+S"));
     connect(actionSave, &QAction::triggered, this, &MainWindow::at_actionSave_triggered);
@@ -236,8 +236,7 @@ bool MainWindow::eventFilter(QObject* obj, QEvent* evt)
 
 void MainWindow::at_customContextMenuRequested(const QPoint& pos)
 {
-    QMenu* menu = new QMenu;
-    menu->setStyleSheet(StyleSheet::format_menu());
+    QMenu* menu = new QMenu(this);
     menu->setWindowFlags(menu->windowFlags() | Qt::NoDropShadowWindowHint);
 
     actionSave->setEnabled(textEdit->document()->isModified() && HasFile());
@@ -272,14 +271,13 @@ void MainWindow::at_customContextMenuRequested(const QPoint& pos)
 
     menu->addSeparator();
 
-    QMenu* colorSchemesSubmenu = new QMenu("Select Color Scheme");
-    colorSchemesSubmenu->setStyleSheet(StyleSheet::format_menu());
+    QMenu* colorSchemesSubmenu = new QMenu("Select Color Scheme", this);
     colorSchemesSubmenu->setWindowFlags(colorSchemesSubmenu->windowFlags() | Qt::NoDropShadowWindowHint);
     for (const auto& scheme : ColorScheme::schemas)
     {
         const QString name = scheme.first;
         QAction* actionScheme = new QAction(name);
-        store_color_scheme(actionScheme, name);
+        ColorSchemeProperty::set(actionScheme, name);
         connect(actionScheme, &QAction::triggered, this, &MainWindow::at_actionSetColorScheme_triggered);
         actionScheme->setIcon(SchemeIcon::get(scheme.second, 24));
         colorSchemesSubmenu->addAction(actionScheme);
@@ -352,7 +350,7 @@ void MainWindow::at_actionSelectAll_triggered() {}
 
 void MainWindow::at_actionSetColorScheme_triggered()
 {
-    const QString schemeName = extract_color_scheme(sender());
+    const QString schemeName = ColorSchemeProperty::get(sender());
     SetStyle({schemeName, std::get<1>(m_style)});
 }
 
@@ -469,6 +467,7 @@ bool MainWindow::maybeSave()
                                tr("The document has been modified.\n"
                                   "Do you want to save your changes?"),
                                QMessageBox::Save | QMessageBox::Discard | QMessageBox::Cancel);
+
     switch (ret) {
     case QMessageBox::Save:
         return save();
@@ -505,7 +504,7 @@ bool MainWindow::maybeSave()
 
  
  
- bool MainWindow::saveFile(const QString &fileName)
+bool MainWindow::saveFile(const QString &fileName)
 {
     QString errorMessage;
 
