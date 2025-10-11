@@ -36,6 +36,12 @@ QString StyleSheet::format_status_bar(const color_scheme_t& scheme, uint32_t fon
 QString StyleSheet::format_scrollbar(const color_scheme_t& scheme)
 {
     return QString(
+		"QScrollBar::sub-page:vertical {"
+		"background: %1;"
+		"}"
+		"QScrollBar::add-page:vertical {"
+		"background: %1;"
+		"}"
         "QScrollBar:vertical{"
         "border: 0;"
         "background-color: %1;"

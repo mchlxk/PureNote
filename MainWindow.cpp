@@ -54,31 +54,38 @@ void MainWindow::SetupActions()
     actionSave = new QAction("Save", this);
     actionSave->setShortcut(QKeySequence("Ctrl+S"));
     connect(actionSave, &QAction::triggered, this, &MainWindow::at_actionSave_triggered);
+    addAction(actionSave);
 
     actionSaveAs = new QAction("Save As...", this);
     connect(actionSaveAs, &QAction::triggered, this, &MainWindow::at_actionSaveAs_triggered);
+    addAction(actionSaveAs);
 
     actionUndo = new QAction("Undo", this);
     actionUndo->setShortcut(QKeySequence("Ctrl+Z"));
     connect(actionUndo, &QAction::triggered, this, &MainWindow::at_actionUndo_triggered);
+    addAction(actionUndo);
 
     actionRedo = new QAction("Redo", this);
     actionRedo->setShortcut(QKeySequence("Ctrl+Shift+Y"));
     connect(actionRedo, &QAction::triggered, this, &MainWindow::at_actionRedo_triggered);
+    addAction(actionRedo);
 
     actionToggleOnTop = new QAction("Stay On Top", this);
     actionToggleOnTop->setCheckable(true);
     actionToggleOnTop->setChecked(IsOnTop());
     connect(actionToggleOnTop, &QAction::triggered, this, &MainWindow::at_actionToggleOnTop_triggered);
+    addAction(actionToggleOnTop);
 
     actionToggleLock = new QAction("Lock Edits", this);
     actionToggleLock->setCheckable(true);
     actionToggleLock->setChecked(IsLocked());
     connect(actionToggleLock, &QAction::triggered, this, &MainWindow::at_actionToggleLock_triggered);
+    addAction(actionToggleLock);
 
     actionExit = new QAction("Exit", this);
     actionExit->setShortcut(QKeySequence("Ctrl+X"));
     connect(actionExit, &QAction::triggered, this, &MainWindow::at_actionExit_triggered);
+    addAction(actionExit);
 }
 
 
