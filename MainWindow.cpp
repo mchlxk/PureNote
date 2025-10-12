@@ -78,15 +78,25 @@ void MainWindow::SetupActions()
     connect(actionNextColorScheme, &QAction::triggered, this, &MainWindow::at_actionNextColorScheme_triggered);
     addAction(actionNextColorScheme);
 
-    actionPreviousFontsize = new QAction("Previous Font Size", this);
-    actionPreviousFontsize->setShortcut(QKeySequence(Qt::ControlModifier | Qt::Key_Minus));
-    connect(actionPreviousFontsize, &QAction::triggered, this, &MainWindow::at_actionPreviousFontSize_triggered);
-    addAction(actionPreviousFontsize);
+    actionDecreaseFontsize = new QAction("Decrease Font Size", this);
+    actionDecreaseFontsize->setShortcut(QKeySequence(Qt::ControlModifier | Qt::Key_Minus));
+    connect(actionDecreaseFontsize, &QAction::triggered, this, &MainWindow::at_actionDecreaseFontSize_triggered);
+    addAction(actionDecreaseFontsize);
 
-    actionNextFontsize = new QAction("Next Font Size", this);
-    actionNextFontsize->setShortcut(QKeySequence(Qt::ControlModifier | Qt::Key_Plus));
-    connect(actionNextFontsize, &QAction::triggered, this, &MainWindow::at_actionNextFontSize_triggered);
-    addAction(actionNextFontsize);
+    actionIncreaseFontsize = new QAction("Increase Font Size", this);
+    actionIncreaseFontsize->setShortcut(QKeySequence(Qt::ControlModifier | Qt::Key_Plus));
+    connect(actionIncreaseFontsize, &QAction::triggered, this, &MainWindow::at_actionIncreaseFontSize_triggered);
+    addAction(actionIncreaseFontsize);
+
+    actionDecreaseOpacity = new QAction("Decrease Opacity", this);
+    actionDecreaseOpacity->setShortcut(QKeySequence(Qt::AltModifier | Qt::Key_Down));
+    connect(actionDecreaseOpacity, &QAction::triggered, this, &MainWindow::at_actionDecreaseOpacity_triggered);
+    addAction(actionDecreaseOpacity);
+
+    actionIncreaseOpacity = new QAction("Increase Opacity", this);
+    actionIncreaseOpacity->setShortcut(QKeySequence(Qt::AltModifier | Qt::Key_Up));
+    connect(actionIncreaseOpacity, &QAction::triggered, this, &MainWindow::at_actionIncreaseOpacity_triggered);
+    addAction(actionIncreaseOpacity);
 
     actionToggleOnTop = new QAction("Stay On Top", this);
     actionToggleOnTop->setCheckable(true);
@@ -205,13 +215,13 @@ bool MainWindow::eventFilter(QObject* obj, QEvent* evt)
 
     if (MouseEvent::is_ctrl_wheel_up(evt))
     {
-        SetNextFontSize();
+        IncreaseFontSize();
 		return true;
     }
 
     if (MouseEvent::is_ctrl_wheel_down(evt))
     {
-        SetPreviousFontSize();
+        DecreaseFontSize();
 		return true;
     }
 
@@ -292,15 +302,13 @@ bool MainWindow::eventFilter(QObject* obj, QEvent* evt)
 
     if (MouseEvent::is_alt_wheel_down(evt))
     {
-        Style::opacity(m_style) = std::max(Style::opacity(m_style) - .08f, Style::min_opacity);
-        UpdatePerOpacity();
+        DecreaseOpacity();
         return true;
     }
 
     if (MouseEvent::is_alt_wheel_up(evt))
     {
-        Style::opacity(m_style) = std::min(Style::opacity(m_style) + .08f, 1.f);
-        UpdatePerOpacity();
+        IncreaseOpacity();
         return true;
     }
 
@@ -477,14 +485,25 @@ void MainWindow::at_actionNextColorScheme_triggered()
     SetStyle({ next->first, Style::font_size(m_style), Style::opacity(m_style) });
 }
 
-void MainWindow::at_actionPreviousFontSize_triggered()
+void MainWindow::at_actionDecreaseFontSize_triggered()
 {
-    SetPreviousFontSize();
+    DecreaseFontSize();
 }
 
-void MainWindow::at_actionNextFontSize_triggered()
+void MainWindow::at_actionIncreaseFontSize_triggered()
 {
-    SetNextFontSize();
+    IncreaseFontSize();
+}
+
+
+void MainWindow::at_actionDecreaseOpacity_triggered()
+{
+    DecreaseOpacity();
+}
+
+void MainWindow::at_actionIncreaseOpacity_triggered()
+{
+    IncreaseOpacity();
 }
 
 
@@ -561,7 +580,7 @@ void MainWindow::UpdatePerLocked()
 }
 
 
-void MainWindow::SetPreviousFontSize()
+void MainWindow::DecreaseFontSize()
 {
 	const uint32_t sz = Style::font_size(m_style);
 	auto found = std::lower_bound(Style::font_sizes.cbegin(), Style::font_sizes.cend(), sz);
@@ -571,7 +590,7 @@ void MainWindow::SetPreviousFontSize()
 	UpdatePerStyle();
 }
 
-void MainWindow::SetNextFontSize()
+void MainWindow::IncreaseFontSize()
 {
 	const uint32_t sz = Style::font_size(m_style);
 	const auto found = std::upper_bound(Style::font_sizes.cbegin(), Style::font_sizes.cend(), sz);
@@ -581,6 +600,22 @@ void MainWindow::SetNextFontSize()
 	UpdatePerStyle();
 }
 
+
+void MainWindow::DecreaseOpacity()
+{
+    if (State::has_tag<State::Tag::Fullscreen>(m_stateTags))
+        return;
+	Style::opacity(m_style) = std::max(Style::opacity(m_style) - .08f, Style::min_opacity);
+	UpdatePerOpacity();
+}
+
+void MainWindow::IncreaseOpacity()
+{
+    if (State::has_tag<State::Tag::Fullscreen>(m_stateTags))
+        return;
+	Style::opacity(m_style) = std::min(Style::opacity(m_style) + .08f, 1.f);
+	UpdatePerOpacity();
+}
 
 
 void MainWindow::newFile()
