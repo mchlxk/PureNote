@@ -15,7 +15,7 @@ QString StyleSheet::format_main_window(const color_scheme_t& scheme, uint32_t fo
     return QString("QMainWindow{font-size: %1px; color: %2; background-color: %3}").arg(
         QString::number(fontSize),
         ColorScheme::color(scheme),
-        ColorScheme::background(scheme) );
+        ColorScheme::highlighted(scheme) );
 }
 
 QString StyleSheet::format_text_edit(const color_scheme_t& scheme, uint32_t fontSize)

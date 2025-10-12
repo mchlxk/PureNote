@@ -4,6 +4,7 @@
 #include <QPlainTextEdit>
 #include <QLabel>
 
+#include "State.h"
 #include "Style.h"
 
 class MainWindow : public QMainWindow
@@ -30,9 +31,8 @@ private slots:
     void at_customContextMenuRequested(const QPoint&);
 
     void at_actionSaveAs_triggered();
-    void at_actionExit_triggered();
     void at_actionToggleOnTop_triggered();
-    void at_actionToggleLock_triggered();
+    void at_actionToggleLocked_triggered();
     void at_actionSave_triggered();
     void at_actionUndo_triggered();
     void at_actionRedo_triggered();
@@ -42,7 +42,8 @@ private slots:
     void at_actionSelectAll_triggered();
     void at_actionSetColorScheme_triggered();
     void at_actionSetFontSize_triggered();
-
+    void at_actionToggleFullscreen_triggered();
+    void at_actionExit_triggered();
 
 private:
     void readSettings();
@@ -53,22 +54,23 @@ private:
     QString strippedName(const QString &fullFileName);
 
     bool HasFile() const { return !curFile.isEmpty(); }
-    bool HasUnsavedChanges() const { return textEdit->document()->isModified(); }
     bool HasTitle() const { return !title.isEmpty(); }
 
-    bool IsOnTop();
-    void SetupWindowFlags(bool enabled);
-    void SetLocked(bool locked) { textEdit->setReadOnly(locked); }
-    bool IsLocked() { return textEdit->isReadOnly(); }
+    void SetupWindowFlags(bool onTop);
 
     void SetupActions();
     void SetupStatusLabel();
     void SetupTextEdit();
     void SetupContextMenu();
 
+    void UpdatePerUnsaved();
     void UpdatePerFile();
     void SetStyle(const style_t& style);
     void UpdatePerStyle();
+
+    void UpdateOnTopPerState();
+    void UpdatePerFullscreen();
+    void UpdatePerLocked();
 
     QAction* actionSave{ nullptr };
     QAction* actionSaveAs{ nullptr };
@@ -79,7 +81,8 @@ private:
     QAction* actionPaste{ nullptr };
     QAction* actionSelectAll{ nullptr };
     QAction* actionToggleOnTop{ nullptr };
-    QAction* actionToggleLock{ nullptr };
+    QAction* actionToggleLocked{ nullptr };
+    QAction* actionToggleFullscreen{ nullptr };
     QAction* actionExit{ nullptr };
 
     QPlainTextEdit *textEdit{ nullptr };
@@ -89,5 +92,7 @@ private:
     QString title;
 
     style_t m_style{ Style::defaults };
+
+    State::tags_t m_stateTags;
 };
 

@@ -33,7 +33,7 @@ MainWindow::MainWindow()
     SetupTextEdit();
     UpdatePerStyle();
 
-    SetupWindowFlags(true);
+    UpdateOnTopPerState();
     SetupStatusLabel();
     SetupActions();
 
@@ -69,15 +69,21 @@ void MainWindow::SetupActions()
 
     actionToggleOnTop = new QAction("Stay On Top", this);
     actionToggleOnTop->setCheckable(true);
-    actionToggleOnTop->setChecked(IsOnTop());
+    actionToggleOnTop->setChecked(State::has_tag<State::Tag::OnTop>(m_stateTags));
     connect(actionToggleOnTop, &QAction::triggered, this, &MainWindow::at_actionToggleOnTop_triggered);
     addAction(actionToggleOnTop);
 
-    actionToggleLock = new QAction("Lock Edits", this);
-    actionToggleLock->setCheckable(true);
-    actionToggleLock->setChecked(IsLocked());
-    connect(actionToggleLock, &QAction::triggered, this, &MainWindow::at_actionToggleLock_triggered);
-    addAction(actionToggleLock);
+    actionToggleLocked = new QAction("Lock Edits", this);
+    actionToggleLocked->setCheckable(true);
+    actionToggleLocked->setChecked(State::has_tag<State::Tag::Locked>(m_stateTags));
+    connect(actionToggleLocked, &QAction::triggered, this, &MainWindow::at_actionToggleLocked_triggered);
+    addAction(actionToggleLocked);
+
+    actionToggleFullscreen = new QAction("Fullscreen", this);
+    actionToggleLocked->setCheckable(true);
+    actionToggleFullscreen->setShortcut(QKeySequence("F11"));
+    connect(actionToggleFullscreen, &QAction::triggered, this, &MainWindow::at_actionToggleFullscreen_triggered);
+    addAction(actionToggleFullscreen);
 
     actionExit = new QAction("Exit", this);
     actionExit->setShortcut(QKeySequence("Ctrl+X"));
@@ -166,6 +172,15 @@ bool MainWindow::eventFilter(QObject* obj, QEvent* evt)
     static QPoint mouseStartPos;
     static MouseEvent::ActionE action{ MouseEvent::ActionE::None };
 
+    if (MouseEvent::is_rmb_release(evt) && action == MouseEvent::ActionE::None)
+    {
+        emit customContextMenuRequested(static_cast<QMouseEvent*>(evt)->globalPos());
+        return true;
+    }
+
+    if (State::has_tag<State::Tag::Fullscreen>(m_stateTags))
+        return false;
+
     if (MouseEvent::is_mmb_press(evt))
     {
         QMouseEvent* mouseEvent = static_cast<QMouseEvent*>(evt);
@@ -237,12 +252,6 @@ bool MainWindow::eventFilter(QObject* obj, QEvent* evt)
         return true;
     }
 
-    if (MouseEvent::is_rmb_release(evt) && action == MouseEvent::ActionE::None)
-    {
-        emit customContextMenuRequested(static_cast<QMouseEvent*>(evt)->globalPos());
-        return true;
-    }
-
     return false;
 }
 
@@ -264,10 +273,10 @@ void MainWindow::at_customContextMenuRequested(const QPoint& pos)
     // Text edit actions
     menu->addSeparator();
 
-    actionUndo->setEnabled(!IsLocked() && textEdit->document()->isUndoAvailable());
+    actionUndo->setEnabled(!State::has_tag<State::Tag::Locked>(m_stateTags) && textEdit->document()->isUndoAvailable());
     menu->addAction(actionUndo);
 
-    actionRedo->setEnabled(!IsLocked() && textEdit->document()->isRedoAvailable());
+    actionRedo->setEnabled(!State::has_tag<State::Tag::Locked>(m_stateTags) && textEdit->document()->isRedoAvailable());
     menu->addAction(actionRedo);
 
 
@@ -314,11 +323,14 @@ void MainWindow::at_customContextMenuRequested(const QPoint& pos)
 
     menu->addSeparator();
 
-    actionToggleOnTop->setChecked(IsOnTop());
+    actionToggleOnTop->setChecked(State::has_tag<State::Tag::OnTop>(m_stateTags));
     menu->addAction(actionToggleOnTop);
 
-    actionToggleLock->setChecked(IsLocked());
-    menu->addAction(actionToggleLock);
+    actionToggleLocked->setChecked(State::has_tag<State::Tag::Locked>(m_stateTags));
+    menu->addAction(actionToggleLocked);
+
+    actionToggleFullscreen->setChecked(State::has_tag<State::Tag::Fullscreen>(m_stateTags));
+    menu->addAction(actionToggleFullscreen);
 
     menu->addAction(actionExit);
 
@@ -336,6 +348,11 @@ void MainWindow::at_actionSaveAs_triggered()
     // TBD
 }
 
+void MainWindow::at_actionToggleFullscreen_triggered()
+{
+    State::toggle_tag<State::Tag::Fullscreen>(m_stateTags);
+    UpdatePerFullscreen();
+}
 
 
 void MainWindow::at_actionExit_triggered()
@@ -346,25 +363,27 @@ void MainWindow::at_actionExit_triggered()
 
 void MainWindow::at_actionToggleOnTop_triggered()
 {
-    SetupWindowFlags(!IsOnTop());
+    State::toggle_tag<State::Tag::OnTop>(m_stateTags);
+    UpdateOnTopPerState();
 }
 
-void MainWindow::at_actionToggleLock_triggered()
+void MainWindow::at_actionToggleLocked_triggered()
 {
-    SetLocked(!IsLocked());
+    State::toggle_tag<State::Tag::Locked>(m_stateTags);
+    UpdatePerLocked();
 }
 
 
 void MainWindow::at_actionUndo_triggered()
 {
-    if(IsLocked())
+    if(State::has_tag<State::Tag::Locked>(m_stateTags))
         return;
     textEdit->document()->undo();
 }
 
 void MainWindow::at_actionRedo_triggered()
 {
-    if (IsLocked())
+    if (State::has_tag<State::Tag::Locked>(m_stateTags))
         return;
     textEdit->document()->redo();
 }
@@ -410,6 +429,44 @@ void MainWindow::UpdatePerStyle()
     statusBar()->setStyleSheet(StyleSheet::format_status_bar(ColorScheme::schemas.at(schema), fontSize));
     statusLabel->setStyleSheet(StyleSheet::format_status_label(ColorScheme::schemas.at(schema), fontSize));
 }
+
+
+
+void MainWindow::UpdatePerFullscreen()
+{
+    if (State::has_tag<State::Tag::Fullscreen>(m_stateTags))
+    {
+        UpdateOnTopPerState();
+        QMainWindow::showFullScreen();
+
+        const auto gm = geometry();
+        if (gm.width() > gm.height())
+        {
+            const int hMargin = gm.width() / 5;
+            const int vMargin = gm.height() / 20;
+			setContentsMargins(hMargin, vMargin, hMargin, vMargin);
+        }
+        else
+        {
+            const int hMargin = gm.width() / 20;
+            const int vMargin = gm.height() / 5;
+			setContentsMargins(hMargin, vMargin, hMargin, vMargin);
+        }
+    }
+    else
+    {
+        QMainWindow::showNormal();
+        setContentsMargins(0, 0, 0, 0);
+        UpdateOnTopPerState();
+    }
+}
+
+
+void MainWindow::UpdatePerLocked()
+{
+	textEdit->setReadOnly(State::has_tag<State::Tag::Locked>(m_stateTags));
+}
+
 
 
 
@@ -466,7 +523,11 @@ void MainWindow::about()
 
 void MainWindow::at_document_contentsChanged()
 {
-    setWindowModified(textEdit->document()->isModified());
+    if (textEdit->document()->isModified())
+        State::set_tag<State::Tag::Unsaved>(m_stateTags);
+    else
+        State::clear_tag<State::Tag::Unsaved>(m_stateTags);
+    UpdatePerUnsaved();
 }
 
 
@@ -497,7 +558,7 @@ void MainWindow::at_document_contentsChanged()
 
 bool MainWindow::ResolveUnsavedChanges()
 {
-    if (!HasUnsavedChanges())
+    if (!State::has_tag<State::Tag::Unsaved>(m_stateTags))
         return true;
 
     QMessageBox msgBox(this);
@@ -579,7 +640,15 @@ void MainWindow::setCurrentFile(const QString &fileName)
 {
     curFile = fileName;
     textEdit->document()->setModified(false);
-    setWindowModified(false);
+    UpdatePerFile();
+}
+
+void MainWindow::UpdatePerUnsaved()
+{
+    static bool lastValue{false};
+    if (lastValue == State::has_tag<State::Tag::Unsaved>(m_stateTags))
+        return;
+    lastValue = State::has_tag<State::Tag::Unsaved>(m_stateTags);
     UpdatePerFile();
 }
 
@@ -593,13 +662,13 @@ void MainWindow::UpdatePerFile()
         ? curFile
         : "[No file]";
 
-    const QString unsavedTag = (HasUnsavedChanges() || !HasFile())
+    const QString unsaved = (State::has_tag<State::Tag::Unsaved>(m_stateTags))
         ? "*"
         : "";
 
-    setWindowTitle(tit + unsavedTag + " [PureNote]");
+    setWindowTitle(tit + unsaved + " [PureNote]");
     //statusBar()->showMessage(filePath + unsavedTag);
-    statusLabel->setText(filePath + unsavedTag);
+    statusLabel->setText(filePath + unsaved);
 }
 
 
@@ -608,10 +677,14 @@ QString MainWindow::strippedName(const QString &fullFileName)
     return QFileInfo(fullFileName).fileName();
 }
 
-bool MainWindow::IsOnTop()
+void MainWindow::UpdateOnTopPerState()
 {
-    return windowFlags() & Qt::WindowStaysOnTopHint;
+    const bool setOnTop = State::has_tag<State::Tag::OnTop>(m_stateTags)
+        || State::has_tag<State::Tag::Fullscreen>(m_stateTags);
+
+    SetupWindowFlags(setOnTop);
 }
+
 
 void MainWindow::SetupWindowFlags(bool onTop)
 {
