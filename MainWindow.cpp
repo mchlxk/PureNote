@@ -283,7 +283,7 @@ bool MainWindow::eventFilter(QObject* obj, QEvent* evt)
 
     if (MouseEvent::is_alt_wheel_down(evt))
     {
-        m_opacity = std::max(m_opacity - .08f, .1f);
+        m_opacity = std::max(m_opacity - .08f, .15f);
         UpdatePerOpacity();
         return true;
     }
@@ -364,7 +364,7 @@ void MainWindow::at_customContextMenuRequested(const QPoint& pos)
 
     QMenu* opacitySubmenu = new QMenu("Set Window Opacity (Alt+Wheel)", this);
     opacitySubmenu->setWindowFlags(opacitySubmenu->windowFlags() | Qt::NoDropShadowWindowHint);
-    for (const float opacity : std::vector<float>({ 1.f, .8f, .6f, .5f, .4f, .2f, .1f}))
+    for (const float opacity : std::vector<float>({ 1.f, .8f, .6f, .5f, .4f, .3f, .15f}))
     {
         QAction* actionOpacity = new QAction(QString::number(opacity));
         Property::Opacity::set(actionOpacity, opacity);
