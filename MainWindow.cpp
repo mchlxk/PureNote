@@ -111,7 +111,7 @@ void MainWindow::SetupActions()
     addAction(actionToggleLocked);
 
     actionToggleFullscreen = new QAction("Fullscreen", this);
-    actionToggleLocked->setCheckable(true);
+    actionToggleFullscreen->setCheckable(true);
     actionToggleFullscreen->setShortcut(QKeySequence("F11"));
     connect(actionToggleFullscreen, &QAction::triggered, this, &MainWindow::at_actionToggleFullscreen_triggered);
     addAction(actionToggleFullscreen);
