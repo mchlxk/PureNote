@@ -92,8 +92,8 @@ bool MouseEvent::is_alt_wheel_down(const QEvent* evt)
     if (evt->type() != QEvent::Wheel)
         return false;
     const QWheelEvent* wheelEvt = static_cast<const QWheelEvent*>(evt);
-    //if (wheelEvt->modifiers() != Qt::AltModifier)
-        //return false;
+    if (wheelEvt->angleDelta().y() != 0)
+        return false;
     if (wheelEvt->angleDelta().x() > 0)
         return false;
     return true;
@@ -104,9 +104,10 @@ bool MouseEvent::is_alt_wheel_up(const QEvent* evt)
     if (evt->type() != QEvent::Wheel)
         return false;
     const QWheelEvent* wheelEvt = static_cast<const QWheelEvent*>(evt);
-    //if (wheelEvt->modifiers() != Qt::AltModifier)
-        //return false;
+    if (wheelEvt->angleDelta().y() != 0)
+        return false;
     if (wheelEvt->angleDelta().x() < 0)
         return false;
     return true;
 }
+

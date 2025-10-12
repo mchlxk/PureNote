@@ -22,6 +22,12 @@ namespace Property
         static void set(QObject* obj, uint32_t size) { obj->setProperty("font_size", size); }
         static uint32_t get(QObject* obj) { return obj->property("font_size").toUInt(); }
     }
+
+    namespace Opacity
+    {
+        static void set(QObject* obj, float opacity) { obj->setProperty("opacity", opacity); }
+        static float get(QObject* obj) { return obj->property("opacity").toFloat(); }
+    }
 }
 
 MainWindow::MainWindow()
@@ -186,6 +192,7 @@ bool MainWindow::eventFilter(QObject* obj, QEvent* evt)
             return true;
         Style::font_size(m_style) = *found;
         UpdatePerStyle();
+		return true;
     }
 
     if (MouseEvent::is_ctrl_wheel_down(evt))
@@ -196,6 +203,7 @@ bool MainWindow::eventFilter(QObject* obj, QEvent* evt)
             return true;
         Style::font_size(m_style) = *(--found);
         UpdatePerStyle();
+		return true;
     }
 
 
@@ -275,14 +283,16 @@ bool MainWindow::eventFilter(QObject* obj, QEvent* evt)
 
     if (MouseEvent::is_alt_wheel_down(evt))
     {
-        m_opacity = std::max(m_opacity - .01f, .1f);
+        m_opacity = std::max(m_opacity - .08f, .1f);
         UpdatePerOpacity();
+        return true;
     }
 
     if (MouseEvent::is_alt_wheel_up(evt))
     {
-        m_opacity = std::min(m_opacity + .01f, 1.f);
+        m_opacity = std::min(m_opacity + .08f, 1.f);
         UpdatePerOpacity();
+        return true;
     }
 
     return false;
@@ -333,15 +343,13 @@ void MainWindow::at_customContextMenuRequested(const QPoint& pos)
         QAction* actionScheme = new QAction(name);
         Property::ColorScheme::set(actionScheme, name);
         connect(actionScheme, &QAction::triggered, this, &MainWindow::at_actionSetColorScheme_triggered);
-        if (name == Style::color_scheme(m_style))
-            actionScheme->setEnabled(false);
         actionScheme->setIcon(SchemeIcon::get(scheme.second, 24));
         colorSchemesSubmenu->addAction(actionScheme);
     }
     menu->addMenu(colorSchemesSubmenu);
 
 
-    QMenu* fontSizeSubmenu = new QMenu("Select Font Size", this);
+    QMenu* fontSizeSubmenu = new QMenu("Select Font Size (Ctrl+Wheel)", this);
     fontSizeSubmenu->setWindowFlags(fontSizeSubmenu->windowFlags() | Qt::NoDropShadowWindowHint);
     for (const uint32_t size : Style::font_sizes)
     {
@@ -353,6 +361,17 @@ void MainWindow::at_customContextMenuRequested(const QPoint& pos)
         fontSizeSubmenu->addAction(actionSize);
     }
     menu->addMenu(fontSizeSubmenu);
+
+    QMenu* opacitySubmenu = new QMenu("Set Window Opacity (Alt+Wheel)", this);
+    opacitySubmenu->setWindowFlags(opacitySubmenu->windowFlags() | Qt::NoDropShadowWindowHint);
+    for (const float opacity : std::vector<float>({ 1.f, .8f, .6f, .5f, .4f, .2f, .1f}))
+    {
+        QAction* actionOpacity = new QAction(QString::number(opacity));
+        Property::Opacity::set(actionOpacity, opacity);
+        connect(actionOpacity, &QAction::triggered, this, &MainWindow::at_actionSetOpacity_triggered);
+        opacitySubmenu->addAction(actionOpacity);
+    }
+    menu->addMenu(opacitySubmenu);
 
     menu->addSeparator();
 
@@ -440,6 +459,12 @@ void MainWindow::at_actionSetFontSize_triggered()
     SetStyle({std::get<0>(m_style), size});
 }
 
+
+void MainWindow::at_actionSetOpacity_triggered()
+{
+    m_opacity = Property::Opacity::get(sender());
+    UpdatePerOpacity();
+}
 
 
 void MainWindow::SetStyle(const style_t& style)

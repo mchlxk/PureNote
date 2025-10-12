@@ -42,6 +42,7 @@ private slots:
     void at_actionSelectAll_triggered();
     void at_actionSetColorScheme_triggered();
     void at_actionSetFontSize_triggered();
+    void at_actionSetOpacity_triggered();
     void at_actionToggleFullscreen_triggered();
     void at_actionExit_triggered();
 
