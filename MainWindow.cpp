@@ -178,6 +178,27 @@ bool MainWindow::eventFilter(QObject* obj, QEvent* evt)
         return true;
     }
 
+    if (MouseEvent::is_ctrl_wheel_up(evt))
+    {
+        const uint32_t sz = Style::font_size(m_style);
+        const auto found = std::upper_bound(Style::font_sizes.cbegin(), Style::font_sizes.cend(), sz);
+        if (found == Style::font_sizes.cend())
+            return true;
+        Style::font_size(m_style) = *found;
+        UpdatePerStyle();
+    }
+
+    if (MouseEvent::is_ctrl_wheel_down(evt))
+    {
+        const uint32_t sz = Style::font_size(m_style);
+        auto found = std::lower_bound(Style::font_sizes.cbegin(), Style::font_sizes.cend(), sz);
+        if (found == Style::font_sizes.cbegin())
+            return true;
+        Style::font_size(m_style) = *(--found);
+        UpdatePerStyle();
+    }
+
+
     if (State::has_tag<State::Tag::Fullscreen>(m_stateTags))
         return false;
 
