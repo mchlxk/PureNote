@@ -13,5 +13,6 @@ namespace StyleSheet
 	QString format_menu();
 	QString format_push_button();
 	QString format_message_box();
+	QString format_tooltip();
 }
 

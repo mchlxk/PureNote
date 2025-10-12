@@ -339,7 +339,7 @@ void MainWindow::at_customContextMenuRequested(const QPoint& pos)
 
     menu->addSeparator();
 
-    QMenu* colorSchemesSubmenu = new QMenu("Select Color Scheme", this);
+    QMenu* colorSchemesSubmenu = new QMenu("Color Scheme", this);
     colorSchemesSubmenu->setWindowFlags(colorSchemesSubmenu->windowFlags() | Qt::NoDropShadowWindowHint);
     for (const auto& scheme : ColorScheme::schemas)
     {
@@ -353,7 +353,7 @@ void MainWindow::at_customContextMenuRequested(const QPoint& pos)
     menu->addMenu(colorSchemesSubmenu);
 
 
-    QMenu* fontSizeSubmenu = new QMenu("Select Font Size (Ctrl+Wheel)", this);
+    QMenu* fontSizeSubmenu = new QMenu("Font Size (Ctrl+Wheel)", this);
     fontSizeSubmenu->setWindowFlags(fontSizeSubmenu->windowFlags() | Qt::NoDropShadowWindowHint);
     for (const uint32_t size : Style::font_sizes)
     {
@@ -366,7 +366,7 @@ void MainWindow::at_customContextMenuRequested(const QPoint& pos)
     }
     menu->addMenu(fontSizeSubmenu);
 
-    QMenu* opacitySubmenu = new QMenu("Set Window Opacity (Alt+Wheel)", this);
+    QMenu* opacitySubmenu = new QMenu("Window Opacity (Alt+Wheel)", this);
     opacitySubmenu->setWindowFlags(opacitySubmenu->windowFlags() | Qt::NoDropShadowWindowHint);
 	QAction* actionOpauqe = new QAction("Opaque");
 	Property::Opacity::set(actionOpauqe, 1.f);

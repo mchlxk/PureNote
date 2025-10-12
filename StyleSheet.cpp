@@ -30,7 +30,7 @@ QString StyleSheet::format_text_edit(const color_scheme_t& scheme, uint32_t font
 
 QString StyleSheet::format_status_bar(const color_scheme_t& scheme, uint32_t fontSize)
 {
-    return QString("QStatusBar{border: 0;font-size: %1px; color: %2; background: %3}").arg(
+    return QString("QStatusBar{border: 0; font-size: %1px; color: %2; background: %3}").arg(
         QString::number(fontSize),
         ColorScheme::color(scheme),
         ColorScheme::highlighted(scheme) );
@@ -39,10 +39,10 @@ QString StyleSheet::format_status_bar(const color_scheme_t& scheme, uint32_t fon
 
 QString StyleSheet::format_status_label(const color_scheme_t& scheme, uint32_t fontSize)
 {
-    return QString("QLabel{border: 0; font-size: %1px; color: %2; background: %3}").arg(
+    return format_tooltip() + QString("QLabel{border: 0; font-size: %1px; color: %2; background: %3}").arg(
         QString::number(fontSize),
         ColorScheme::color(scheme),
-        ColorScheme::highlighted(scheme) );
+        ColorScheme::highlighted(scheme));
 }
 
 
@@ -95,4 +95,10 @@ QString StyleSheet::format_message_box()
 }
 
 
+QString StyleSheet::format_tooltip()
+{
+    return QString("QToolTip { border: 0; color: %1; background-color: %2; }").arg(
+            ColorScheme::Ui::color,
+			ColorScheme::Ui::background );
+}
 
