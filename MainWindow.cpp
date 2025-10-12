@@ -178,6 +178,10 @@ bool MainWindow::eventFilter(QObject* obj, QEvent* evt)
     static QPoint mouseStartPos;
     static MouseEvent::ActionE action{ MouseEvent::ActionE::None };
 
+    // Exit early on unneeded event;
+    if (evt->type() == QEvent::MouseMove && action == MouseEvent::ActionE::None)
+        return false;
+
     if (MouseEvent::is_rmb_release(evt) && action == MouseEvent::ActionE::None)
     {
         emit customContextMenuRequested(static_cast<QMouseEvent*>(evt)->globalPos());
@@ -364,7 +368,11 @@ void MainWindow::at_customContextMenuRequested(const QPoint& pos)
 
     QMenu* opacitySubmenu = new QMenu("Set Window Opacity (Alt+Wheel)", this);
     opacitySubmenu->setWindowFlags(opacitySubmenu->windowFlags() | Qt::NoDropShadowWindowHint);
-    for (const float opacity : std::vector<float>({ 1.f, .8f, .6f, .5f, .4f, .3f, .15f}))
+	QAction* actionOpauqe = new QAction("Opaque");
+	Property::Opacity::set(actionOpauqe, 1.f);
+	connect(actionOpauqe, &QAction::triggered, this, &MainWindow::at_actionSetOpacity_triggered);
+	opacitySubmenu->addAction(actionOpauqe);
+    for (const float opacity : std::vector<float>({ .8f, .6f, .5f, .4f, .3f, .15f}))
     {
         QAction* actionOpacity = new QAction(QString::number(opacity));
         Property::Opacity::set(actionOpacity, opacity);
@@ -729,6 +737,7 @@ void MainWindow::UpdatePerFile()
     setWindowTitle(tit + unsaved + " [PureNote]");
     //statusBar()->showMessage(filePath + unsavedTag);
     statusLabel->setText(filePath + unsaved);
+    statusLabel->setToolTip(filePath + unsaved);
 }
 
 
