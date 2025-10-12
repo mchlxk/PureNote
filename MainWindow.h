@@ -67,6 +67,7 @@ private:
     void UpdatePerFile();
     void SetStyle(const style_t& style);
     void UpdatePerStyle();
+    void UpdatePerOpacity();
 
     void UpdateOnTopPerState();
     void UpdatePerFullscreen();
@@ -92,6 +93,7 @@ private:
     QString title;
 
     style_t m_style{ Style::defaults };
+    float m_opacity{ 1.f };
 
     State::tags_t m_stateTags;
 };

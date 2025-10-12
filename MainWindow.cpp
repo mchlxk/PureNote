@@ -252,6 +252,18 @@ bool MainWindow::eventFilter(QObject* obj, QEvent* evt)
         return true;
     }
 
+    if (MouseEvent::is_alt_wheel_down(evt))
+    {
+        m_opacity = std::max(m_opacity - .01f, .1f);
+        UpdatePerOpacity();
+    }
+
+    if (MouseEvent::is_alt_wheel_up(evt))
+    {
+        m_opacity = std::min(m_opacity + .01f, 1.f);
+        UpdatePerOpacity();
+    }
+
     return false;
 }
 
@@ -436,6 +448,7 @@ void MainWindow::UpdatePerFullscreen()
 {
     if (State::has_tag<State::Tag::Fullscreen>(m_stateTags))
     {
+        UpdatePerOpacity();
         UpdateOnTopPerState();
         QMainWindow::showFullScreen();
 
@@ -458,6 +471,7 @@ void MainWindow::UpdatePerFullscreen()
         QMainWindow::showNormal();
         setContentsMargins(0, 0, 0, 0);
         UpdateOnTopPerState();
+        UpdatePerOpacity();
     }
 }
 
@@ -685,6 +699,15 @@ void MainWindow::UpdateOnTopPerState()
     SetupWindowFlags(setOnTop);
 }
 
+void MainWindow::UpdatePerOpacity()
+{
+    if(State::has_tag<State::Tag::Fullscreen>(m_stateTags))
+    {
+		setWindowOpacity(1);
+        return;
+    }
+	setWindowOpacity(m_opacity);
+}
 
 void MainWindow::SetupWindowFlags(bool onTop)
 {

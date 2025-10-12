@@ -20,5 +20,9 @@ namespace MouseEvent
     bool is_mmb_press(const QEvent* evt);
     bool is_mmb_release(const QEvent* evt);
     bool is_rmb_press(const QEvent* evt);
+    bool is_ctrl_wheel_down(const QEvent* evt);
+    bool is_ctrl_wheel_up(const QEvent* evt);
+    bool is_alt_wheel_down(const QEvent* evt);
+    bool is_alt_wheel_up(const QEvent* evt);
 }
 
