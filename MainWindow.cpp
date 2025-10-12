@@ -73,6 +73,11 @@ void MainWindow::SetupActions()
     connect(actionRedo, &QAction::triggered, this, &MainWindow::at_actionRedo_triggered);
     addAction(actionRedo);
 
+    actionNextColorScheme = new QAction("Next ColorScheme", this);
+    actionNextColorScheme->setShortcut(QKeySequence("F5"));
+    connect(actionNextColorScheme, &QAction::triggered, this, &MainWindow::at_actionNextColorScheme_triggered);
+    addAction(actionNextColorScheme);
+
     actionToggleOnTop = new QAction("Stay On Top", this);
     actionToggleOnTop->setCheckable(true);
     actionToggleOnTop->setChecked(State::has_tag<State::Tag::OnTop>(m_stateTags));
@@ -92,7 +97,7 @@ void MainWindow::SetupActions()
     addAction(actionToggleFullscreen);
 
     actionExit = new QAction("Exit", this);
-    actionExit->setShortcut(QKeySequence("Ctrl+X"));
+    actionExit->setShortcut(QKeySequence("Alt+X"));
     connect(actionExit, &QAction::triggered, this, &MainWindow::at_actionExit_triggered);
     addAction(actionExit);
 }
@@ -178,7 +183,7 @@ bool MainWindow::eventFilter(QObject* obj, QEvent* evt)
     static QPoint mouseStartPos;
     static MouseEvent::ActionE action{ MouseEvent::ActionE::None };
 
-    // Exit early on unneeded event;
+    // Exit early on plain mouse-move
     if (evt->type() == QEvent::MouseMove && action == MouseEvent::ActionE::None)
         return false;
 
@@ -211,6 +216,7 @@ bool MainWindow::eventFilter(QObject* obj, QEvent* evt)
     }
 
 
+    // Do not process any of the following events in fullscreen mode
     if (State::has_tag<State::Tag::Fullscreen>(m_stateTags))
         return false;
 
@@ -264,7 +270,6 @@ bool MainWindow::eventFilter(QObject* obj, QEvent* evt)
                 return true;
             }
         }
-
     }
 
     if (MouseEvent::is_lmb_release(evt) && action == MouseEvent::ActionE::MoveAltLmb)
@@ -287,14 +292,14 @@ bool MainWindow::eventFilter(QObject* obj, QEvent* evt)
 
     if (MouseEvent::is_alt_wheel_down(evt))
     {
-        m_opacity = std::max(m_opacity - .08f, .15f);
+        Style::opacity(m_style) = std::max(Style::opacity(m_style) - .08f, Style::min_opacity);
         UpdatePerOpacity();
         return true;
     }
 
     if (MouseEvent::is_alt_wheel_up(evt))
     {
-        m_opacity = std::min(m_opacity + .08f, 1.f);
+        Style::opacity(m_style) = std::min(Style::opacity(m_style) + .08f, 1.f);
         UpdatePerOpacity();
         return true;
     }
@@ -338,6 +343,8 @@ void MainWindow::at_customContextMenuRequested(const QPoint& pos)
 
 
     menu->addSeparator();
+
+    menu->addAction(actionNextColorScheme);
 
     QMenu* colorSchemesSubmenu = new QMenu("Color Scheme", this);
     colorSchemesSubmenu->setWindowFlags(colorSchemesSubmenu->windowFlags() | Qt::NoDropShadowWindowHint);
@@ -458,19 +465,29 @@ void MainWindow::at_actionSelectAll_triggered() {}
 void MainWindow::at_actionSetColorScheme_triggered()
 {
     const QString schemeName = Property::ColorScheme::get(sender());
-    SetStyle({schemeName, std::get<1>(m_style)});
+    SetStyle({ schemeName, Style::font_size(m_style), Style::opacity(m_style) });
 }
+
+void MainWindow::at_actionNextColorScheme_triggered()
+{
+    auto found = ColorScheme::schemas.find(Style::color_scheme(m_style));
+    auto next = ++found;
+    if (next == ColorScheme::schemas.end())
+        next = ColorScheme::schemas.begin();
+    SetStyle({ next->first, Style::font_size(m_style), Style::opacity(m_style) });
+}
+
 
 void MainWindow::at_actionSetFontSize_triggered()
 {
     const uint32_t size = Property::FontSize::get(sender());
-    SetStyle({std::get<0>(m_style), size});
+    SetStyle({ Style::color_scheme(m_style), size, Style::opacity(m_style) });
 }
 
 
 void MainWindow::at_actionSetOpacity_triggered()
 {
-    m_opacity = Property::Opacity::get(sender());
+    Style::opacity(m_style) = Property::Opacity::get(sender());
     UpdatePerOpacity();
 }
 
@@ -485,15 +502,13 @@ void MainWindow::SetStyle(const style_t& style)
 
 void MainWindow::UpdatePerStyle()
 {
-    const QString& schema = std::get<0>(m_style);
-    const uint32_t fontSize = std::get<1>(m_style);
-
-    if (!ColorScheme::schemas.count(schema))
+    if (!ColorScheme::schemas.count(Style::color_scheme(m_style)))
         return;
-    setStyleSheet(StyleSheet::format_global(ColorScheme::schemas.at(schema), fontSize));
-    textEdit->setStyleSheet(StyleSheet::format_text_edit(ColorScheme::schemas.at(schema), fontSize));
-    statusBar()->setStyleSheet(StyleSheet::format_status_bar(ColorScheme::schemas.at(schema), fontSize));
-    statusLabel->setStyleSheet(StyleSheet::format_status_label(ColorScheme::schemas.at(schema), fontSize));
+    setStyleSheet(StyleSheet::format_global(ColorScheme::schemas.at(Style::color_scheme(m_style)), Style::font_size(m_style)));
+    textEdit->setStyleSheet(StyleSheet::format_text_edit(ColorScheme::schemas.at(Style::color_scheme(m_style)), Style::font_size(m_style)));
+    statusBar()->setStyleSheet(StyleSheet::format_status_bar(ColorScheme::schemas.at(Style::color_scheme(m_style)), Style::font_size(m_style)));
+    statusLabel->setStyleSheet(StyleSheet::format_status_label(ColorScheme::schemas.at(Style::color_scheme(m_style)), Style::font_size(m_style)));
+    UpdatePerOpacity();
 }
 
 
@@ -758,10 +773,10 @@ void MainWindow::UpdatePerOpacity()
 {
     if(State::has_tag<State::Tag::Fullscreen>(m_stateTags))
     {
-		setWindowOpacity(1);
+		setWindowOpacity(1.f);
         return;
     }
-	setWindowOpacity(m_opacity);
+	setWindowOpacity(Style::opacity(m_style));
 }
 
 void MainWindow::SetupWindowFlags(bool onTop)

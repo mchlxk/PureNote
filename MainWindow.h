@@ -41,6 +41,7 @@ private slots:
     void at_actionPaste_triggered();
     void at_actionSelectAll_triggered();
     void at_actionSetColorScheme_triggered();
+    void at_actionNextColorScheme_triggered();
     void at_actionSetFontSize_triggered();
     void at_actionSetOpacity_triggered();
     void at_actionToggleFullscreen_triggered();
@@ -82,6 +83,7 @@ private:
     QAction* actionCopy{ nullptr };
     QAction* actionPaste{ nullptr };
     QAction* actionSelectAll{ nullptr };
+    QAction* actionNextColorScheme{ nullptr };
     QAction* actionToggleOnTop{ nullptr };
     QAction* actionToggleLocked{ nullptr };
     QAction* actionToggleFullscreen{ nullptr };
@@ -94,7 +96,6 @@ private:
     QString title;
 
     style_t m_style{ Style::defaults };
-    float m_opacity{ 1.f };
 
     State::tags_t m_stateTags;
 };
