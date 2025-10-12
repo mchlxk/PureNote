@@ -42,6 +42,8 @@ private slots:
     void at_actionSelectAll_triggered();
     void at_actionSetColorScheme_triggered();
     void at_actionNextColorScheme_triggered();
+    void at_actionPreviousFontSize_triggered();
+    void at_actionNextFontSize_triggered();
     void at_actionSetFontSize_triggered();
     void at_actionSetOpacity_triggered();
     void at_actionToggleFullscreen_triggered();
@@ -75,6 +77,9 @@ private:
     void UpdatePerFullscreen();
     void UpdatePerLocked();
 
+    void SetPreviousFontSize();
+    void SetNextFontSize();
+
     QAction* actionSave{ nullptr };
     QAction* actionSaveAs{ nullptr };
     QAction* actionUndo{ nullptr };
@@ -84,6 +89,8 @@ private:
     QAction* actionPaste{ nullptr };
     QAction* actionSelectAll{ nullptr };
     QAction* actionNextColorScheme{ nullptr };
+    QAction* actionPreviousFontsize{ nullptr };
+    QAction* actionNextFontsize{ nullptr };
     QAction* actionToggleOnTop{ nullptr };
     QAction* actionToggleLocked{ nullptr };
     QAction* actionToggleFullscreen{ nullptr };
@@ -99,4 +106,5 @@ private:
 
     State::tags_t m_stateTags;
 };
+
 

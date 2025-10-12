@@ -78,6 +78,16 @@ void MainWindow::SetupActions()
     connect(actionNextColorScheme, &QAction::triggered, this, &MainWindow::at_actionNextColorScheme_triggered);
     addAction(actionNextColorScheme);
 
+    actionPreviousFontsize = new QAction("Previous Font Size", this);
+    actionPreviousFontsize->setShortcut(QKeySequence(Qt::ControlModifier | Qt::Key_Minus));
+    connect(actionPreviousFontsize, &QAction::triggered, this, &MainWindow::at_actionPreviousFontSize_triggered);
+    addAction(actionPreviousFontsize);
+
+    actionNextFontsize = new QAction("Next Font Size", this);
+    actionNextFontsize->setShortcut(QKeySequence(Qt::ControlModifier | Qt::Key_Plus));
+    connect(actionNextFontsize, &QAction::triggered, this, &MainWindow::at_actionNextFontSize_triggered);
+    addAction(actionNextFontsize);
+
     actionToggleOnTop = new QAction("Stay On Top", this);
     actionToggleOnTop->setCheckable(true);
     actionToggleOnTop->setChecked(State::has_tag<State::Tag::OnTop>(m_stateTags));
@@ -195,23 +205,13 @@ bool MainWindow::eventFilter(QObject* obj, QEvent* evt)
 
     if (MouseEvent::is_ctrl_wheel_up(evt))
     {
-        const uint32_t sz = Style::font_size(m_style);
-        const auto found = std::upper_bound(Style::font_sizes.cbegin(), Style::font_sizes.cend(), sz);
-        if (found == Style::font_sizes.cend())
-            return true;
-        Style::font_size(m_style) = *found;
-        UpdatePerStyle();
+        SetNextFontSize();
 		return true;
     }
 
     if (MouseEvent::is_ctrl_wheel_down(evt))
     {
-        const uint32_t sz = Style::font_size(m_style);
-        auto found = std::lower_bound(Style::font_sizes.cbegin(), Style::font_sizes.cend(), sz);
-        if (found == Style::font_sizes.cbegin())
-            return true;
-        Style::font_size(m_style) = *(--found);
-        UpdatePerStyle();
+        SetPreviousFontSize();
 		return true;
     }
 
@@ -477,6 +477,16 @@ void MainWindow::at_actionNextColorScheme_triggered()
     SetStyle({ next->first, Style::font_size(m_style), Style::opacity(m_style) });
 }
 
+void MainWindow::at_actionPreviousFontSize_triggered()
+{
+    SetPreviousFontSize();
+}
+
+void MainWindow::at_actionNextFontSize_triggered()
+{
+    SetNextFontSize();
+}
+
 
 void MainWindow::at_actionSetFontSize_triggered()
 {
@@ -550,6 +560,26 @@ void MainWindow::UpdatePerLocked()
 	textEdit->setReadOnly(State::has_tag<State::Tag::Locked>(m_stateTags));
 }
 
+
+void MainWindow::SetPreviousFontSize()
+{
+	const uint32_t sz = Style::font_size(m_style);
+	auto found = std::lower_bound(Style::font_sizes.cbegin(), Style::font_sizes.cend(), sz);
+	if (found == Style::font_sizes.cbegin())
+		return;
+	Style::font_size(m_style) = *(--found);
+	UpdatePerStyle();
+}
+
+void MainWindow::SetNextFontSize()
+{
+	const uint32_t sz = Style::font_size(m_style);
+	const auto found = std::upper_bound(Style::font_sizes.cbegin(), Style::font_sizes.cend(), sz);
+	if (found == Style::font_sizes.cend())
+		return;
+	Style::font_size(m_style) = *found;
+	UpdatePerStyle();
+}
 
 
 
