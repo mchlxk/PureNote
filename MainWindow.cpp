@@ -28,6 +28,12 @@ namespace Property
         static void set(QObject* obj, float opacity) { obj->setProperty("opacity", opacity); }
         static float get(QObject* obj) { return obj->property("opacity").toFloat(); }
     }
+
+    namespace FontFamily
+    {
+        static void set(QObject* obj, const QString& family) { obj->setProperty("font_family", family); }
+        static QString get(QObject* obj) { return obj->property("font_family").toString(); }
+    }
 }
 
 static constexpr float min_opacity{ .15f };
@@ -391,9 +397,7 @@ void MainWindow::at_customContextMenuRequested(const QPoint& pos)
 
     menu->addSeparator();
 
-    menu->addAction(actionNextColorScheme);
-
-    QMenu* colorSchemesSubmenu = new QMenu("Color Scheme", this);
+    QMenu* colorSchemesSubmenu = new QMenu("Color Scheme (F5)", this);
     colorSchemesSubmenu->setWindowFlags(colorSchemesSubmenu->windowFlags() | Qt::NoDropShadowWindowHint);
     for (const auto& scheme : ColorScheme::schemas)
     {
@@ -525,7 +529,9 @@ void MainWindow::at_actionSelectAll_triggered() {}
 void MainWindow::at_actionSetColorScheme_triggered()
 {
     const QString schemeName = Property::ColorScheme::get(sender());
-    SetStyle({ schemeName, Style::font_size(m_style) });
+    style_t newStyle(m_style);
+    Style::color_scheme(newStyle) = schemeName;
+    SetStyle(newStyle);
 }
 
 void MainWindow::at_actionNextColorScheme_triggered()
@@ -534,7 +540,9 @@ void MainWindow::at_actionNextColorScheme_triggered()
     auto next = ++found;
     if (next == ColorScheme::schemas.end())
         next = ColorScheme::schemas.begin();
-    SetStyle({ next->first, Style::font_size(m_style) });
+    style_t newStyle(m_style);
+    Style::color_scheme(newStyle) = next->first;
+    SetStyle(newStyle);
 }
 
 void MainWindow::at_actionDecreaseFontSize_triggered()
@@ -562,7 +570,9 @@ void MainWindow::at_actionIncreaseOpacity_triggered()
 void MainWindow::at_actionSetFontSize_triggered()
 {
     const uint32_t size = Property::FontSize::get(sender());
-    SetStyle({ Style::color_scheme(m_style), size });
+    style_t newStyle(m_style);
+    Style::font_size(newStyle) = size;
+    SetStyle(newStyle);
 }
 
 

@@ -70,8 +70,9 @@ QString StyleSheet::format_main_window(const style_t& style)
 QString StyleSheet::format_text_edit(const style_t& style)
 {
     const auto& schema = ColorScheme::schemas.at(Style::color_scheme(style));
-    return QString("QPlainTextEdit{border: 0; font-size: %1px; color: %2; background-color: %3; selection-color: %2; selection-background-color: %4}").arg(
+    return QString("QPlainTextEdit{border: 0; font-size: %1px; font-family: '%2'; color: %3; background-color: %4; selection-color: %3; selection-background-color: %5}").arg(
         QString::number(Style::font_size(style)),
+        Style::font_families.at(Style::font_family(style)),
         ColorScheme::color(schema),
         ColorScheme::background(schema),
         ColorScheme::highlighted(schema));
