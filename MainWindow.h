@@ -3,6 +3,7 @@
 #include <QMainWindow>
 #include <QPlainTextEdit>
 #include <QLabel>
+#include <QTimer>
 
 #include "State.h"
 #include "Style.h"
@@ -49,7 +50,10 @@ private slots:
     void at_actionSetFontSize_triggered();
     void at_actionSetOpacity_triggered();
     void at_actionToggleFullscreen_triggered();
+    void at_actionToggleOpaqueOnContext_triggered();
     void at_actionExit_triggered();
+
+    void at_opacityAdjustTimer_expired();
 
 private:
     void readSettings();
@@ -100,6 +104,7 @@ private:
     QAction* actionToggleOnTop{ nullptr };
     QAction* actionToggleLocked{ nullptr };
     QAction* actionToggleFullscreen{ nullptr };
+    QAction* actionToggleOpaqueOnContext{ nullptr };
     QAction* actionExit{ nullptr };
 
     QPlainTextEdit *textEdit{ nullptr };
@@ -112,6 +117,7 @@ private:
     float m_opacity{ 1.f };
 
     State::tags_t m_stateTags;
+    QTimer m_opacityAdjustTimer;
 };
 
 

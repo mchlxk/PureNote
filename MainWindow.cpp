@@ -52,6 +52,10 @@ MainWindow::MainWindow()
     SetupContextMenu();
 
     setCurrentFile(QString());
+
+    m_opacityAdjustTimer.setSingleShot(true);
+    m_opacityAdjustTimer.setInterval(1000);
+    connect(&m_opacityAdjustTimer, &QTimer::timeout, this, &MainWindow::at_opacityAdjustTimer_expired);
 }
 
 void MainWindow::SetupActions()
@@ -117,6 +121,11 @@ void MainWindow::SetupActions()
     actionToggleFullscreen->setShortcut(QKeySequence("F11"));
     connect(actionToggleFullscreen, &QAction::triggered, this, &MainWindow::at_actionToggleFullscreen_triggered);
     addAction(actionToggleFullscreen);
+
+    actionToggleOpaqueOnContext = new QAction("Opaque If Active", this);
+    actionToggleOpaqueOnContext->setCheckable(true);
+    connect(actionToggleOpaqueOnContext, &QAction::triggered, this, &MainWindow::at_actionToggleOpaqueOnContext_triggered);
+    addAction(actionToggleOpaqueOnContext);
 
     actionExit = new QAction("Exit", this);
     actionExit->setShortcut(QKeySequence("Alt+X"));
@@ -213,6 +222,34 @@ bool MainWindow::eventFilter(QObject* obj, QEvent* evt)
     {
         emit customContextMenuRequested(static_cast<QMouseEvent*>(evt)->globalPos());
         return true;
+    }
+
+    if (evt->type() == QEvent::WindowActivate)
+    {
+        State::set_tag<State::Tag::HasDialogContext>(m_stateTags);
+        UpdatePerOpacity();
+        return false;
+    }
+
+    if (evt->type() == QEvent::WindowDeactivate)
+    {
+        State::clear_tag<State::Tag::HasDialogContext>(m_stateTags);
+        UpdatePerOpacity();
+        return false;
+    }
+
+    if (evt->type() == QEvent::Enter)
+    {
+        State::set_tag<State::Tag::HasMouseContext>(m_stateTags);
+        UpdatePerOpacity();
+        return false;
+    }
+
+    if (evt->type() == QEvent::Leave)
+    {
+        State::clear_tag<State::Tag::HasMouseContext>(m_stateTags);
+        UpdatePerOpacity();
+        return false;
     }
 
     if (MouseEvent::is_ctrl_wheel_up(evt))
@@ -398,6 +435,8 @@ void MainWindow::at_customContextMenuRequested(const QPoint& pos)
     }
     menu->addMenu(opacitySubmenu);
 
+    menu->addAction(actionToggleOpaqueOnContext);
+
     menu->addSeparator();
 
     actionToggleOnTop->setChecked(State::has_tag<State::Tag::OnTop>(m_stateTags));
@@ -431,12 +470,23 @@ void MainWindow::at_actionToggleFullscreen_triggered()
     UpdatePerFullscreen();
 }
 
+void MainWindow::at_actionToggleOpaqueOnContext_triggered()
+{
+    State::toggle_tag<State::Tag::OpaqueOnContext>(m_stateTags);
+    UpdatePerOpacity();
+}
+
 
 void MainWindow::at_actionExit_triggered()
 {
     emit close();
 }
 
+void MainWindow::at_opacityAdjustTimer_expired()
+{
+    State::clear_tag<State::Tag::OpacityAdjust>(m_stateTags);
+    UpdatePerOpacity();
+}
 
 void MainWindow::at_actionToggleOnTop_triggered()
 {
@@ -519,6 +569,8 @@ void MainWindow::at_actionSetFontSize_triggered()
 void MainWindow::at_actionSetOpacity_triggered()
 {
     m_opacity = Property::Opacity::get(sender());
+    State::set_tag<State::Tag::OpacityAdjust>(m_stateTags);
+    m_opacityAdjustTimer.start();
     UpdatePerOpacity();
 }
 
@@ -607,6 +659,8 @@ void MainWindow::DecreaseOpacity()
     if (State::has_tag<State::Tag::Fullscreen>(m_stateTags))
         return;
 	m_opacity = std::max(m_opacity - .08f, min_opacity);
+    State::set_tag<State::Tag::OpacityAdjust>(m_stateTags);
+    m_opacityAdjustTimer.start();
 	UpdatePerOpacity();
 }
 
@@ -615,6 +669,8 @@ void MainWindow::IncreaseOpacity()
     if (State::has_tag<State::Tag::Fullscreen>(m_stateTags))
         return;
 	m_opacity = std::min(m_opacity + .08f, 1.f);
+    State::set_tag<State::Tag::OpacityAdjust>(m_stateTags);
+    m_opacityAdjustTimer.start();
 	UpdatePerOpacity();
 }
 
@@ -716,7 +772,11 @@ bool MainWindow::ResolveUnsavedChanges()
     msgBox.setStandardButtons(QMessageBox::Save | QMessageBox::Discard | QMessageBox::Cancel);
     msgBox.setWindowFlags(msgBox.windowFlags() | Qt::FramelessWindowHint);
 
+    State::set_tag<State::Tag::MsgBox>(m_stateTags);
+    UpdatePerOpacity();
     const auto ret = msgBox.exec();
+    State::clear_tag<State::Tag::MsgBox>(m_stateTags);
+    UpdatePerOpacity();
 
     switch (ret) 
     {
@@ -837,11 +897,25 @@ void MainWindow::UpdateOnTopPerState()
 
 void MainWindow::UpdatePerOpacity()
 {
-    if(State::has_tag<State::Tag::Fullscreen>(m_stateTags))
+    if(State::has_tag<State::Tag::Fullscreen>(m_stateTags) || State::has_tag<State::Tag::MsgBox>(m_stateTags))
     {
 		setWindowOpacity(1.f);
         return;
     }
+
+    if (State::has_tag<State::Tag::OpacityAdjust>(m_stateTags))
+    {
+		setWindowOpacity(m_opacity);
+        return;
+    }
+
+    if (State::has_tag<State::Tag::OpaqueOnContext>(m_stateTags)
+        && (State::has_tag<State::Tag::HasMouseContext>(m_stateTags) || State::has_tag<State::Tag::HasDialogContext>(m_stateTags)))
+    {
+		setWindowOpacity(1.f);
+        return;
+    }
+
 	setWindowOpacity(m_opacity);
 }
 
