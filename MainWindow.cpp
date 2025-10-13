@@ -552,8 +552,6 @@ void MainWindow::at_actionNextColorScheme_triggered()
     SetStyle(newStyle);
 }
 
-#include <QFontDatabase>
-
 void MainWindow::at_actionNextFont_triggered()
 {
     const QString& currentFont = Style::font_family(m_style);

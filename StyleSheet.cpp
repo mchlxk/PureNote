@@ -72,7 +72,7 @@ QString StyleSheet::format_text_edit(const style_t& style)
     const auto& schema = ColorScheme::schemas.at(Style::color_scheme(style));
     return QString("QPlainTextEdit{border: 0; font-size: %1px; font-family: '%2'; color: %3; background-color: %4; selection-color: %3; selection-background-color: %5}").arg(
         QString::number(Style::font_size(style)),
-        Style::font_families.at(Style::font_family(style)),
+        Style::font_families.at(Style::font_family(style)).join(","),
         ColorScheme::color(schema),
         ColorScheme::background(schema),
         ColorScheme::highlighted(schema));
@@ -92,7 +92,7 @@ QString StyleSheet::format_status_label(const style_t& style)
     const auto& schema = ColorScheme::schemas.at(Style::color_scheme(style));
     return format_tooltip() + QString("QLabel{border: 0; font-size: %1px; font-family: '%2'; color: %3; background: %4}").arg(
         QString::number(Style::font_size(style)),
-        Style::font_families.at(Style::font_family(style)),
+        Style::font_families.at(Style::font_family(style)).join(","),
         ColorScheme::color(schema),
         ColorScheme::highlighted(schema));
 }

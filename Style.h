@@ -5,6 +5,7 @@
 #include <unordered_map>
 
 #include <QString>
+#include <QStringList>
 
 #include "HashQString.h"
 
@@ -21,7 +22,7 @@ namespace Style
 
     extern const T defaults;    
     extern const std::set<uint32_t> font_sizes;
-    extern const std::unordered_map<QString, QString, hash_qstring> font_families;
+    extern const std::unordered_map<QString, QStringList, hash_qstring> font_families;
 }
 using style_t = Style::T;
 
