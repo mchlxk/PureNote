@@ -90,6 +90,11 @@ void MainWindow::SetupActions()
     connect(actionNextColorScheme, &QAction::triggered, this, &MainWindow::at_actionNextColorScheme_triggered);
     addAction(actionNextColorScheme);
 
+    actionNextFont = new QAction("Next Font", this);
+    actionNextFont->setShortcut(QKeySequence("F4"));
+    connect(actionNextFont, &QAction::triggered, this, &MainWindow::at_actionNextFont_triggered);
+    addAction(actionNextFont);
+
     actionDecreaseFontsize = new QAction("Decrease Font Size", this);
     actionDecreaseFontsize->setShortcut(QKeySequence(Qt::ControlModifier | Qt::Key_Minus));
     connect(actionDecreaseFontsize, &QAction::triggered, this, &MainWindow::at_actionDecreaseFontSize_triggered);
@@ -384,20 +389,9 @@ void MainWindow::at_customContextMenuRequested(const QPoint& pos)
     actionRedo->setEnabled(!State::has_tag<State::Tag::Locked>(m_stateTags) && textEdit->document()->isRedoAvailable());
     menu->addAction(actionRedo);
 
-
-
-    // save
-    // save-as
-    // new note
-    // (un)lock
-    // display on top
-    // set transparent
-    // next color scheme
-
-
     menu->addSeparator();
 
-    QMenu* colorSchemesSubmenu = new QMenu("Color Scheme (F5)", this);
+    QMenu* colorSchemesSubmenu = new QMenu("Color Scheme\t(F5)", this);
     colorSchemesSubmenu->setWindowFlags(colorSchemesSubmenu->windowFlags() | Qt::NoDropShadowWindowHint);
     for (const auto& scheme : ColorScheme::schemas)
     {
@@ -410,8 +404,21 @@ void MainWindow::at_customContextMenuRequested(const QPoint& pos)
     }
     menu->addMenu(colorSchemesSubmenu);
 
+    QMenu* fontSubmenu = new QMenu("Font\t(F4)", this);
+    fontSubmenu->setWindowFlags(fontSubmenu->windowFlags() | Qt::NoDropShadowWindowHint);
+    for (const auto& font : Style::font_families)
+    {
+        const QString name = font.first;
+        QAction* actionFont = new QAction(name);
+        Property::FontFamily::set(actionFont, name);
+        connect(actionFont, &QAction::triggered, this, &MainWindow::at_actionSetFont_triggered);
+        if (name == Style::font_family(m_style))
+            actionFont->setEnabled(false);
+        fontSubmenu->addAction(actionFont);
+    }
+    menu->addMenu(fontSubmenu);
 
-    QMenu* fontSizeSubmenu = new QMenu("Font Size (Ctrl+Wheel)", this);
+    QMenu* fontSizeSubmenu = new QMenu("Font Size\t(Ctrl+Wheel)", this);
     fontSizeSubmenu->setWindowFlags(fontSizeSubmenu->windowFlags() | Qt::NoDropShadowWindowHint);
     for (const uint32_t size : Style::font_sizes)
     {
@@ -424,7 +431,7 @@ void MainWindow::at_customContextMenuRequested(const QPoint& pos)
     }
     menu->addMenu(fontSizeSubmenu);
 
-    QMenu* opacitySubmenu = new QMenu("Window Opacity (Alt+Wheel)", this);
+    QMenu* opacitySubmenu = new QMenu("Window Opacity\t(Alt+Wheel)", this);
     opacitySubmenu->setWindowFlags(opacitySubmenu->windowFlags() | Qt::NoDropShadowWindowHint);
 	QAction* actionOpauqe = new QAction("Opaque");
 	Property::Opacity::set(actionOpauqe, 1.f);
@@ -544,6 +551,31 @@ void MainWindow::at_actionNextColorScheme_triggered()
     Style::color_scheme(newStyle) = next->first;
     SetStyle(newStyle);
 }
+
+#include <QFontDatabase>
+
+void MainWindow::at_actionNextFont_triggered()
+{
+    const QString& currentFont = Style::font_family(m_style);
+    auto found = Style::font_families.find(currentFont);
+    if (found == Style::font_families.end())
+        Style::font_family(m_style) = Style::font_families.begin()->first;
+    else if (++found == Style::font_families.end())
+        Style::font_family(m_style) = Style::font_families.begin()->first;
+    else
+        Style::font_family(m_style) = found->first;
+    UpdatePerStyle();
+}
+
+void MainWindow::at_actionSetFont_triggered()
+{
+    const QString name = Property::FontFamily::get(sender());
+    if(!Style::font_families.count(name))
+        return;
+    Style::font_family(m_style) = name;
+    UpdatePerStyle();
+}
+
 
 void MainWindow::at_actionDecreaseFontSize_triggered()
 {

@@ -43,6 +43,8 @@ private slots:
     void at_actionSelectAll_triggered();
     void at_actionSetColorScheme_triggered();
     void at_actionNextColorScheme_triggered();
+    void at_actionNextFont_triggered();
+    void at_actionSetFont_triggered();
     void at_actionDecreaseFontSize_triggered();
     void at_actionIncreaseFontSize_triggered();
     void at_actionDecreaseOpacity_triggered();
@@ -97,6 +99,7 @@ private:
     QAction* actionPaste{ nullptr };
     QAction* actionSelectAll{ nullptr };
     QAction* actionNextColorScheme{ nullptr };
+    QAction* actionNextFont{ nullptr };
     QAction* actionDecreaseFontsize{ nullptr };
     QAction* actionIncreaseFontsize{ nullptr };
     QAction* actionDecreaseOpacity{ nullptr };

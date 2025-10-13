@@ -90,8 +90,9 @@ QString StyleSheet::format_status_bar(const style_t& style)
 QString StyleSheet::format_status_label(const style_t& style)
 {
     const auto& schema = ColorScheme::schemas.at(Style::color_scheme(style));
-    return format_tooltip() + QString("QLabel{border: 0; font-size: %1px; color: %2; background: %3}").arg(
+    return format_tooltip() + QString("QLabel{border: 0; font-size: %1px; font-family: '%2'; color: %3; background: %4}").arg(
         QString::number(Style::font_size(style)),
+        Style::font_families.at(Style::font_family(style)),
         ColorScheme::color(schema),
         ColorScheme::highlighted(schema));
 }
@@ -107,5 +108,5 @@ QString StyleSheet::format_scrollbar(const style_t& style)
         "QScrollBar::handle:vertical{background-color: %2;min-height: 10px;}").arg(
             ColorScheme::background(schema), 
             ColorScheme::highlighted(schema));
-}
 
+}
