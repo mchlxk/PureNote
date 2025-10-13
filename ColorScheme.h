@@ -19,7 +19,7 @@ namespace ColorScheme
 	static inline QString& highlighted(T& op) { return std::get<2>(op); }
 	static inline const QString& highlighted(const  T& op) { return std::get<2>(op); }
 
-	extern const std::unordered_map<QString, T> schemas;
+	extern const std::unordered_map<QString, T, hash_qstring> schemas;
 
 	namespace Ui
 	{
