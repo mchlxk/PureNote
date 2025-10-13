@@ -587,10 +587,10 @@ void MainWindow::UpdatePerStyle()
 {
     if (!ColorScheme::schemas.count(Style::color_scheme(m_style)))
         return;
-    setStyleSheet(StyleSheet::format_global(ColorScheme::schemas.at(Style::color_scheme(m_style)), Style::font_size(m_style)));
-    textEdit->setStyleSheet(StyleSheet::format_text_edit(ColorScheme::schemas.at(Style::color_scheme(m_style)), Style::font_size(m_style)));
-    statusBar()->setStyleSheet(StyleSheet::format_status_bar(ColorScheme::schemas.at(Style::color_scheme(m_style)), Style::font_size(m_style)));
-    statusLabel->setStyleSheet(StyleSheet::format_status_label(ColorScheme::schemas.at(Style::color_scheme(m_style)), Style::font_size(m_style)));
+    setStyleSheet(StyleSheet::format_global(m_style));
+    textEdit->setStyleSheet(StyleSheet::format_text_edit(m_style));
+    statusBar()->setStyleSheet(StyleSheet::format_status_bar(m_style));
+    statusLabel->setStyleSheet(StyleSheet::format_status_label(m_style));
 }
 
 
