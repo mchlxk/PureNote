@@ -30,6 +30,8 @@ namespace Property
     }
 }
 
+static constexpr float min_opacity{ .15f };
+
 MainWindow::MainWindow()
 : textEdit(new QPlainTextEdit)
 , statusLabel (new QLabel)
@@ -473,7 +475,7 @@ void MainWindow::at_actionSelectAll_triggered() {}
 void MainWindow::at_actionSetColorScheme_triggered()
 {
     const QString schemeName = Property::ColorScheme::get(sender());
-    SetStyle({ schemeName, Style::font_size(m_style), Style::opacity(m_style) });
+    SetStyle({ schemeName, Style::font_size(m_style) });
 }
 
 void MainWindow::at_actionNextColorScheme_triggered()
@@ -482,7 +484,7 @@ void MainWindow::at_actionNextColorScheme_triggered()
     auto next = ++found;
     if (next == ColorScheme::schemas.end())
         next = ColorScheme::schemas.begin();
-    SetStyle({ next->first, Style::font_size(m_style), Style::opacity(m_style) });
+    SetStyle({ next->first, Style::font_size(m_style) });
 }
 
 void MainWindow::at_actionDecreaseFontSize_triggered()
@@ -510,13 +512,13 @@ void MainWindow::at_actionIncreaseOpacity_triggered()
 void MainWindow::at_actionSetFontSize_triggered()
 {
     const uint32_t size = Property::FontSize::get(sender());
-    SetStyle({ Style::color_scheme(m_style), size, Style::opacity(m_style) });
+    SetStyle({ Style::color_scheme(m_style), size });
 }
 
 
 void MainWindow::at_actionSetOpacity_triggered()
 {
-    Style::opacity(m_style) = Property::Opacity::get(sender());
+    m_opacity = Property::Opacity::get(sender());
     UpdatePerOpacity();
 }
 
@@ -537,7 +539,6 @@ void MainWindow::UpdatePerStyle()
     textEdit->setStyleSheet(StyleSheet::format_text_edit(ColorScheme::schemas.at(Style::color_scheme(m_style)), Style::font_size(m_style)));
     statusBar()->setStyleSheet(StyleSheet::format_status_bar(ColorScheme::schemas.at(Style::color_scheme(m_style)), Style::font_size(m_style)));
     statusLabel->setStyleSheet(StyleSheet::format_status_label(ColorScheme::schemas.at(Style::color_scheme(m_style)), Style::font_size(m_style)));
-    UpdatePerOpacity();
 }
 
 
@@ -605,7 +606,7 @@ void MainWindow::DecreaseOpacity()
 {
     if (State::has_tag<State::Tag::Fullscreen>(m_stateTags))
         return;
-	Style::opacity(m_style) = std::max(Style::opacity(m_style) - .08f, Style::min_opacity);
+	m_opacity = std::max(m_opacity - .08f, min_opacity);
 	UpdatePerOpacity();
 }
 
@@ -613,7 +614,7 @@ void MainWindow::IncreaseOpacity()
 {
     if (State::has_tag<State::Tag::Fullscreen>(m_stateTags))
         return;
-	Style::opacity(m_style) = std::min(Style::opacity(m_style) + .08f, 1.f);
+	m_opacity = std::min(m_opacity + .08f, 1.f);
 	UpdatePerOpacity();
 }
 
@@ -841,7 +842,7 @@ void MainWindow::UpdatePerOpacity()
 		setWindowOpacity(1.f);
         return;
     }
-	setWindowOpacity(Style::opacity(m_style));
+	setWindowOpacity(m_opacity);
 }
 
 void MainWindow::SetupWindowFlags(bool onTop)

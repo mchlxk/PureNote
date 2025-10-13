@@ -109,6 +109,7 @@ private:
     QString title;
 
     style_t m_style{ Style::defaults };
+    float m_opacity{ 1.f };
 
     State::tags_t m_stateTags;
 };
