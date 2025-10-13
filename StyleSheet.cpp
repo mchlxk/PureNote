@@ -30,9 +30,7 @@ QString StyleSheet::format_text_edit(const color_scheme_t& scheme, uint32_t font
 
 QString StyleSheet::format_status_bar(const color_scheme_t& scheme, uint32_t fontSize)
 {
-    return QString("QStatusBar{border: 0; font-size: %1px; color: %2; background: %3}").arg(
-        QString::number(fontSize),
-        ColorScheme::color(scheme),
+    return QString("QStatusBar{background: %1} QStatusBar::item{border: 0;}").arg(
         ColorScheme::highlighted(scheme) );
 }
 
