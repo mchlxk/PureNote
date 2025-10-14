@@ -12,7 +12,7 @@ QString StyleSheet::format_menu(const style_t& style)
         "QMenu::item:selected{ background: %3; }"
         "QMenu::item:disabled{ color: %4 }" ).arg(
             ColorScheme::color(schema),
-            ColorScheme::highlighted(schema),
+            ColorScheme::accent(schema),
             ColorScheme::background(schema),
             ColorScheme::disabled(schema));
 }
@@ -26,7 +26,7 @@ QString StyleSheet::format_push_button()
         "QPushButton:pressed{color: %4; background-color: %2;}" ).arg(
             ColorScheme::Ui::color,
             ColorScheme::Ui::background,
-			ColorScheme::Ui::highlighted,
+			ColorScheme::Ui::accent,
             ColorScheme::Ui::dimmed);
 }
 
@@ -65,7 +65,7 @@ QString StyleSheet::format_main_window(const style_t& style)
     return QString("QMainWindow{font-size: %1px; color: %2; background-color: %3}").arg(
         QString::number(Style::font_size(style)),
         ColorScheme::color(schema),
-        ColorScheme::highlighted(schema));
+        ColorScheme::accent(schema));
 }
 
 QString StyleSheet::format_text_edit(const style_t& style)
@@ -76,7 +76,7 @@ QString StyleSheet::format_text_edit(const style_t& style)
         Style::font_families.at(Style::font_family(style)).join(","),
         ColorScheme::color(schema),
         ColorScheme::background(schema),
-        ColorScheme::highlighted(schema));
+        ColorScheme::accent(schema));
 }
 
 
@@ -84,7 +84,7 @@ QString StyleSheet::format_status_bar(const style_t& style)
 {
     const auto& schema = ColorScheme::schemas.at(Style::color_scheme(style));
     return QString("QStatusBar{background: %1} QStatusBar::item{border: 0;}").arg(
-        ColorScheme::highlighted(schema) );
+        ColorScheme::accent(schema) );
 }
 
 
@@ -95,7 +95,7 @@ QString StyleSheet::format_status_label(const style_t& style)
         QString::number(Style::font_size(style)),
         Style::font_families.at(Style::font_family(style)).join(","),
         ColorScheme::color(schema),
-        ColorScheme::highlighted(schema));
+        ColorScheme::accent(schema));
 }
 
 
@@ -108,6 +108,6 @@ QString StyleSheet::format_scrollbar(const style_t& style)
         "QScrollBar:vertical{border: 0;background-color: %1;width: 10px;}"
         "QScrollBar::handle:vertical{background-color: %2;min-height: 10px;}").arg(
             ColorScheme::background(schema), 
-            ColorScheme::highlighted(schema));
+            ColorScheme::accent(schema));
 
 }

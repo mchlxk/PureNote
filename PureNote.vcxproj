@@ -36,13 +36,13 @@
     <Import Project="$(QtMsBuild)\qt_defaults.props" />
   </ImportGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'" Label="QtSettings">
-    <QtInstall>5.15.2</QtInstall>
+    <QtInstall>5.12.12</QtInstall>
     <QtModules>core;xml;gui;widgets;quick;quick</QtModules>
     <QtBuildConfig>debug</QtBuildConfig>
     <QtQMLDebugEnable>true</QtQMLDebugEnable>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x64'" Label="QtSettings">
-    <QtInstall>5.15.2</QtInstall>
+    <QtInstall>5.12.12</QtInstall>
     <QtModules>core;xml;gui;widgets;quick;core;xml;gui;widgets;quick</QtModules>
     <QtBuildConfig>release</QtBuildConfig>
   </PropertyGroup>

@@ -16,8 +16,8 @@ namespace ColorScheme
 	static inline const QString& color(const  T& op) { return std::get<0>(op); }
 	static inline QString& background(T& op) { return std::get<1>(op); }
 	static inline const QString& background(const  T& op) { return std::get<1>(op); }
-	static inline QString& highlighted(T& op) { return std::get<2>(op); }
-	static inline const QString& highlighted(const  T& op) { return std::get<2>(op); }
+	static inline QString& accent(T& op) { return std::get<2>(op); }
+	static inline const QString& accent(const  T& op) { return std::get<2>(op); }
 	static inline QString& disabled(T& op) { return std::get<3>(op); }
 	static inline const QString& disabled(const  T& op) { return std::get<3>(op); }
 
@@ -28,7 +28,7 @@ namespace ColorScheme
 		extern const QString color;
 		extern const QString dimmed;
 		extern const QString background;
-		extern const QString highlighted;
+		extern const QString accent;
 	}
 }
 
