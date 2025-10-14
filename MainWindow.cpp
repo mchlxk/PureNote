@@ -8,6 +8,8 @@
 #include "ColorScheme.h"
 #include "SchemeIcon.h"
 
+#include "PunParser.h"
+#include "PunSerializer.h"
 
 namespace Property
 {
@@ -467,6 +469,7 @@ void MainWindow::at_customContextMenuRequested(const QPoint& pos)
 
 void MainWindow::at_actionSave_triggered()
 {
+    save();
 // TBD
 }
 
@@ -739,11 +742,18 @@ void MainWindow::open()
  
 bool MainWindow::save()
 {
-    if (m_filePath.isEmpty()) {
+	return saveFile(m_filePath);
+
+	/*
+    if (m_filePath.isEmpty()) 
+    {
         return saveAs();
-    } else {
+    }
+    else 
+    {
         return saveFile(m_filePath);
     }
+    */
 }
 
 
@@ -834,18 +844,24 @@ bool MainWindow::ResolveUnsavedChanges()
  void MainWindow::LoadFile(const QString &fileName)
 {
     QFile file(fileName);
-    if (!file.open(QFile::ReadOnly | QFile::Text)) {
-        QMessageBox::warning(this, tr("Application"),
-                             tr("Cannot read file %1:\n%2.")
-                             .arg(QDir::toNativeSeparators(fileName), file.errorString()));
+    if (!file.open(QFile::ReadOnly | QFile::Text)) 
+    {
+        QMessageBox::warning(this, tr("Application"), tr("Cannot read file %1:\n%2.") .arg(QDir::toNativeSeparators(fileName), file.errorString()));
         return;
     }
 
-    QTextStream in(&file);
+    //QTextStream in(&file);
+
 #ifndef QT_NO_CURSOR
     QGuiApplication::setOverrideCursor(Qt::WaitCursor);
 #endif
-    m_textEdit->setPlainText(in.readAll());
+
+    const QString content = PunParser::parse(file.readAll());
+
+    //in.readAll();
+    m_textEdit->setPlainText(content);
+
+
 #ifndef QT_NO_CURSOR
     QGuiApplication::restoreOverrideCursor();
 #endif
@@ -861,20 +877,25 @@ bool MainWindow::saveFile(const QString &fileName)
 
     QGuiApplication::setOverrideCursor(Qt::WaitCursor);
     QSaveFile file(fileName);
-    if (file.open(QFile::WriteOnly | QFile::Text)) {
-        QTextStream out(&file);
-        out << m_textEdit->toPlainText();
-        if (!file.commit()) {
-            errorMessage = tr("Cannot write file %1:\n%2.")
-                           .arg(QDir::toNativeSeparators(fileName), file.errorString());
+    if (file.open(QFile::WriteOnly | QFile::Text)) 
+    {
+        QByteArray saveData;
+        PunSerializer::serialize(m_textEdit->toPlainText(), &saveData);
+        file.write(saveData);
+
+        if (!file.commit()) 
+        {
+            errorMessage = tr("Cannot write file %1:\n%2.").arg(QDir::toNativeSeparators(fileName), file.errorString());
         }
-    } else {
-        errorMessage = tr("Cannot open file %1 for writing:\n%2.")
-                       .arg(QDir::toNativeSeparators(fileName), file.errorString());
+    }
+    else 
+    {
+        errorMessage = tr("Cannot open file %1 for writing:\n%2.").arg(QDir::toNativeSeparators(fileName), file.errorString());
     }
     QGuiApplication::restoreOverrideCursor();
 
-    if (!errorMessage.isEmpty()) {
+    if (!errorMessage.isEmpty()) 
+    {
         QMessageBox::warning(this, tr("Application"), errorMessage);
         return false;
     }
