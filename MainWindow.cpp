@@ -39,8 +39,8 @@ namespace Property
 static constexpr float min_opacity{ .15f };
 
 MainWindow::MainWindow()
-: textEdit(new QPlainTextEdit)
-, statusLabel (new QLabel)
+: m_textEdit(new QPlainTextEdit)
+, m_statusLabel (new QLabel)
 {
     QCoreApplication::instance()->installEventFilter(this);
     setContentsMargins(0, 0, 0, 0);
@@ -66,96 +66,96 @@ MainWindow::MainWindow()
 
 void MainWindow::SetupActions()
 {
-    actionSave = new QAction("Save", this);
-    actionSave->setShortcut(QKeySequence("Ctrl+S"));
-    connect(actionSave, &QAction::triggered, this, &MainWindow::at_actionSave_triggered);
-    addAction(actionSave);
+    m_actionSave = new QAction("Save", this);
+    m_actionSave->setShortcut(QKeySequence("Ctrl+S"));
+    connect(m_actionSave, &QAction::triggered, this, &MainWindow::at_actionSave_triggered);
+    addAction(m_actionSave);
 
-    actionSaveAs = new QAction("Save As...", this);
-    connect(actionSaveAs, &QAction::triggered, this, &MainWindow::at_actionSaveAs_triggered);
-    addAction(actionSaveAs);
+    m_actionSaveAs = new QAction("Save As...", this);
+    connect(m_actionSaveAs, &QAction::triggered, this, &MainWindow::at_actionSaveAs_triggered);
+    addAction(m_actionSaveAs);
 
-    actionUndo = new QAction("Undo", this);
-    actionUndo->setShortcut(QKeySequence("Ctrl+Z"));
-    connect(actionUndo, &QAction::triggered, this, &MainWindow::at_actionUndo_triggered);
-    addAction(actionUndo);
+    m_actionUndo = new QAction("Undo", this);
+    m_actionUndo->setShortcut(QKeySequence("Ctrl+Z"));
+    connect(m_actionUndo, &QAction::triggered, this, &MainWindow::at_actionUndo_triggered);
+    addAction(m_actionUndo);
 
-    actionRedo = new QAction("Redo", this);
-    actionRedo->setShortcut(QKeySequence("Ctrl+Shift+Y"));
-    connect(actionRedo, &QAction::triggered, this, &MainWindow::at_actionRedo_triggered);
-    addAction(actionRedo);
+    m_actionRedo = new QAction("Redo", this);
+    m_actionRedo->setShortcut(QKeySequence("Ctrl+Shift+Y"));
+    connect(m_actionRedo, &QAction::triggered, this, &MainWindow::at_actionRedo_triggered);
+    addAction(m_actionRedo);
 
-    actionNextColorScheme = new QAction("Next ColorScheme", this);
-    actionNextColorScheme->setShortcut(QKeySequence("F5"));
-    connect(actionNextColorScheme, &QAction::triggered, this, &MainWindow::at_actionNextColorScheme_triggered);
-    addAction(actionNextColorScheme);
+    m_actionNextColorScheme = new QAction("Next ColorScheme", this);
+    m_actionNextColorScheme->setShortcut(QKeySequence("F5"));
+    connect(m_actionNextColorScheme, &QAction::triggered, this, &MainWindow::at_actionNextColorScheme_triggered);
+    addAction(m_actionNextColorScheme);
 
-    actionNextFont = new QAction("Next Font", this);
-    actionNextFont->setShortcut(QKeySequence("F4"));
-    connect(actionNextFont, &QAction::triggered, this, &MainWindow::at_actionNextFont_triggered);
-    addAction(actionNextFont);
+    m_actionNextFont = new QAction("Next Font", this);
+    m_actionNextFont->setShortcut(QKeySequence("F4"));
+    connect(m_actionNextFont, &QAction::triggered, this, &MainWindow::at_actionNextFont_triggered);
+    addAction(m_actionNextFont);
 
-    actionDecreaseFontsize = new QAction("Decrease Font Size", this);
-    actionDecreaseFontsize->setShortcut(QKeySequence(Qt::ControlModifier | Qt::Key_Minus));
-    connect(actionDecreaseFontsize, &QAction::triggered, this, &MainWindow::at_actionDecreaseFontSize_triggered);
-    addAction(actionDecreaseFontsize);
+    m_actionDecreaseFontsize = new QAction("Decrease Font Size", this);
+    m_actionDecreaseFontsize->setShortcut(QKeySequence(Qt::ControlModifier | Qt::Key_Minus));
+    connect(m_actionDecreaseFontsize, &QAction::triggered, this, &MainWindow::at_actionDecreaseFontSize_triggered);
+    addAction(m_actionDecreaseFontsize);
 
-    actionIncreaseFontsize = new QAction("Increase Font Size", this);
-    actionIncreaseFontsize->setShortcut(QKeySequence(Qt::ControlModifier | Qt::Key_Plus));
-    connect(actionIncreaseFontsize, &QAction::triggered, this, &MainWindow::at_actionIncreaseFontSize_triggered);
-    addAction(actionIncreaseFontsize);
+    m_actionIncreaseFontsize = new QAction("Increase Font Size", this);
+    m_actionIncreaseFontsize->setShortcut(QKeySequence(Qt::ControlModifier | Qt::Key_Plus));
+    connect(m_actionIncreaseFontsize, &QAction::triggered, this, &MainWindow::at_actionIncreaseFontSize_triggered);
+    addAction(m_actionIncreaseFontsize);
 
-    actionDecreaseOpacity = new QAction("Decrease Opacity", this);
-    actionDecreaseOpacity->setShortcut(QKeySequence(Qt::AltModifier | Qt::Key_Down));
-    connect(actionDecreaseOpacity, &QAction::triggered, this, &MainWindow::at_actionDecreaseOpacity_triggered);
-    addAction(actionDecreaseOpacity);
+    m_actionDecreaseOpacity = new QAction("Decrease Opacity", this);
+    m_actionDecreaseOpacity->setShortcut(QKeySequence(Qt::AltModifier | Qt::Key_Down));
+    connect(m_actionDecreaseOpacity, &QAction::triggered, this, &MainWindow::at_actionDecreaseOpacity_triggered);
+    addAction(m_actionDecreaseOpacity);
 
-    actionIncreaseOpacity = new QAction("Increase Opacity", this);
-    actionIncreaseOpacity->setShortcut(QKeySequence(Qt::AltModifier | Qt::Key_Up));
-    connect(actionIncreaseOpacity, &QAction::triggered, this, &MainWindow::at_actionIncreaseOpacity_triggered);
-    addAction(actionIncreaseOpacity);
+    m_actionIncreaseOpacity = new QAction("Increase Opacity", this);
+    m_actionIncreaseOpacity->setShortcut(QKeySequence(Qt::AltModifier | Qt::Key_Up));
+    connect(m_actionIncreaseOpacity, &QAction::triggered, this, &MainWindow::at_actionIncreaseOpacity_triggered);
+    addAction(m_actionIncreaseOpacity);
 
-    actionToggleOnTop = new QAction("Stay On Top", this);
-    actionToggleOnTop->setCheckable(true);
-    actionToggleOnTop->setChecked(State::has_tag<State::Tag::OnTop>(m_stateTags));
-    connect(actionToggleOnTop, &QAction::triggered, this, &MainWindow::at_actionToggleOnTop_triggered);
-    addAction(actionToggleOnTop);
+    m_actionToggleOnTop = new QAction("Stay On Top", this);
+    m_actionToggleOnTop->setCheckable(true);
+    m_actionToggleOnTop->setChecked(State::has_tag<State::Tag::OnTop>(m_stateTags));
+    connect(m_actionToggleOnTop, &QAction::triggered, this, &MainWindow::at_actionToggleOnTop_triggered);
+    addAction(m_actionToggleOnTop);
 
-    actionToggleLocked = new QAction("Lock Edits", this);
-    actionToggleLocked->setCheckable(true);
-    actionToggleLocked->setChecked(State::has_tag<State::Tag::Locked>(m_stateTags));
-    connect(actionToggleLocked, &QAction::triggered, this, &MainWindow::at_actionToggleLocked_triggered);
-    addAction(actionToggleLocked);
+    m_actionToggleLocked = new QAction("Lock Edits", this);
+    m_actionToggleLocked->setCheckable(true);
+    m_actionToggleLocked->setChecked(State::has_tag<State::Tag::Locked>(m_stateTags));
+    connect(m_actionToggleLocked, &QAction::triggered, this, &MainWindow::at_actionToggleLocked_triggered);
+    addAction(m_actionToggleLocked);
 
-    actionToggleFullscreen = new QAction("Fullscreen", this);
-    actionToggleFullscreen->setCheckable(true);
-    actionToggleFullscreen->setShortcut(QKeySequence("F11"));
-    connect(actionToggleFullscreen, &QAction::triggered, this, &MainWindow::at_actionToggleFullscreen_triggered);
-    addAction(actionToggleFullscreen);
+    m_actionToggleFullscreen = new QAction("Fullscreen", this);
+    m_actionToggleFullscreen->setCheckable(true);
+    m_actionToggleFullscreen->setShortcut(QKeySequence("F11"));
+    connect(m_actionToggleFullscreen, &QAction::triggered, this, &MainWindow::at_actionToggleFullscreen_triggered);
+    addAction(m_actionToggleFullscreen);
 
-    actionToggleOpaqueOnContext = new QAction("Opaque If Active", this);
-    actionToggleOpaqueOnContext->setCheckable(true);
-    connect(actionToggleOpaqueOnContext, &QAction::triggered, this, &MainWindow::at_actionToggleOpaqueOnContext_triggered);
-    addAction(actionToggleOpaqueOnContext);
+    m_actionToggleOpaqueOnContext = new QAction("Opaque If Active", this);
+    m_actionToggleOpaqueOnContext->setCheckable(true);
+    connect(m_actionToggleOpaqueOnContext, &QAction::triggered, this, &MainWindow::at_actionToggleOpaqueOnContext_triggered);
+    addAction(m_actionToggleOpaqueOnContext);
 
-    actionExit = new QAction("Exit", this);
-    actionExit->setShortcut(QKeySequence("Alt+X"));
-    connect(actionExit, &QAction::triggered, this, &MainWindow::at_actionExit_triggered);
-    addAction(actionExit);
+    m_actionExit = new QAction("Exit", this);
+    m_actionExit->setShortcut(QKeySequence("Alt+X"));
+    connect(m_actionExit, &QAction::triggered, this, &MainWindow::at_actionExit_triggered);
+    addAction(m_actionExit);
 }
 
 
 void MainWindow::SetupStatusLabel()
 {
-    statusLabel->setAlignment(Qt::AlignLeft);
-    statusBar()->addPermanentWidget(statusLabel, 100);
+    m_statusLabel->setAlignment(Qt::AlignLeft);
+    statusBar()->addPermanentWidget(m_statusLabel, 100);
 }
 
 void MainWindow::SetupTextEdit()
 {
-    setCentralWidget(textEdit);
-    textEdit->document()->setDocumentMargin(10);
-    connect(textEdit->document(), &QTextDocument::contentsChanged, this, &MainWindow::at_document_contentsChanged);
+    setCentralWidget(m_textEdit);
+    m_textEdit->document()->setDocumentMargin(10);
+    connect(m_textEdit->document(), &QTextDocument::contentsChanged, this, &MainWindow::at_document_contentsChanged);
 }
 
 void MainWindow::SetupContextMenu()
@@ -370,24 +370,24 @@ void MainWindow::at_customContextMenuRequested(const QPoint& pos)
     QMenu* menu = new QMenu(this);
     menu->setWindowFlags(menu->windowFlags() | Qt::NoDropShadowWindowHint);
 
-    actionSave->setEnabled(textEdit->document()->isModified() && HasFile());
-    connect(actionSave, &QAction::triggered, this, &MainWindow::at_actionSave_triggered);
-    menu->addAction(actionSave);
+    m_actionSave->setEnabled(m_textEdit->document()->isModified() && HasFile());
+    connect(m_actionSave, &QAction::triggered, this, &MainWindow::at_actionSave_triggered);
+    menu->addAction(m_actionSave);
 
-    menu->addAction(actionSaveAs);
+    menu->addAction(m_actionSaveAs);
 
     menu->addSeparator();
 
     // defaults -> submenu
 
-    // Text edit actions
+    // Text edit m_actions
     menu->addSeparator();
 
-    actionUndo->setEnabled(!State::has_tag<State::Tag::Locked>(m_stateTags) && textEdit->document()->isUndoAvailable());
-    menu->addAction(actionUndo);
+    m_actionUndo->setEnabled(!State::has_tag<State::Tag::Locked>(m_stateTags) && m_textEdit->document()->isUndoAvailable());
+    menu->addAction(m_actionUndo);
 
-    actionRedo->setEnabled(!State::has_tag<State::Tag::Locked>(m_stateTags) && textEdit->document()->isRedoAvailable());
-    menu->addAction(actionRedo);
+    m_actionRedo->setEnabled(!State::has_tag<State::Tag::Locked>(m_stateTags) && m_textEdit->document()->isRedoAvailable());
+    menu->addAction(m_actionRedo);
 
     menu->addSeparator();
 
@@ -446,20 +446,20 @@ void MainWindow::at_customContextMenuRequested(const QPoint& pos)
     }
     menu->addMenu(opacitySubmenu);
 
-    menu->addAction(actionToggleOpaqueOnContext);
+    menu->addAction(m_actionToggleOpaqueOnContext);
 
     menu->addSeparator();
 
-    actionToggleOnTop->setChecked(State::has_tag<State::Tag::OnTop>(m_stateTags));
-    menu->addAction(actionToggleOnTop);
+    m_actionToggleOnTop->setChecked(State::has_tag<State::Tag::OnTop>(m_stateTags));
+    menu->addAction(m_actionToggleOnTop);
 
-    actionToggleLocked->setChecked(State::has_tag<State::Tag::Locked>(m_stateTags));
-    menu->addAction(actionToggleLocked);
+    m_actionToggleLocked->setChecked(State::has_tag<State::Tag::Locked>(m_stateTags));
+    menu->addAction(m_actionToggleLocked);
 
-    actionToggleFullscreen->setChecked(State::has_tag<State::Tag::Fullscreen>(m_stateTags));
-    menu->addAction(actionToggleFullscreen);
+    m_actionToggleFullscreen->setChecked(State::has_tag<State::Tag::Fullscreen>(m_stateTags));
+    menu->addAction(m_actionToggleFullscreen);
 
-    menu->addAction(actionExit);
+    menu->addAction(m_actionExit);
 
     menu->exec(pos);
 }
@@ -516,14 +516,14 @@ void MainWindow::at_actionUndo_triggered()
 {
     if(State::has_tag<State::Tag::Locked>(m_stateTags))
         return;
-    textEdit->document()->undo();
+    m_textEdit->document()->undo();
 }
 
 void MainWindow::at_actionRedo_triggered()
 {
     if (State::has_tag<State::Tag::Locked>(m_stateTags))
         return;
-    textEdit->document()->redo();
+    m_textEdit->document()->redo();
 }
 
 
@@ -628,9 +628,9 @@ void MainWindow::UpdatePerStyle()
     if (!ColorScheme::schemas.count(Style::color_scheme(m_style)))
         return;
     setStyleSheet(StyleSheet::format_global(m_style));
-    textEdit->setStyleSheet(StyleSheet::format_text_edit(m_style));
+    m_textEdit->setStyleSheet(StyleSheet::format_text_edit(m_style));
     statusBar()->setStyleSheet(StyleSheet::format_status_bar(m_style));
-    statusLabel->setStyleSheet(StyleSheet::format_status_label(m_style));
+    m_statusLabel->setStyleSheet(StyleSheet::format_status_label(m_style));
 }
 
 
@@ -669,7 +669,7 @@ void MainWindow::UpdatePerFullscreen()
 
 void MainWindow::UpdatePerLocked()
 {
-	textEdit->setReadOnly(State::has_tag<State::Tag::Locked>(m_stateTags));
+	m_textEdit->setReadOnly(State::has_tag<State::Tag::Locked>(m_stateTags));
 }
 
 
@@ -720,7 +720,7 @@ void MainWindow::newFile()
     if (!ResolveUnsavedChanges())
         return;
 
-	textEdit->clear();
+	m_textEdit->clear();
 	setCurrentFile(QString());
 }
 
@@ -739,10 +739,10 @@ void MainWindow::open()
  
 bool MainWindow::save()
 {
-    if (curFile.isEmpty()) {
+    if (m_filePath.isEmpty()) {
         return saveAs();
     } else {
-        return saveFile(curFile);
+        return saveFile(m_filePath);
     }
 }
 
@@ -768,7 +768,7 @@ void MainWindow::about()
 
 void MainWindow::at_document_contentsChanged()
 {
-    if (textEdit->document()->isModified())
+    if (m_textEdit->document()->isModified())
         State::set_tag<State::Tag::Unsaved>(m_stateTags);
     else
         State::clear_tag<State::Tag::Unsaved>(m_stateTags);
@@ -845,7 +845,7 @@ bool MainWindow::ResolveUnsavedChanges()
 #ifndef QT_NO_CURSOR
     QGuiApplication::setOverrideCursor(Qt::WaitCursor);
 #endif
-    textEdit->setPlainText(in.readAll());
+    m_textEdit->setPlainText(in.readAll());
 #ifndef QT_NO_CURSOR
     QGuiApplication::restoreOverrideCursor();
 #endif
@@ -863,7 +863,7 @@ bool MainWindow::saveFile(const QString &fileName)
     QSaveFile file(fileName);
     if (file.open(QFile::WriteOnly | QFile::Text)) {
         QTextStream out(&file);
-        out << textEdit->toPlainText();
+        out << m_textEdit->toPlainText();
         if (!file.commit()) {
             errorMessage = tr("Cannot write file %1:\n%2.")
                            .arg(QDir::toNativeSeparators(fileName), file.errorString());
@@ -887,8 +887,8 @@ bool MainWindow::saveFile(const QString &fileName)
 
 void MainWindow::setCurrentFile(const QString &fileName)
 {
-    curFile = fileName;
-    textEdit->document()->setModified(false);
+    m_filePath = fileName;
+    m_textEdit->document()->setModified(false);
     UpdatePerFile();
 }
 
@@ -903,12 +903,10 @@ void MainWindow::UpdatePerUnsaved()
 
 void MainWindow::UpdatePerFile()
 {
-    const QString tit = HasTitle()
-        ? title
-        : (HasFile() ? QFileInfo(curFile).fileName() : "Untitled");
+    const QString tit = (HasFile() ? QFileInfo(m_filePath).fileName() : "Untitled");
 
     const QString filePath = HasFile()
-        ? curFile
+        ? m_filePath
         : "[No file]";
 
     const QString unsaved = (State::has_tag<State::Tag::Unsaved>(m_stateTags))
@@ -917,8 +915,8 @@ void MainWindow::UpdatePerFile()
 
     setWindowTitle(tit + unsaved + " [PureNote]");
     //statusBar()->showMessage(filePath + unsavedTag);
-    statusLabel->setText(filePath + unsaved);
-    statusLabel->setToolTip(filePath + unsaved);
+    m_statusLabel->setText(filePath + unsaved);
+    m_statusLabel->setToolTip(filePath + unsaved);
 }
 
 

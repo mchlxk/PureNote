@@ -65,8 +65,7 @@ private:
     void setCurrentFile(const QString &fileName);
     QString strippedName(const QString &fullFileName);
 
-    bool HasFile() const { return !curFile.isEmpty(); }
-    bool HasTitle() const { return !title.isEmpty(); }
+    bool HasFile() const { return !m_filePath.isEmpty(); }
 
     void SetupWindowFlags(bool onTop);
 
@@ -90,31 +89,29 @@ private:
     void DecreaseOpacity();
     void IncreaseOpacity();
 
-    QAction* actionSave{ nullptr };
-    QAction* actionSaveAs{ nullptr };
-    QAction* actionUndo{ nullptr };
-    QAction* actionRedo{ nullptr };
-    QAction* actionCut{ nullptr };
-    QAction* actionCopy{ nullptr };
-    QAction* actionPaste{ nullptr };
-    QAction* actionSelectAll{ nullptr };
-    QAction* actionNextColorScheme{ nullptr };
-    QAction* actionNextFont{ nullptr };
-    QAction* actionDecreaseFontsize{ nullptr };
-    QAction* actionIncreaseFontsize{ nullptr };
-    QAction* actionDecreaseOpacity{ nullptr };
-    QAction* actionIncreaseOpacity{ nullptr };
-    QAction* actionToggleOnTop{ nullptr };
-    QAction* actionToggleLocked{ nullptr };
-    QAction* actionToggleFullscreen{ nullptr };
-    QAction* actionToggleOpaqueOnContext{ nullptr };
-    QAction* actionExit{ nullptr };
+    QAction* m_actionSave{ nullptr };
+    QAction* m_actionSaveAs{ nullptr };
+    QAction* m_actionUndo{ nullptr };
+    QAction* m_actionRedo{ nullptr };
+    QAction* m_actionCut{ nullptr };
+    QAction* m_actionCopy{ nullptr };
+    QAction* m_actionPaste{ nullptr };
+    QAction* m_actionSelectAll{ nullptr };
+    QAction* m_actionNextColorScheme{ nullptr };
+    QAction* m_actionNextFont{ nullptr };
+    QAction* m_actionDecreaseFontsize{ nullptr };
+    QAction* m_actionIncreaseFontsize{ nullptr };
+    QAction* m_actionDecreaseOpacity{ nullptr };
+    QAction* m_actionIncreaseOpacity{ nullptr };
+    QAction* m_actionToggleOnTop{ nullptr };
+    QAction* m_actionToggleLocked{ nullptr };
+    QAction* m_actionToggleFullscreen{ nullptr };
+    QAction* m_actionToggleOpaqueOnContext{ nullptr };
+    QAction* m_actionExit{ nullptr };
 
-    QPlainTextEdit *textEdit{ nullptr };
-    QLabel* statusLabel{ nullptr };
-
-    QString curFile;
-    QString title;
+    QPlainTextEdit *m_textEdit{ nullptr };
+    QLabel* m_statusLabel{ nullptr };
+    QString m_filePath;
 
     style_t m_style{ Style::defaults };
     float m_opacity{ 1.f };
