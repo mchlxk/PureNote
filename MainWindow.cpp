@@ -785,6 +785,22 @@ void MainWindow::at_document_contentsChanged()
     UpdatePerUnsaved();
 }
 
+pun_t MainWindow::GetPun() const
+{
+    pun_t pun;
+    
+    //Pun::geometry(pun) = ;
+    Pun::style(pun) = m_style;
+    Pun::opacity(pun) = m_opacity;
+    Pun::opaque_on_context(pun) = State::has_tag<State::Tag::OpaqueOnContext>(m_stateTags);
+    Pun::locked(pun) = State::has_tag<State::Tag::Locked>(m_stateTags);
+    Pun::on_top(pun) = State::has_tag<State::Tag::OnTop>(m_stateTags);
+    Pun::fullscreen(pun) = State::has_tag<State::Tag::Fullscreen>(m_stateTags);
+    Pun::content(pun) = m_textEdit->toPlainText();
+
+    return pun;
+}
+
 
  void MainWindow::readSettings()
 {
@@ -880,7 +896,7 @@ bool MainWindow::saveFile(const QString &fileName)
     if (file.open(QFile::WriteOnly | QFile::Text)) 
     {
         QByteArray saveData;
-        PunSerializer::serialize(m_textEdit->toPlainText(), &saveData);
+        PunSerializer::serialize(GetPun(), &saveData);
         file.write(saveData);
 
         if (!file.commit()) 

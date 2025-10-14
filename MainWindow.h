@@ -7,6 +7,7 @@
 
 #include "State.h"
 #include "Style.h"
+#include "Pun.h"
 
 class MainWindow : public QMainWindow
 {
@@ -58,6 +59,8 @@ private slots:
     void at_opacityAdjustTimer_expired();
 
 private:
+    pun_t GetPun() const;
+
     void readSettings();
     void writeSettings();
     bool ResolveUnsavedChanges();

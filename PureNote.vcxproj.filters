@@ -93,6 +93,9 @@
     <ClInclude Include="Pun.h">
       <Filter>Source Files</Filter>
     </ClInclude>
+    <ClInclude Include="AccessTupleElement.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="PureNote.rc">
