@@ -2,18 +2,19 @@
 #include "ColorScheme.h"
 
 
-QString StyleSheet::format_menu()
+QString StyleSheet::format_menu(const style_t& style)
 {
+    const auto& schema = ColorScheme::schemas.at(Style::color_scheme(style));
     return QString(
         "QMenu{border: 0; color: %1; background-color: %2} "
         "QMenu::separator{height: 15px; background: %2; margin-left: 0px; margin-right: 0px; } "
         "QMenu::item{ padding: 2 25px 2 20px; border: 0; } "
         "QMenu::item:selected{ background: %3; }"
         "QMenu::item:disabled{ color: %4 }" ).arg(
-            ColorScheme::Ui::color,
-            ColorScheme::Ui::background,
-            ColorScheme::Ui::highlighted,
-            ColorScheme::Ui::dimmed);
+            ColorScheme::color(schema),
+            ColorScheme::highlighted(schema),
+            ColorScheme::background(schema),
+            ColorScheme::disabled(schema));
 }
 
 
@@ -53,7 +54,7 @@ QString StyleSheet::format_global(const style_t& style)
     return format_main_window(style) 
         + format_scrollbar(style) 
         + format_push_button() 
-        + format_menu()
+        + format_menu(style)
         + format_message_box();
 }
 
