@@ -15,6 +15,7 @@ void PunSerializer::serialize(const pun_t& pun, QByteArray* output)
     write_style(Pun::style(pun), writer);
 
     writer.writeStartElement("window");
+    writer.writeTextElement("geometry", Pun::geometry(pun).toHex());
 	writer.writeTextElement("opacity", QString::number(Pun::opacity(pun)));
 	writer.writeTextElement("opaque_on_context", serialize_bool.at(Pun::opaque_on_context(pun)));
 	writer.writeTextElement("on_top", serialize_bool.at(Pun::on_top(pun)));

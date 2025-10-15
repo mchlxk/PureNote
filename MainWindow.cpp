@@ -49,7 +49,7 @@ MainWindow::MainWindow()
     SetupTextEdit();
     UpdatePerStyle();
 
-    UpdateOnTopPerState();
+    UpdatePerOnTopState();
     SetupStatusLabel();
     SetupActions();
 
@@ -505,7 +505,7 @@ void MainWindow::at_opacityAdjustTimer_expired()
 void MainWindow::at_actionToggleOnTop_triggered()
 {
     State::toggle_tag<State::Tag::OnTop>(m_stateTags);
-    UpdateOnTopPerState();
+    UpdatePerOnTopState();
 }
 
 void MainWindow::at_actionToggleLocked_triggered()
@@ -642,8 +642,9 @@ void MainWindow::UpdatePerFullscreen()
 {
     if (State::has_tag<State::Tag::Fullscreen>(m_stateTags))
     {
+        m_fullscreenRestoreGeometry = saveGeometry();
         UpdatePerOpacity();
-        UpdateOnTopPerState();
+        UpdatePerOnTopState();
         QMainWindow::showFullScreen();
 
         const auto gm = geometry();
@@ -664,8 +665,10 @@ void MainWindow::UpdatePerFullscreen()
     {
         QMainWindow::showNormal();
         setContentsMargins(0, 0, 0, 0);
-        UpdateOnTopPerState();
+        UpdatePerOnTopState();
         UpdatePerOpacity();
+        restoreGeometry(m_fullscreenRestoreGeometry);
+        m_fullscreenRestoreGeometry = QByteArray();
     }
 }
 
@@ -788,8 +791,7 @@ void MainWindow::at_document_contentsChanged()
 pun_t MainWindow::GetPun() const
 {
     pun_t pun;
-    
-    //Pun::geometry(pun) = ;
+    Pun::geometry(pun) = GetGeometry();
     Pun::style(pun) = m_style;
     Pun::opacity(pun) = m_opacity;
     Pun::opaque_on_context(pun) = State::has_tag<State::Tag::OpaqueOnContext>(m_stateTags);
@@ -797,8 +799,14 @@ pun_t MainWindow::GetPun() const
     Pun::on_top(pun) = State::has_tag<State::Tag::OnTop>(m_stateTags);
     Pun::fullscreen(pun) = State::has_tag<State::Tag::Fullscreen>(m_stateTags);
     Pun::content(pun) = m_textEdit->toPlainText();
-
     return pun;
+}
+
+QByteArray MainWindow::GetGeometry() const
+{
+    if (!m_fullscreenRestoreGeometry.isEmpty())
+		return m_fullscreenRestoreGeometry;
+	return saveGeometry();
 }
 
 
@@ -962,11 +970,10 @@ QString MainWindow::strippedName(const QString &fullFileName)
     return QFileInfo(fullFileName).fileName();
 }
 
-void MainWindow::UpdateOnTopPerState()
+void MainWindow::UpdatePerOnTopState()
 {
     const bool setOnTop = State::has_tag<State::Tag::OnTop>(m_stateTags)
         || State::has_tag<State::Tag::Fullscreen>(m_stateTags);
-
     SetupWindowFlags(setOnTop);
 }
 

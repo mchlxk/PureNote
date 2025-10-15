@@ -60,6 +60,7 @@ private slots:
 
 private:
     pun_t GetPun() const;
+    QByteArray GetGeometry() const;
 
     void readSettings();
     void writeSettings();
@@ -83,7 +84,7 @@ private:
     void UpdatePerStyle();
     void UpdatePerOpacity();
 
-    void UpdateOnTopPerState();
+    void UpdatePerOnTopState();
     void UpdatePerFullscreen();
     void UpdatePerLocked();
 
@@ -118,6 +119,7 @@ private:
 
     style_t m_style{ Style::defaults };
     float m_opacity{ 1.f };
+    QByteArray m_fullscreenRestoreGeometry;
 
     State::tags_t m_stateTags;
     QTimer m_opacityAdjustTimer;
