@@ -665,7 +665,7 @@ void MainWindow::UpdatePerFullscreen()
 {
     if (State::has_tag<State::Tag::Fullscreen>(m_stateTags))
     {
-        m_fullscreenRestoreGeometry = saveGeometry();
+        PushGeometry();
         UpdatePerOpacity();
         UpdatePerOnTopState();
         QMainWindow::showFullScreen();
@@ -690,8 +690,8 @@ void MainWindow::UpdatePerFullscreen()
         setContentsMargins(0, 0, 0, 0);
         UpdatePerOnTopState();
         UpdatePerOpacity();
-        restoreGeometry(m_fullscreenRestoreGeometry);
-        m_fullscreenRestoreGeometry = QByteArray();
+        if (CanPopGeometry())
+            PopGeometry();
     }
 }
 
@@ -827,9 +827,35 @@ pun_t MainWindow::GetPun() const
 
 QByteArray MainWindow::GetGeometry() const
 {
-    if (!m_fullscreenRestoreGeometry.isEmpty())
-		return m_fullscreenRestoreGeometry;
+    if (CanPopGeometry())
+        return PeekGeometry();
 	return saveGeometry();
+}
+
+void MainWindow::PushGeometry(const QByteArray& geom)
+{
+    m_geometryStack.push(geom);
+}
+
+void MainWindow::PushGeometry()
+{
+    m_geometryStack.push(saveGeometry());
+}
+
+void MainWindow::PopGeometry()
+{
+    restoreGeometry(m_geometryStack.top());
+    m_geometryStack.pop();
+}
+
+bool MainWindow::CanPopGeometry() const
+{
+    return m_geometryStack.size();
+}
+
+QByteArray MainWindow::PeekGeometry() const
+{
+    return m_geometryStack.top();
 }
 
 
@@ -1026,11 +1052,16 @@ void MainWindow::UpdatePerOpacity()
 
 void MainWindow::SetupWindowFlags(bool onTop)
 {
+    PushGeometry();
     if(onTop)
         setWindowFlags(Qt::WindowStaysOnTopHint | Qt::FramelessWindowHint);
     else
+    const QByteArray geom = State::has_tag<State::Tag::Fullscreen>(m_stateTags)
+        ? QByteArray()
+        : saveGeometry();
         setWindowFlags(Qt::FramelessWindowHint);
     show();
+    PopGeometry();
 }
 
 

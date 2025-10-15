@@ -1,5 +1,7 @@
 #pragma once
 
+#include <stack>
+
 #include <QMainWindow>
 #include <QPlainTextEdit>
 #include <QLabel>
@@ -60,7 +62,13 @@ private slots:
 
 private:
     pun_t GetPun() const;
+
     QByteArray GetGeometry() const;
+    void PushGeometry(const QByteArray&);
+    void PushGeometry();
+    void PopGeometry();
+    bool CanPopGeometry() const;
+    QByteArray PeekGeometry() const;
 
     void readSettings();
     void writeSettings();
@@ -119,7 +127,7 @@ private:
 
     style_t m_style{ Style::defaults };
     float m_opacity{ 1.f };
-    QByteArray m_fullscreenRestoreGeometry;
+    std::stack<QByteArray> m_geometryStack;
 
     State::tags_t m_stateTags;
     QTimer m_opacityAdjustTimer;
