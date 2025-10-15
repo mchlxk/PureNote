@@ -8,15 +8,15 @@
 #include <QStringList>
 
 #include "HashQString.h"
-#include "AccessTupleElement.h"
+#include "ElementExtract.h"
 
 namespace Style
 {
     using T = std::tuple<QString, uint32_t, QString>;
 
-    ACCESS_TUPLE_ELEMENT(T, 0, color_scheme) 
-    ACCESS_TUPLE_ELEMENT(T, 1, font_size) 
-    ACCESS_TUPLE_ELEMENT(T, 2, font_family) 
+    ELEMENT_EXTRACT(T, 0, color_scheme) 
+    ELEMENT_EXTRACT(T, 1, font_size) 
+    ELEMENT_EXTRACT(T, 2, font_family) 
 
     extern const T defaults;    
     extern const std::set<uint32_t> font_sizes;

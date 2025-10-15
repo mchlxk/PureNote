@@ -2,7 +2,7 @@
 
 #include <tuple>
 
-#include "AccessTupleElement.h"
+#include "ElementExtract.h"
 
 #include <QString>
 #include <QSize>
@@ -14,14 +14,14 @@ namespace Pun
 {
 	using T = std::tuple<QByteArray, style_t, float, bool, bool, bool, bool, QString>;
 
-	ACCESS_TUPLE_ELEMENT(T, 0, geometry)
-	ACCESS_TUPLE_ELEMENT(T, 1, style)
-	ACCESS_TUPLE_ELEMENT(T, 2, opacity)
-	ACCESS_TUPLE_ELEMENT(T, 3, opaque_on_context)
-	ACCESS_TUPLE_ELEMENT(T, 4, locked)
-	ACCESS_TUPLE_ELEMENT(T, 5, on_top)
-	ACCESS_TUPLE_ELEMENT(T, 6, fullscreen)
-	ACCESS_TUPLE_ELEMENT(T, 7, content)
+	ELEMENT_EXTRACT(T, 0, geometry)
+	ELEMENT_EXTRACT(T, 1, style)
+	ELEMENT_EXTRACT(T, 2, opacity)
+	ELEMENT_EXTRACT(T, 3, opaque_on_context)
+	ELEMENT_EXTRACT(T, 4, locked)
+	ELEMENT_EXTRACT(T, 5, on_top)
+	ELEMENT_EXTRACT(T, 6, fullscreen)
+	ELEMENT_EXTRACT(T, 7, content)
 }
 using pun_t = Pun::T;
 

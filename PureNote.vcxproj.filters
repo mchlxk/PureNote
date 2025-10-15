@@ -93,7 +93,7 @@
     <ClInclude Include="Pun.h">
       <Filter>Source Files</Filter>
     </ClInclude>
-    <ClInclude Include="AccessTupleElement.h">
+    <ClInclude Include="ElementExtract.h">
       <Filter>Source Files</Filter>
     </ClInclude>
   </ItemGroup>

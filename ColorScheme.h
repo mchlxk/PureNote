@@ -7,16 +7,16 @@
 #include <QHash>
 
 #include "HashQString.h"
-#include "AccessTupleElement.h"
+#include "ElementExtract.h"
 
 namespace ColorScheme
 {
 	using T = std::tuple<QString, QString, QString, QString>;
 
-	ACCESS_TUPLE_ELEMENT(T, 0, color);
-	ACCESS_TUPLE_ELEMENT(T, 1, background);
-	ACCESS_TUPLE_ELEMENT(T, 2, accent);
-	ACCESS_TUPLE_ELEMENT(T, 3, disabled);
+	ELEMENT_EXTRACT(T, 0, color);
+	ELEMENT_EXTRACT(T, 1, background);
+	ELEMENT_EXTRACT(T, 2, accent);
+	ELEMENT_EXTRACT(T, 3, disabled);
 	
 	extern const std::unordered_map<QString, T, hash_qstring> schemas;
 
