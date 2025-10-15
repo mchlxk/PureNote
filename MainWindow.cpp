@@ -38,6 +38,19 @@ namespace Property
     }
 }
 
+// Woraround for QTBUG-74655: chackabls vs. non-checkable menu items not aligned properly
+template<typename T>
+static inline void apply_qtbug_74655_workaround(T* item)
+{
+    static const QPixmap pixmap = [] {
+        QPixmap p(1, 1);
+        p.fill(Qt::transparent);
+        return p;
+	} ();
+    static const QIcon ico(pixmap);
+    item->setIcon(ico);
+}
+
 static constexpr float min_opacity{ .15f };
 
 MainWindow::MainWindow()
@@ -374,8 +387,10 @@ void MainWindow::at_customContextMenuRequested(const QPoint& pos)
 
     m_actionSave->setEnabled(m_textEdit->document()->isModified() && HasFile());
     connect(m_actionSave, &QAction::triggered, this, &MainWindow::at_actionSave_triggered);
+    apply_qtbug_74655_workaround(m_actionSave);
     menu->addAction(m_actionSave);
 
+    apply_qtbug_74655_workaround(m_actionSaveAs);
     menu->addAction(m_actionSaveAs);
 
     menu->addSeparator();
@@ -386,9 +401,11 @@ void MainWindow::at_customContextMenuRequested(const QPoint& pos)
     menu->addSeparator();
 
     m_actionUndo->setEnabled(!State::has_tag<State::Tag::Locked>(m_stateTags) && m_textEdit->document()->isUndoAvailable());
+    apply_qtbug_74655_workaround(m_actionUndo);
     menu->addAction(m_actionUndo);
 
     m_actionRedo->setEnabled(!State::has_tag<State::Tag::Locked>(m_stateTags) && m_textEdit->document()->isRedoAvailable());
+    apply_qtbug_74655_workaround(m_actionRedo);
     menu->addAction(m_actionRedo);
 
     menu->addSeparator();
@@ -404,6 +421,7 @@ void MainWindow::at_customContextMenuRequested(const QPoint& pos)
         actionScheme->setIcon(SchemeIcon::get(scheme.second, 24));
         colorSchemesSubmenu->addAction(actionScheme);
     }
+    apply_qtbug_74655_workaround(colorSchemesSubmenu);
     menu->addMenu(colorSchemesSubmenu);
 
     QMenu* fontSubmenu = new QMenu("Font\t(F4)", this);
@@ -418,6 +436,7 @@ void MainWindow::at_customContextMenuRequested(const QPoint& pos)
             actionFont->setEnabled(false);
         fontSubmenu->addAction(actionFont);
     }
+    apply_qtbug_74655_workaround(fontSubmenu);
     menu->addMenu(fontSubmenu);
 
     QMenu* fontSizeSubmenu = new QMenu("Font Size\t(Ctrl+Wheel)", this);
@@ -431,9 +450,10 @@ void MainWindow::at_customContextMenuRequested(const QPoint& pos)
             actionSize->setEnabled(false);
         fontSizeSubmenu->addAction(actionSize);
     }
+    apply_qtbug_74655_workaround(fontSizeSubmenu);
     menu->addMenu(fontSizeSubmenu);
 
-    QMenu* opacitySubmenu = new QMenu("Window Opacity\t(Alt+Wheel)", this);
+    QMenu* opacitySubmenu = new QMenu("Opacity\t(Alt+Wheel)", this);
     opacitySubmenu->setWindowFlags(opacitySubmenu->windowFlags() | Qt::NoDropShadowWindowHint);
 	QAction* actionOpauqe = new QAction("Opaque");
 	Property::Opacity::set(actionOpauqe, 1.f);
@@ -446,8 +466,10 @@ void MainWindow::at_customContextMenuRequested(const QPoint& pos)
         connect(actionOpacity, &QAction::triggered, this, &MainWindow::at_actionSetOpacity_triggered);
         opacitySubmenu->addAction(actionOpacity);
     }
+    apply_qtbug_74655_workaround(opacitySubmenu);
     menu->addMenu(opacitySubmenu);
 
+    apply_qtbug_74655_workaround(m_actionToggleOpaqueOnContext);
     menu->addAction(m_actionToggleOpaqueOnContext);
 
     menu->addSeparator();
@@ -461,6 +483,7 @@ void MainWindow::at_customContextMenuRequested(const QPoint& pos)
     m_actionToggleFullscreen->setChecked(State::has_tag<State::Tag::Fullscreen>(m_stateTags));
     menu->addAction(m_actionToggleFullscreen);
 
+    apply_qtbug_74655_workaround(m_actionExit);
     menu->addAction(m_actionExit);
 
     menu->exec(pos);
