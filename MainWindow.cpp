@@ -667,7 +667,7 @@ void MainWindow::UpdatePerFullscreen()
     {
         PushGeometry();
         UpdatePerOpacity();
-        UpdatePerOnTopState();
+        SetupWindowFlags(true);
         QMainWindow::showFullScreen();
 
         const auto gm = geometry();
@@ -1021,9 +1021,9 @@ QString MainWindow::strippedName(const QString &fullFileName)
 
 void MainWindow::UpdatePerOnTopState()
 {
-    const bool setOnTop = State::has_tag<State::Tag::OnTop>(m_stateTags)
-        || State::has_tag<State::Tag::Fullscreen>(m_stateTags);
-    SetupWindowFlags(setOnTop);
+    if (State::has_tag<State::Tag::Fullscreen>(m_stateTags))
+        return;
+    SetupWindowFlags(State::has_tag<State::Tag::OnTop>(m_stateTags));
 }
 
 void MainWindow::UpdatePerOpacity()
@@ -1052,16 +1052,15 @@ void MainWindow::UpdatePerOpacity()
 
 void MainWindow::SetupWindowFlags(bool onTop)
 {
-    PushGeometry();
+    if(!State::has_tag<State::Tag::Fullscreen>(m_stateTags))
+		PushGeometry();
     if(onTop)
         setWindowFlags(Qt::WindowStaysOnTopHint | Qt::FramelessWindowHint);
     else
-    const QByteArray geom = State::has_tag<State::Tag::Fullscreen>(m_stateTags)
-        ? QByteArray()
-        : saveGeometry();
         setWindowFlags(Qt::FramelessWindowHint);
     show();
-    PopGeometry();
+    if(!State::has_tag<State::Tag::Fullscreen>(m_stateTags))
+		PopGeometry();
 }
 
 

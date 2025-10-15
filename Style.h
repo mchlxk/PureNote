@@ -8,17 +8,15 @@
 #include <QStringList>
 
 #include "HashQString.h"
+#include "AccessTupleElement.h"
 
 namespace Style
 {
     using T = std::tuple<QString, uint32_t, QString>;
 
-    static inline QString& color_scheme(T& op) { return std::get<0>(op); }
-    static inline const QString& color_scheme(const T& op) { return std::get<0>(op); }
-    static inline uint32_t& font_size(T& op) { return std::get<1>(op); }
-    static inline const uint32_t& font_size(const T& op) { return std::get<1>(op); }
-    static inline QString& font_family(T& op) { return std::get<2>(op); }
-    static inline const QString& font_family(const T& op) { return std::get<2>(op); }
+    ACCESS_TUPLE_ELEMENT(T, 0, color_scheme) 
+    ACCESS_TUPLE_ELEMENT(T, 1, font_size) 
+    ACCESS_TUPLE_ELEMENT(T, 2, font_family) 
 
     extern const T defaults;    
     extern const std::set<uint32_t> font_sizes;
