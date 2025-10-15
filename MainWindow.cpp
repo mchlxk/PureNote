@@ -825,6 +825,16 @@ pun_t MainWindow::GetPun() const
     return pun;
 }
 
+void MainWindow::RestorePun(const pun_t pun)
+{
+    if (!Pun::geometry(pun).isEmpty())
+    {
+        PushGeometry(Pun::geometry(pun));
+        PopGeometry();
+    }
+}
+
+
 QByteArray MainWindow::GetGeometry() const
 {
     if (CanPopGeometry())

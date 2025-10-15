@@ -62,6 +62,7 @@ private slots:
 
 private:
     pun_t GetPun() const;
+    void RestorePun(const pun_t pun);
 
     QByteArray GetGeometry() const;
     void PushGeometry(const QByteArray&);
