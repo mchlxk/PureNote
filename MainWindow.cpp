@@ -385,7 +385,7 @@ void MainWindow::at_customContextMenuRequested(const QPoint& pos)
     QMenu* menu = new QMenu(this);
     menu->setWindowFlags(menu->windowFlags() | Qt::NoDropShadowWindowHint);
 
-    m_actionSave->setEnabled(m_textEdit->document()->isModified() && HasFile());
+    m_actionSave->setEnabled(State::has_tag<State::Tag::Unsaved>(m_stateTags) && HasFile());
     connect(m_actionSave, &QAction::triggered, this, &MainWindow::at_actionSave_triggered);
     apply_qtbug_74655_workaround(m_actionSave);
     menu->addAction(m_actionSave);
@@ -977,6 +977,7 @@ void MainWindow::SetFile(const QString &filePath)
     m_filePath = filePath;
     State::clear_tag<State::Tag::Unsaved>(m_stateTags);
     m_textEdit->document()->setModified(false);
+    UpdatePerUnsaved();
     UpdateStatusBar();
 }
 
