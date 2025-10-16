@@ -25,12 +25,6 @@ protected:
     bool eventFilter(QObject* obj, QEvent* e) override;
 
 private slots:
-    void newFile();
-    void open();
-    bool save();
-    bool saveAs();
-    void about();
-
     void at_document_contentsChanged();
     void at_customContextMenuRequested(const QPoint&);
 
@@ -62,7 +56,7 @@ private slots:
 
 private:
     pun_t GetPun() const;
-    void RestorePun(const pun_t pun);
+    void SetPun(const pun_t& pun, const QString& filePath);
 
     QByteArray GetGeometry() const;
     void PushGeometry(const QByteArray&);
@@ -73,10 +67,14 @@ private:
 
     void readSettings();
     void writeSettings();
+
     bool ResolveUnsavedChanges();
-    bool saveFile(const QString &fileName);
-    void setCurrentFile(const QString &fileName);
-    QString strippedName(const QString &fullFileName);
+    bool Save();
+    bool SaveAs();
+    bool Save(const QString filePath);
+    void SetFile(const QString &filePath);
+    void About();
+    QString GetBrowseFilename();
 
     bool HasFile() const { return !m_filePath.isEmpty(); }
 
@@ -88,7 +86,7 @@ private:
     void SetupContextMenu();
 
     void UpdatePerUnsaved();
-    void UpdatePerFile();
+    void UpdateStatusBar();
     void SetStyle(const style_t& style);
     void UpdatePerStyle();
     void UpdatePerOpacity();

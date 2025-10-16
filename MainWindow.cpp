@@ -72,7 +72,7 @@ MainWindow::MainWindow()
 
     SetupContextMenu();
 
-    setCurrentFile(QString());
+    SetFile(QString());
 
     m_opacityAdjustTimer.setSingleShot(true);
     m_opacityAdjustTimer.setInterval(1000);
@@ -489,16 +489,38 @@ void MainWindow::at_customContextMenuRequested(const QPoint& pos)
     menu->exec(pos);
 }
 
+bool MainWindow::Save()
+{
+    const QString filePath = HasFile()
+        ? m_filePath
+        : GetBrowseFilename();
+    if (filePath.isEmpty())
+        return false;
+    if(!Save(filePath))
+        return false;
+	SetFile(filePath);
+    return true;
+}
+
+bool MainWindow::SaveAs()
+{
+    const QString filePath = GetBrowseFilename();
+    if (filePath.isEmpty())
+        return false;
+    if (!Save(filePath))
+        return false;
+	SetFile(filePath);
+	return true;
+}
 
 void MainWindow::at_actionSave_triggered()
 {
-    save();
-// TBD
+    Save();
 }
 
 void MainWindow::at_actionSaveAs_triggered()
 {
-    // TBD
+    SaveAs();
 }
 
 void MainWindow::at_actionToggleFullscreen_triggered()
@@ -743,58 +765,18 @@ void MainWindow::IncreaseOpacity()
 	UpdatePerOpacity();
 }
 
-
-void MainWindow::newFile()
-{
-    if (!ResolveUnsavedChanges())
-        return;
-
-	m_textEdit->clear();
-	setCurrentFile(QString());
-}
-
-
-void MainWindow::open()
-{
-    if (!ResolveUnsavedChanges())
-        return;
-
-	QString fileName = QFileDialog::getOpenFileName(this);
-	if (!fileName.isEmpty())
-		LoadFile(fileName);
-}
-
-
- 
-bool MainWindow::save()
-{
-	return saveFile(m_filePath);
-
-	/*
-    if (m_filePath.isEmpty()) 
-    {
-        return saveAs();
-    }
-    else 
-    {
-        return saveFile(m_filePath);
-    }
-    */
-}
-
-
-
-bool MainWindow::saveAs()
+QString MainWindow::GetBrowseFilename()
 {
     QFileDialog dialog(this);
     dialog.setWindowModality(Qt::WindowModal);
     dialog.setAcceptMode(QFileDialog::AcceptSave);
     if (dialog.exec() != QDialog::Accepted)
-        return false;
-    return saveFile(dialog.selectedFiles().first());
+        return "";
+    return dialog.selectedFiles().first();
 }
 
-void MainWindow::about()
+
+void MainWindow::About()
 {
    QMessageBox::about(this, tr("About Application"),
             tr("The <b>Application</b> example demonstrates how to "
@@ -825,13 +807,15 @@ pun_t MainWindow::GetPun() const
     return pun;
 }
 
-void MainWindow::RestorePun(const pun_t pun)
+void MainWindow::SetPun(const pun_t& pun, const QString& filePath)
 {
     if (!Pun::geometry(pun).isEmpty())
     {
         PushGeometry(Pun::geometry(pun));
         PopGeometry();
     }
+    m_textEdit->document()->setPlainText(Pun::content(pun));
+    SetFile(filePath);
 }
 
 
@@ -914,7 +898,7 @@ bool MainWindow::ResolveUnsavedChanges()
     switch (ret) 
     {
 		case QMessageBox::Save:
-			return save();
+			return Save();
 		case QMessageBox::Cancel:
 			return false;
 		default:
@@ -924,42 +908,42 @@ bool MainWindow::ResolveUnsavedChanges()
 }
 
  
- void MainWindow::LoadFile(const QString &fileName)
+ void MainWindow::LoadFile(const QString& filePath)
 {
-    QFile file(fileName);
+    QFile file(filePath);
     if (!file.open(QFile::ReadOnly | QFile::Text)) 
     {
-        QMessageBox::warning(this, tr("Application"), tr("Cannot read file %1:\n%2.") .arg(QDir::toNativeSeparators(fileName), file.errorString()));
+        QMessageBox::warning(this, tr("Application"), tr("Cannot read file %1:\n%2.") .arg(QDir::toNativeSeparators(filePath), file.errorString()));
         return;
     }
-
-    //QTextStream in(&file);
 
 #ifndef QT_NO_CURSOR
     QGuiApplication::setOverrideCursor(Qt::WaitCursor);
 #endif
 
-    const QString content = PunParser::parse(file.readAll());
-
-    //in.readAll();
-    m_textEdit->setPlainText(content);
-
+    const auto pun = PunParser::parse(file.readAll());
 
 #ifndef QT_NO_CURSOR
     QGuiApplication::restoreOverrideCursor();
 #endif
 
-    setCurrentFile(fileName);
+    if (!pun)
+    {
+        QMessageBox::warning(this, "PureNote", "Cannot parse input file, parser error: "+pun.get_error());
+        return;
+    }
+
+    SetPun(*pun, filePath);
 }
 
  
  
-bool MainWindow::saveFile(const QString &fileName)
+bool MainWindow::Save(const QString filePath)
 {
     QString errorMessage;
 
     QGuiApplication::setOverrideCursor(Qt::WaitCursor);
-    QSaveFile file(fileName);
+    QSaveFile file(filePath);
     if (file.open(QFile::WriteOnly | QFile::Text)) 
     {
         QByteArray saveData;
@@ -968,12 +952,12 @@ bool MainWindow::saveFile(const QString &fileName)
 
         if (!file.commit()) 
         {
-            errorMessage = tr("Cannot write file %1:\n%2.").arg(QDir::toNativeSeparators(fileName), file.errorString());
+            errorMessage = tr("Cannot write file %1:\n%2.").arg(QDir::toNativeSeparators(filePath), file.errorString());
         }
     }
     else 
     {
-        errorMessage = tr("Cannot open file %1 for writing:\n%2.").arg(QDir::toNativeSeparators(fileName), file.errorString());
+        errorMessage = tr("Cannot open file %1 for writing:\n%2.").arg(QDir::toNativeSeparators(filePath), file.errorString());
     }
     QGuiApplication::restoreOverrideCursor();
 
@@ -983,17 +967,17 @@ bool MainWindow::saveFile(const QString &fileName)
         return false;
     }
 
-    setCurrentFile(fileName);
     return true;
 }
 
 
 
-void MainWindow::setCurrentFile(const QString &fileName)
+void MainWindow::SetFile(const QString &filePath)
 {
-    m_filePath = fileName;
+    m_filePath = filePath;
+    State::clear_tag<State::Tag::Unsaved>(m_stateTags);
     m_textEdit->document()->setModified(false);
-    UpdatePerFile();
+    UpdateStatusBar();
 }
 
 void MainWindow::UpdatePerUnsaved()
@@ -1002,31 +986,20 @@ void MainWindow::UpdatePerUnsaved()
     if (lastValue == State::has_tag<State::Tag::Unsaved>(m_stateTags))
         return;
     lastValue = State::has_tag<State::Tag::Unsaved>(m_stateTags);
-    UpdatePerFile();
+    UpdateStatusBar();
 }
 
-void MainWindow::UpdatePerFile()
+void MainWindow::UpdateStatusBar()
 {
-    const QString tit = (HasFile() ? QFileInfo(m_filePath).fileName() : "Untitled");
-
     const QString filePath = HasFile()
         ? m_filePath
         : "[No file]";
-
-    const QString unsaved = (State::has_tag<State::Tag::Unsaved>(m_stateTags))
+    const QString unsavedMarker = (State::has_tag<State::Tag::Unsaved>(m_stateTags))
         ? "*"
         : "";
-
-    setWindowTitle(tit + unsaved + " [PureNote]");
-    //statusBar()->showMessage(filePath + unsavedTag);
-    m_statusLabel->setText(filePath + unsaved);
-    m_statusLabel->setToolTip(filePath + unsaved);
-}
-
-
-QString MainWindow::strippedName(const QString &fullFileName)
-{
-    return QFileInfo(fullFileName).fileName();
+    setWindowTitle(filePath + unsavedMarker + " | PureNote");
+    m_statusLabel->setText(filePath + unsavedMarker);
+    m_statusLabel->setToolTip(filePath + unsavedMarker);
 }
 
 void MainWindow::UpdatePerOnTopState()

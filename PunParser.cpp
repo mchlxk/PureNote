@@ -2,7 +2,7 @@
 
 #include "PunParser.h"
 
-QString PunParser::parse(const QByteArray& input)
+Pun::expected<pun_t, QString> PunParser::parse(const QByteArray& input)
 {
     QString content;
     QXmlStreamReader reader(input);
@@ -42,14 +42,13 @@ QString PunParser::parse(const QByteArray& input)
     */
 
 
-
     reader.readNextStartElement();
     if (reader.name() != "pun")
-        return "parser error 1";
+        return QString("parser error 1");
 
     reader.readNextStartElement();
     if(reader.name() != "content")
-        return "parser error 2";
+        return QString("parser error 2");
 
 	content = reader.readElementText();
 

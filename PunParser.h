@@ -3,8 +3,11 @@
 #include <QByteArray>
 #include <QString>
 
+#include "Pun.h"
+#include "PunExpected.h"
+
 namespace PunParser
 {
-    QString parse(const QByteArray& input);
+    Pun::expected<pun_t, QString> parse(const QByteArray& input);
 }
 
