@@ -17,7 +17,7 @@ void PunSerializer::serialize(const pun_t& pun, QByteArray* output)
 
         { ElementScope windowScope(writer, "Window");
             writer.writeAttribute("Opacity", QString::number(Pun::opacity(pun)));
-            writer.writeAttribute("OpaqueWhenActive", serialize_bool.at(Pun::opaque_on_context(pun)));
+            writer.writeAttribute("OpaqueWhenActive", serialize_bool.at(Pun::opaque_when_active(pun)));
             writer.writeAttribute("OnTop", serialize_bool.at(Pun::on_top(pun)));
             writer.writeAttribute("Fullscreen", serialize_bool.at(Pun::fullscreen(pun)));
             writer.writeTextElement("Geometry", Pun::geometry(pun).toHex());

@@ -172,10 +172,10 @@ void MainWindow::SetupActions()
     connect(m_actionToggleFullscreen, &QAction::triggered, this, &MainWindow::at_actionToggleFullscreen_triggered);
     addAction(m_actionToggleFullscreen);
 
-    m_actionToggleOpaqueOnContext = new QAction("Opaque If Active", this);
-    m_actionToggleOpaqueOnContext->setCheckable(true);
-    connect(m_actionToggleOpaqueOnContext, &QAction::triggered, this, &MainWindow::at_actionToggleOpaqueOnContext_triggered);
-    addAction(m_actionToggleOpaqueOnContext);
+    m_actionToggleOpaqueWhenActive = new QAction("Opaque When Active", this);
+    m_actionToggleOpaqueWhenActive->setCheckable(true);
+    connect(m_actionToggleOpaqueWhenActive, &QAction::triggered, this, &MainWindow::at_actionToggleOpaqueWhenActive_triggered);
+    addAction(m_actionToggleOpaqueWhenActive);
 
     m_actionExit = new QAction("Exit", this);
     m_actionExit->setShortcut(QKeySequence("Alt+X"));
@@ -514,8 +514,8 @@ void MainWindow::at_customContextMenuRequested(const QPoint& pos)
     apply_qtbug_74655_workaround(opacitySubmenu);
     menu->addMenu(opacitySubmenu);
 
-    apply_qtbug_74655_workaround(m_actionToggleOpaqueOnContext);
-    menu->addAction(m_actionToggleOpaqueOnContext);
+    apply_qtbug_74655_workaround(m_actionToggleOpaqueWhenActive);
+    menu->addAction(m_actionToggleOpaqueWhenActive);
 
     menu->addSeparator();
 
@@ -574,9 +574,9 @@ void MainWindow::at_actionToggleFullscreen_triggered()
     UpdatePerFullscreen();
 }
 
-void MainWindow::at_actionToggleOpaqueOnContext_triggered()
+void MainWindow::at_actionToggleOpaqueWhenActive_triggered()
 {
-    State::toggle_tag<State::Tag::OpaqueOnContext>(m_stateTags);
+    State::toggle_tag<State::Tag::OpaqueWhenActive>(m_stateTags);
     UpdatePerOpacity();
 }
 
@@ -845,7 +845,7 @@ pun_t MainWindow::GetPun() const
     Pun::geometry(pun) = GetGeometry();
     Pun::style(pun) = m_style;
     Pun::opacity(pun) = m_opacity;
-    Pun::opaque_on_context(pun) = State::has_tag<State::Tag::OpaqueOnContext>(m_stateTags);
+    Pun::opaque_when_active(pun) = State::has_tag<State::Tag::OpaqueWhenActive>(m_stateTags);
     Pun::locked(pun) = State::has_tag<State::Tag::Locked>(m_stateTags);
     Pun::on_top(pun) = State::has_tag<State::Tag::OnTop>(m_stateTags);
     Pun::fullscreen(pun) = State::has_tag<State::Tag::Fullscreen>(m_stateTags);
@@ -1070,7 +1070,7 @@ void MainWindow::UpdatePerOpacity()
         return;
     }
 
-    if (State::has_tag<State::Tag::OpaqueOnContext>(m_stateTags)
+    if (State::has_tag<State::Tag::OpaqueWhenActive>(m_stateTags)
         && (State::has_tag<State::Tag::HasMouseContext>(m_stateTags) || State::has_tag<State::Tag::HasDialogContext>(m_stateTags)))
     {
 		setWindowOpacity(1.f);

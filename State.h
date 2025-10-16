@@ -10,7 +10,7 @@ namespace State
         constexpr uint8_t Fullscreen{2};
         constexpr uint8_t OnTop{3};
         constexpr uint8_t Unsaved{4};
-        constexpr uint8_t OpaqueOnContext{5};
+        constexpr uint8_t OpaqueWhenActive{5};
         constexpr uint8_t HasDialogContext{6};
         constexpr uint8_t HasMouseContext{7};
         constexpr uint8_t OpacityAdjust{8};

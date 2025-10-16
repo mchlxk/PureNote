@@ -54,7 +54,7 @@ private slots:
     void at_actionToggleOnTop_triggered();
     void at_actionToggleLocked_triggered();
     void at_actionToggleFullscreen_triggered();
-    void at_actionToggleOpaqueOnContext_triggered();
+    void at_actionToggleOpaqueWhenActive_triggered();
     void at_actionExit_triggered();
 
     void at_opacityAdjustTimer_expired();
@@ -127,7 +127,7 @@ private:
     QAction* m_actionToggleOnTop{ nullptr };
     QAction* m_actionToggleLocked{ nullptr };
     QAction* m_actionToggleFullscreen{ nullptr };
-    QAction* m_actionToggleOpaqueOnContext{ nullptr };
+    QAction* m_actionToggleOpaqueWhenActive{ nullptr };
     QAction* m_actionExit{ nullptr };
 
     QPlainTextEdit *m_textEdit{ nullptr };
