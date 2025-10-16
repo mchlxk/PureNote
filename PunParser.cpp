@@ -19,12 +19,11 @@ Pun::expected<pun_t, QString> PunParser::parse(const QByteArray& input)
 
     while (!reader.atEnd() && !reader.hasError()) 
     {
-        reader.readNext();
+        reader.readNextStartElement();
 
         if (reader.isStartElement() && reader.name() == "Style")
         {
 			parse_style(reader, pun);
-            // parse
         }
         else if (reader.isStartElement() && reader.name() == "Window")
         {
@@ -36,7 +35,7 @@ Pun::expected<pun_t, QString> PunParser::parse(const QByteArray& input)
 		}
         else
         {
-            return QString("unexpected element:" + reader.name());
+            reader.skipCurrentElement();
         }
 	}
 
@@ -104,6 +103,10 @@ Pun::expected<pun_t, QString> PunParser::parse(const QByteArray& input)
 
 QString PunParser::parse_style(QXmlStreamReader& reader, pun_t& output)
 {
+    //while (!reader.atEnd() && !reader.hasError() && reader.name() == "Style")
+    //{
+        //reader.readNextStartElement();
+    //}
     return "";
 }
 
