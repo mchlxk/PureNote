@@ -13,5 +13,19 @@ namespace PunSerializer
     void write_style(const style_t& style, QXmlStreamWriter& writer);
 
     static const std::unordered_map<bool, QString> serialize_bool = { { true, "true"} ,{ false, "false"} };
+
+    class ElementScope
+    {
+    public:
+        [[nodiscard]] ElementScope(QXmlStreamWriter& writer, const QString& name) : writer_(writer) { writer.writeStartElement(name); }
+        ~ElementScope() { writer_.writeEndElement(); }
+
+        ElementScope() = delete;
+        ElementScope(const ElementScope&) = delete;
+        ElementScope(ElementScope&&) = delete;
+        ElementScope& operator=(const ElementScope&) = delete;
+    private:
+        QXmlStreamWriter& writer_;
+    };
 }
 
