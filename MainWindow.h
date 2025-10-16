@@ -28,16 +28,19 @@ private slots:
     void at_document_contentsChanged();
     void at_customContextMenuRequested(const QPoint&);
 
-    void at_actionSaveAs_triggered();
-    void at_actionToggleOnTop_triggered();
-    void at_actionToggleLocked_triggered();
+    // file actions
     void at_actionSave_triggered();
+    void at_actionSaveAs_triggered();
+
+    // text edit actions
     void at_actionUndo_triggered();
     void at_actionRedo_triggered();
     void at_actionCut_triggered();
     void at_actionCopy_triggered();
     void at_actionPaste_triggered();
+    void at_actionDelete_triggered();
     void at_actionSelectAll_triggered();
+
     void at_actionSetColorScheme_triggered();
     void at_actionNextColorScheme_triggered();
     void at_actionNextFont_triggered();
@@ -48,6 +51,8 @@ private slots:
     void at_actionIncreaseOpacity_triggered();
     void at_actionSetFontSize_triggered();
     void at_actionSetOpacity_triggered();
+    void at_actionToggleOnTop_triggered();
+    void at_actionToggleLocked_triggered();
     void at_actionToggleFullscreen_triggered();
     void at_actionToggleOpaqueOnContext_triggered();
     void at_actionExit_triggered();
@@ -100,14 +105,19 @@ private:
     void DecreaseOpacity();
     void IncreaseOpacity();
 
+    // file actions
     QAction* m_actionSave{ nullptr };
     QAction* m_actionSaveAs{ nullptr };
+
+    // text edit actions
     QAction* m_actionUndo{ nullptr };
     QAction* m_actionRedo{ nullptr };
     QAction* m_actionCut{ nullptr };
     QAction* m_actionCopy{ nullptr };
     QAction* m_actionPaste{ nullptr };
+    QAction* m_actionDelete{ nullptr };
     QAction* m_actionSelectAll{ nullptr };
+
     QAction* m_actionNextColorScheme{ nullptr };
     QAction* m_actionNextFont{ nullptr };
     QAction* m_actionDecreaseFontsize{ nullptr };
