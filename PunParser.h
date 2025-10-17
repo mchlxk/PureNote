@@ -15,7 +15,11 @@ namespace PunParser
     Pun::expected<std::pair<QString, bool>, QString> parse_content(QXmlStreamReader& reader);
     Pun::expected<std::pair<QString, int>, QString> parse_font(QXmlStreamReader& reader);
 
-    bool parse_bool_attribute(QXmlStreamReader& reader, const QString& attributeName);
-    bool parse_bool(const QString& value);
+    namespace Utility
+    {
+        bool at_element_end(QXmlStreamReader& reader, const QString& name);
+        bool parse_bool_attribute(const QXmlStreamReader& reader, const QString& attributeName);
+        bool parse_bool(const QString& value);
+    }
 }
 

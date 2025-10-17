@@ -17,7 +17,7 @@ Pun::expected<pun_t, QString> PunParser::parse(const QByteArray& input)
     if(reader.attributes().value("Version") != "1.0")
         return QString("wrong version");
 
-    while (!(reader.isEndElement() && reader.name() == "Pun") && !reader.atEnd())
+    while (!Utility::at_element_end(reader, "Pun"))
     {
         reader.readNext();
         if (reader.hasError())
@@ -59,7 +59,7 @@ Pun::expected<pun_t, QString> PunParser::parse(const QByteArray& input)
 Pun::expected<style_t, QString> PunParser::parse_style(QXmlStreamReader& reader)
 {
     style_t style{ Style::defaults };
-    while (!(reader.isEndElement() && reader.name() == "Style") && !reader.atEnd())
+    while (!Utility::at_element_end(reader, "Style"))
     {
         reader.readNext();
         if (reader.hasError())
@@ -90,7 +90,7 @@ Pun::expected<style_t, QString> PunParser::parse_style(QXmlStreamReader& reader)
 Pun::expected<std::pair<QString, int>, QString> PunParser::parse_font(QXmlStreamReader& reader)
 {
     std::pair<QString, int> font{Style::font_family(Style::defaults), Style::font_size(Style::defaults)};
-    while (!(reader.isEndElement() && reader.name() == "Font") && !reader.atEnd())
+    while (!Utility::at_element_end(reader, "Font"))
     {
         reader.readNext();
         if (reader.hasError())
@@ -120,16 +120,16 @@ Pun::expected<std::pair<QString, int>, QString> PunParser::parse_font(QXmlStream
 
 QString PunParser::parse_window(QXmlStreamReader& reader, pun_t& output)
 {
-    Pun::opaque_when_active(output) = parse_bool_attribute(reader, "OpaqueWhenActive");
-    Pun::on_top(output) = parse_bool_attribute(reader, "OnTop");
-    Pun::fullscreen(output) = parse_bool_attribute(reader, "Fullscreen");
+    Pun::opaque_when_active(output) = Utility::parse_bool_attribute(reader, "OpaqueWhenActive");
+    Pun::on_top(output) = Utility::parse_bool_attribute(reader, "OnTop");
+    Pun::fullscreen(output) = Utility::parse_bool_attribute(reader, "Fullscreen");
 
     if (reader.attributes().hasAttribute("Opacity"))
         Pun::opacity(output) = reader.attributes().value("Opacity").toFloat();
     else
         Pun::opacity(output) = 1.f;
 
-    while (!(reader.isEndElement() && reader.name() == "Window") && !reader.atEnd())
+    while (!Utility::at_element_end(reader, "Window"))
     {
         reader.readNext();
         if (reader.hasError())
@@ -153,19 +153,24 @@ QString PunParser::parse_window(QXmlStreamReader& reader, pun_t& output)
 
 Pun::expected<std::pair<QString, bool>, QString> PunParser::parse_content(QXmlStreamReader& reader)
 {
-    std::pair<QString, bool> content;
-    content.second = parse_bool_attribute(reader, "Locked");
+    std::pair<QString, bool> content{"", false};
+    content.second = Utility::parse_bool_attribute(reader, "Locked");
     content.first = reader.readElementText();
     return content;
 }
 
 
-bool PunParser::parse_bool_attribute(QXmlStreamReader& reader, const QString& attributeName)
+bool PunParser::Utility::at_element_end(QXmlStreamReader& reader, const QString& name)
+{
+    return (reader.isEndElement() && reader.name() == name) || reader.atEnd();
+}
+
+bool PunParser::Utility::parse_bool_attribute(const QXmlStreamReader& reader, const QString& attributeName)
 {
     return reader.attributes().hasAttribute(attributeName) && parse_bool(reader.attributes().value(attributeName).toString());
 }
 
-bool PunParser::parse_bool(const QString& value) 
+bool PunParser::Utility::parse_bool(const QString& value) 
 {
     return value.toLower() == "true"; 
 }

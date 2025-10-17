@@ -877,8 +877,31 @@ void MainWindow::SetPun(const pun_t& pun, const QString& filePath)
     }
     SetStyle(Pun::style(pun));
 
+    m_opacity = Pun::opacity(pun);
+
+    if (Pun::opaque_when_active(pun))
+        State::set_tag<State::Tag::OpaqueWhenActive>(m_stateTags);
+    if (Pun::on_top(pun))
+    {
+        State::set_tag<State::Tag::OnTop>(m_stateTags);
+        UpdatePerOnTopState();
+    }
+    if (Pun::locked(pun))
+    {
+        State::set_tag<State::Tag::Locked>(m_stateTags);
+        UpdatePerLocked();
+    }
+
     m_textEdit->document()->setPlainText(Pun::content(pun));
     SetFile(filePath);
+
+    UpdatePerOpacity();
+
+    if (Pun::fullscreen(pun))
+    {
+        State::set_tag<State::Tag::Fullscreen>(m_stateTags);
+		UpdatePerFullscreen();
+    }
 }
 
 
