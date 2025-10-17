@@ -27,6 +27,7 @@ protected:
 private slots:
     void at_document_contentsChanged();
     void at_customContextMenuRequested(const QPoint&);
+    void at_textEdit_customContextMenuRequested(const QPoint&);
 
     // file actions
     void at_actionSave_triggered();
@@ -89,6 +90,8 @@ private:
     void SetupStatusLabel();
     void SetupTextEdit();
     void SetupContextMenu();
+
+    void ShowContextMenu(const QPoint& pos);
 
     void UpdatePerUnsaved();
     void UpdateStatusBar();

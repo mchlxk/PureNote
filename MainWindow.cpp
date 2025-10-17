@@ -195,6 +195,8 @@ void MainWindow::SetupTextEdit()
     setCentralWidget(m_textEdit);
     m_textEdit->document()->setDocumentMargin(10);
     connect(m_textEdit->document(), &QTextDocument::contentsChanged, this, &MainWindow::at_document_contentsChanged);
+    connect(m_textEdit, &QPlainTextEdit::customContextMenuRequested, this, &MainWindow::at_textEdit_customContextMenuRequested);
+    m_textEdit->setContextMenuPolicy(Qt::CustomContextMenu);
 }
 
 void MainWindow::SetupContextMenu()
@@ -202,7 +204,6 @@ void MainWindow::SetupContextMenu()
     setContextMenuPolicy(Qt::CustomContextMenu);
     connect(this, &MainWindow::customContextMenuRequested, this, &MainWindow::at_customContextMenuRequested);
 }
-
 
 
 /*
@@ -404,7 +405,21 @@ bool MainWindow::eventFilter(QObject* obj, QEvent* evt)
     return false;
 }
 
+
+
+void MainWindow::at_textEdit_customContextMenuRequested(const QPoint& pos)
+{
+    ShowContextMenu(m_textEdit->mapToGlobal(pos));
+}
+
+
 void MainWindow::at_customContextMenuRequested(const QPoint& pos)
+{
+    ShowContextMenu(pos);
+}
+
+
+void MainWindow::ShowContextMenu(const QPoint& pos)
 {
     QMenu* menu = new QMenu(this);
     menu->setWindowFlags(menu->windowFlags() | Qt::NoDropShadowWindowHint);
