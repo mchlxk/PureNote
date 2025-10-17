@@ -62,7 +62,7 @@ MainWindow::MainWindow()
     UpdatePerStyle();
 
     UpdatePerOnTopState();
-    SetupStatusLabel();
+    SetupStatusBar();
     SetupActions();
 
     readSettings();
@@ -188,10 +188,11 @@ void MainWindow::SetupActions()
 }
 
 
-void MainWindow::SetupStatusLabel()
+void MainWindow::SetupStatusBar()
 {
     m_statusLabel->setAlignment(Qt::AlignLeft);
     statusBar()->addPermanentWidget(m_statusLabel, 90);
+    statusBar()->setSizeGripEnabled(true);
 }
 
 void MainWindow::SetupTextEdit()
@@ -364,6 +365,7 @@ bool MainWindow::eventFilter(QObject* obj, QEvent* evt)
     {
         QMouseEvent* mouseEvent = static_cast<QMouseEvent*>(evt);
         QRect grabArea(statusBar()->frameGeometry());
+        // leave space for size-grip
         grabArea.setWidth(grabArea.width() - grabArea.height());
         if (grabArea.contains(mouseEvent->pos()))
         {

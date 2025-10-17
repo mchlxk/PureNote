@@ -83,8 +83,9 @@ QString StyleSheet::format_text_edit(const style_t& style)
 QString StyleSheet::format_status_bar(const style_t& style)
 {
     const auto& schema = ColorScheme::schemas.at(Style::color_scheme(style));
-    return QString("QStatusBar{background: %1} QStatusBar::item{border: 0;}").arg(
-        ColorScheme::accent(schema) );
+    return QString("QStatusBar{background: %1} QStatusBar::item{border: 0;} QSizeGrip{background: %2}").arg(
+        ColorScheme::accent(schema),
+        ColorScheme::background(schema));
 }
 
 

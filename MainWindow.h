@@ -102,7 +102,7 @@ private:
     void SetupWindowFlags(bool onTop);
 
     void SetupActions();
-    void SetupStatusLabel();
+    void SetupStatusBar();
     void SetupTextEdit();
     void SetupContextMenu();
 
