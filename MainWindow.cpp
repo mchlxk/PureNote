@@ -76,6 +76,10 @@ MainWindow::MainWindow()
     m_opacityAdjustTimer.setSingleShot(true);
     m_opacityAdjustTimer.setInterval(1000);
     connect(&m_opacityAdjustTimer, &QTimer::timeout, this, &MainWindow::at_opacityAdjustTimer_expired);
+
+    m_delayedUnsavedUpdateTimer.setSingleShot(true);
+    m_delayedUnsavedUpdateTimer.setInterval(1000);
+    connect(&m_delayedUnsavedUpdateTimer, &QTimer::timeout, this, &MainWindow::at_delayedUnsavedUpdateTimer_expired);
 }
 
 void MainWindow::SetupActions()
@@ -86,6 +90,7 @@ void MainWindow::SetupActions()
     addAction(m_actionSave);
 
     m_actionSaveAs = new QAction("Save As...", this);
+    m_actionSaveAs->setShortcut(QKeySequence("Ctrl+Shift+S"));
     connect(m_actionSaveAs, &QAction::triggered, this, &MainWindow::at_actionSaveAs_triggered);
     addAction(m_actionSaveAs);
 
@@ -161,7 +166,7 @@ void MainWindow::SetupActions()
 
     m_actionToggleLocked = new QAction("Lock Edits", this);
     m_actionToggleLocked->setCheckable(true);
-    m_actionToggleLocked->setChecked(State::has_tag<State::Tag::Locked>(m_stateTags));
+    m_actionToggleLocked->setChecked(!IsLocked());
     connect(m_actionToggleLocked, &QAction::triggered, this, &MainWindow::at_actionToggleLocked_triggered);
     addAction(m_actionToggleLocked);
 
@@ -256,6 +261,15 @@ void MainWindow::closeEvent(QCloseEvent *event)
     }
 }
 
+void MainWindow::resizeEvent(QResizeEvent* event)
+{
+    ScheduleUpdatePerUnsaved();
+}
+
+void MainWindow::moveEvent(QMoveEvent* event)
+{
+    ScheduleUpdatePerUnsaved();
+}
 
 bool MainWindow::eventFilter(QObject* obj, QEvent* evt)
 {
@@ -423,7 +437,7 @@ void MainWindow::ShowContextMenu(const QPoint& pos)
     QMenu* menu = new QMenu(this);
     menu->setWindowFlags(menu->windowFlags() | Qt::NoDropShadowWindowHint);
 
-    m_actionSave->setEnabled((State::has_tag<State::Tag::UnsavedText>(m_stateTags) || State::has_tag<State::Tag::UnsavedView>(m_stateTags)) && HasFile());
+    m_actionSave->setEnabled(CanSave());
     connect(m_actionSave, &QAction::triggered, this, &MainWindow::at_actionSave_triggered);
     apply_qtbug_74655_workaround(m_actionSave);
     menu->addAction(m_actionSave);
@@ -438,11 +452,11 @@ void MainWindow::ShowContextMenu(const QPoint& pos)
     // Text Edit Actions
     menu->addSeparator();
 
-    m_actionUndo->setEnabled(!State::has_tag<State::Tag::Locked>(m_stateTags) && m_textEdit->document()->isUndoAvailable());
+    m_actionUndo->setEnabled(!IsLocked() && m_textEdit->document()->isUndoAvailable());
     apply_qtbug_74655_workaround(m_actionUndo);
     menu->addAction(m_actionUndo);
 
-    m_actionRedo->setEnabled(!State::has_tag<State::Tag::Locked>(m_stateTags) && m_textEdit->document()->isRedoAvailable());
+    m_actionRedo->setEnabled(!IsLocked() && m_textEdit->document()->isRedoAvailable());
     apply_qtbug_74655_workaround(m_actionRedo);
     menu->addAction(m_actionRedo);
 
@@ -528,7 +542,7 @@ void MainWindow::ShowContextMenu(const QPoint& pos)
     apply_qtbug_74655_workaround(opacitySubmenu);
     menu->addMenu(opacitySubmenu);
 
-    apply_qtbug_74655_workaround(m_actionToggleOpaqueWhenActive);
+    m_actionToggleOpaqueWhenActive->setChecked(State::has_tag<State::Tag::OpaqueWhenActive>(m_stateTags));
     menu->addAction(m_actionToggleOpaqueWhenActive);
 
     menu->addSeparator();
@@ -536,7 +550,7 @@ void MainWindow::ShowContextMenu(const QPoint& pos)
     m_actionToggleOnTop->setChecked(State::has_tag<State::Tag::OnTop>(m_stateTags));
     menu->addAction(m_actionToggleOnTop);
 
-    m_actionToggleLocked->setChecked(State::has_tag<State::Tag::Locked>(m_stateTags));
+    m_actionToggleLocked->setChecked(IsLocked());
     menu->addAction(m_actionToggleLocked);
 
     m_actionToggleFullscreen->setChecked(State::has_tag<State::Tag::Fullscreen>(m_stateTags));
@@ -551,7 +565,7 @@ void MainWindow::ShowContextMenu(const QPoint& pos)
 bool MainWindow::Save()
 {
     const QString filePath = HasFile()
-        ? m_filePath
+        ? m_savedFile
         : GetBrowseFilename();
     if (filePath.isEmpty())
         return false;
@@ -586,7 +600,6 @@ void MainWindow::at_actionToggleFullscreen_triggered()
 {
     State::toggle_tag<State::Tag::Fullscreen>(m_stateTags);
     UpdatePerFullscreen();
-    State::set_tag<State::Tag::UnsavedView>(m_stateTags);
     UpdatePerUnsaved();
 }
 
@@ -594,7 +607,6 @@ void MainWindow::at_actionToggleOpaqueWhenActive_triggered()
 {
     State::toggle_tag<State::Tag::OpaqueWhenActive>(m_stateTags);
     UpdatePerOpacity();
-    State::set_tag<State::Tag::UnsavedView>(m_stateTags);
     UpdatePerUnsaved();
 }
 
@@ -610,33 +622,36 @@ void MainWindow::at_opacityAdjustTimer_expired()
     UpdatePerOpacity();
 }
 
+void MainWindow::at_delayedUnsavedUpdateTimer_expired()
+{
+    UpdatePerUnsaved();
+}
+
+
 void MainWindow::at_actionToggleOnTop_triggered()
 {
     State::toggle_tag<State::Tag::OnTop>(m_stateTags);
     UpdatePerOnTopState();
-    State::set_tag<State::Tag::UnsavedView>(m_stateTags);
     UpdatePerUnsaved();
 }
 
 void MainWindow::at_actionToggleLocked_triggered()
 {
-    State::toggle_tag<State::Tag::Locked>(m_stateTags);
-    UpdatePerLocked();
-    State::set_tag<State::Tag::UnsavedView>(m_stateTags);
+    m_textEdit->setReadOnly(!IsLocked());
     UpdatePerUnsaved();
 }
 
 
 void MainWindow::at_actionUndo_triggered()
 {
-    if(State::has_tag<State::Tag::Locked>(m_stateTags))
+    if(IsLocked())
         return;
     m_textEdit->document()->undo();
 }
 
 void MainWindow::at_actionRedo_triggered()
 {
-    if (State::has_tag<State::Tag::Locked>(m_stateTags))
+    if (IsLocked())
         return;
     m_textEdit->document()->redo();
 }
@@ -736,22 +751,48 @@ void MainWindow::SetStyle(const style_t& style)
         return;
     m_style = style;
     UpdatePerStyle();
-    State::set_tag<State::Tag::UnsavedView>(m_stateTags);
     UpdatePerUnsaved();
 }
+
+bool MainWindow::HasUnsavedMeta() const
+{
+    if (!HasFile() && m_textEdit->document()->isEmpty())
+        return false;
+    if (Content::locked(Pun::content(m_savedPun)) != IsLocked())
+        return true;
+    if (!Window::equal(Pun::window(m_savedPun), GetWindow()))
+        return true;
+    if (Pun::style(m_savedPun) != GetStyle())
+        return true;
+    return false;
+}
+
+bool MainWindow::HasUnsavedText() const
+{
+    return m_textEdit->document()->isModified();
+}
+
+bool MainWindow::CanSave() const
+{
+    return HasFile() && (HasUnsavedMeta() || HasUnsavedText());
+}
+
 
 void MainWindow::SetOpacity(float opacity)
 {
-    if (std::fabs(m_opacity - opacity) < .02f)
+    if (Window::equal_opacity(m_opacity, Window::clamp_opacity(opacity)))
         return;
     m_opacity = Window::clamp_opacity(opacity);
-    State::set_tag<State::Tag::OpacityAdjust>(m_stateTags);
-    m_opacityAdjustTimer.start();
+    StartOpacityAdjustPeriod();
     UpdatePerOpacity();
-    State::set_tag<State::Tag::UnsavedView>(m_stateTags);
     UpdatePerUnsaved();
 }
 
+void MainWindow::StartOpacityAdjustPeriod()
+{
+    State::set_tag<State::Tag::OpacityAdjust>(m_stateTags);
+    m_opacityAdjustTimer.start();
+}
 
 void MainWindow::UpdatePerStyle()
 {
@@ -797,12 +838,6 @@ void MainWindow::UpdatePerFullscreen()
         if (CanPopGeometry())
             PopGeometry();
     }
-}
-
-
-void MainWindow::UpdatePerLocked()
-{
-	m_textEdit->setReadOnly(State::has_tag<State::Tag::Locked>(m_stateTags));
 }
 
 
@@ -860,17 +895,13 @@ void MainWindow::About()
 
 void MainWindow::at_document_contentsChanged()
 {
-    if (m_textEdit->document()->isModified())
-        State::set_tag<State::Tag::UnsavedText>(m_stateTags);
-    else
-        State::clear_tag<State::Tag::UnsavedText>(m_stateTags);
     UpdatePerUnsaved();
 }
 
 content_t MainWindow::GetContent() const
 {
     content_t content{ Content::defaults };
-    Content::locked(content) = State::has_tag<State::Tag::Locked>(m_stateTags);
+    Content::locked(content) = IsLocked();
     Content::text(content) = m_textEdit->toPlainText();
     return content;
 }
@@ -878,12 +909,7 @@ content_t MainWindow::GetContent() const
 void MainWindow::SetContent(const content_t& content)
 {
     m_textEdit->document()->setPlainText(Content::text(content));
-
-    if (Content::locked(content))
-    {
-        State::set_tag<State::Tag::Locked>(m_stateTags);
-        UpdatePerLocked();
-    }
+    SetLocked(Content::locked(content));
 }
 
 window_t MainWindow::GetWindow() const
@@ -1004,11 +1030,8 @@ QByteArray MainWindow::PeekGeometry() const
 
 bool MainWindow::ResolveUnsavedChanges()
 {
-    if (!State::has_tag<State::Tag::UnsavedText>(m_stateTags)
-        && !State::has_tag<State::Tag::UnsavedView>(m_stateTags))
-    {
+    if(!HasUnsavedMeta() && !HasUnsavedText())
         return true;
-    }
 
     QMessageBox msgBox(this);
     msgBox.setWindowTitle("PureNote");
@@ -1098,44 +1121,55 @@ bool MainWindow::Save(const QString filePath)
 }
 
 
-
 void MainWindow::SetFile(const QString &filePath)
 {
-    m_filePath = filePath;
-    State::clear_tag<State::Tag::UnsavedText>(m_stateTags);
-    State::clear_tag<State::Tag::UnsavedView>(m_stateTags);
+    m_savedFile = filePath;
+    m_savedPun = GetPun();
     m_textEdit->document()->setModified(false);
     UpdatePerUnsaved();
-    UpdateStatusBar();
+    UpdateStatusBar(HasUnsavedMeta(), HasUnsavedText());
 }
+
+void MainWindow::ScheduleUpdatePerUnsaved()
+{
+    m_delayedUnsavedUpdateTimer.start();
+}
+
 
 void MainWindow::UpdatePerUnsaved()
 {
-    static bool unsavedText{false};
-    static bool unsavedView{false};
-    if (unsavedText == State::has_tag<State::Tag::UnsavedText>(m_stateTags)
-        && unsavedView == State::has_tag<State::Tag::UnsavedView>(m_stateTags))
-    {
-        return;
-    }
-    unsavedText = State::has_tag<State::Tag::UnsavedText>(m_stateTags);
-    unsavedView = State::has_tag<State::Tag::UnsavedView>(m_stateTags);
-    m_actionSave->setEnabled(unsavedText || unsavedView);
-    UpdateStatusBar();
+    const bool hasUnsavedMeta = HasUnsavedMeta();
+    const bool hasUnsavedText = HasUnsavedText();
+    if(!hasUnsavedMeta && !hasUnsavedText)
+		m_actionSave->setEnabled(false);
+    else
+		m_actionSave->setEnabled(HasFile());
+    UpdateStatusBarPerUnsaved(hasUnsavedMeta, hasUnsavedText);
 }
 
-void MainWindow::UpdateStatusBar()
+void MainWindow::UpdateStatusBarPerUnsaved(bool hasUnsavedMeta, bool hasUnsavedText)
 {
+    static bool lastUnsavedMeta{ false };
+    static bool lastUnsavedText{ false };
+
+    if ((lastUnsavedMeta == hasUnsavedMeta) && (lastUnsavedText == hasUnsavedText))
+        return;
+
+    lastUnsavedMeta = hasUnsavedMeta;
+	lastUnsavedText = hasUnsavedText;
+
+    UpdateStatusBar(hasUnsavedMeta, hasUnsavedText);
+}
+
+void MainWindow::UpdateStatusBar(bool hasUnsavedMeta, bool hasUnsavedText)
+{
+
     const QString filePath = HasFile()
-        ? m_filePath
+        ? m_savedFile
         : "[No file]";
-    const QString unsavedTextMark = (State::has_tag<State::Tag::UnsavedText>(m_stateTags))
-        ? "*"
-        : "";
-    const QString unsavedViewMark = (State::has_tag<State::Tag::UnsavedView>(m_stateTags))
-        ? "^"
-        : "";
-    const QString decoratedPath = filePath + unsavedTextMark + unsavedViewMark;
+    const QString unsavedTextMark = hasUnsavedText ? "*" : "";
+    const QString unsavedMetaMark = hasUnsavedMeta ? "^" : "";
+    const QString decoratedPath = filePath + unsavedTextMark + unsavedMetaMark;
     setWindowTitle(decoratedPath + " | PureNote");
     m_statusLabel->setText(decoratedPath);
     m_statusLabel->setToolTip(decoratedPath);

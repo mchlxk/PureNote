@@ -21,8 +21,10 @@ public:
     void LoadFile(const QString &fileName);
 
 protected:
-    void closeEvent(QCloseEvent *event) override;
     bool eventFilter(QObject* obj, QEvent* e) override;
+    void closeEvent(QCloseEvent *event) override;
+    void resizeEvent(QResizeEvent* event);
+    void moveEvent(QMoveEvent* event);
 
 private slots:
     void at_document_contentsChanged();
@@ -59,6 +61,7 @@ private slots:
     void at_actionExit_triggered();
 
     void at_opacityAdjustTimer_expired();
+    void at_delayedUnsavedUpdateTimer_expired();
 
 private:
     pun_t GetPun() const;
@@ -67,6 +70,12 @@ private:
     void SetWindow(const window_t& window);
     content_t GetContent() const;
     void SetContent(const content_t& content);
+    style_t GetStyle() const { return m_style; }
+    void SetStyle(const style_t& style);
+
+    bool HasUnsavedMeta() const;
+    bool HasUnsavedText() const;
+    bool CanSave() const;
 
     QByteArray GetGeometry() const;
     void PushGeometry(const QByteArray&);
@@ -86,7 +95,9 @@ private:
     void About();
     QString GetBrowseFilename();
 
-    bool HasFile() const { return !m_filePath.isEmpty(); }
+    bool HasFile() const { return !m_savedFile.isEmpty(); }
+    bool IsLocked() const { return m_textEdit->isReadOnly(); }
+    void SetLocked(bool locked) { m_textEdit->setReadOnly(locked); }
 
     void SetupWindowFlags(bool onTop);
 
@@ -97,16 +108,17 @@ private:
 
     void ShowContextMenu(const QPoint& pos);
 
+    void StartOpacityAdjustPeriod();
+    void ScheduleUpdatePerUnsaved();
     void UpdatePerUnsaved();
-    void UpdateStatusBar();
-    void SetStyle(const style_t& style);
+    void UpdateStatusBar(bool hasUnsavedView, bool hasUnsavedText);
+    void UpdateStatusBarPerUnsaved(bool hasUnsavedView, bool hasUnsavedText);
     void SetOpacity(float opacity);
     void UpdatePerStyle();
     void UpdatePerOpacity();
 
     void UpdatePerOnTopState();
     void UpdatePerFullscreen();
-    void UpdatePerLocked();
 
     void DecreaseFontSize();
     void IncreaseFontSize();
@@ -140,14 +152,17 @@ private:
 
     QPlainTextEdit *m_textEdit{ nullptr };
     QLabel* m_statusLabel{ nullptr };
-    QString m_filePath;
 
     style_t m_style{ Style::defaults };
     float m_opacity{ 1.f };
     std::stack<QByteArray> m_geometryStack;
 
+    QString m_savedFile;
+    pun_t m_savedPun;
+
     State::tags_t m_stateTags;
     QTimer m_opacityAdjustTimer;
+    QTimer m_delayedUnsavedUpdateTimer;
 };
 
 

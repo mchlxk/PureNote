@@ -23,6 +23,9 @@ namespace Window
 	static constexpr float min_opacity{ .15f };
 
 	static inline float clamp_opacity(float value) { return std::max(min_opacity, std::min(1.f, value)); }
+
+	bool equal_opacity(float a, float b);
+	bool equal(const T& a, const T& b);
 }
 using window_t = Window::T;
 
