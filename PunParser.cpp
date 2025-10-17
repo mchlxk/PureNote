@@ -129,6 +129,25 @@ QString PunParser::parse_window(QXmlStreamReader& reader, pun_t& output)
     else
         Pun::opacity(output) = 1.f;
 
+    while (!(reader.isEndElement() && reader.name() == "Window") && !reader.atEnd())
+    {
+        reader.readNext();
+        if (reader.hasError())
+            return reader.errorString();
+
+        if (reader.isStartElement() && reader.name() == "Geometry")
+        {
+            const QString geometryText = reader.readElementText();
+            if (geometryText.isEmpty())
+                continue;
+            Pun::geometry(output) = QByteArray::fromHex(geometryText.toUtf8());
+			continue;
+        }
+
+		if (reader.isStartElement())
+			reader.skipCurrentElement();
+    }
+
     return "";
 }
 

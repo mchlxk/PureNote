@@ -875,6 +875,8 @@ void MainWindow::SetPun(const pun_t& pun, const QString& filePath)
         PushGeometry(Pun::geometry(pun));
         PopGeometry();
     }
+    SetStyle(Pun::style(pun));
+
     m_textEdit->document()->setPlainText(Pun::content(pun));
     SetFile(filePath);
 }
