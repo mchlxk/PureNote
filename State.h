@@ -9,12 +9,13 @@ namespace State
         constexpr uint8_t Locked{1};
         constexpr uint8_t Fullscreen{2};
         constexpr uint8_t OnTop{3};
-        constexpr uint8_t Unsaved{4};
-        constexpr uint8_t OpaqueWhenActive{5};
-        constexpr uint8_t HasDialogContext{6};
-        constexpr uint8_t HasMouseContext{7};
-        constexpr uint8_t OpacityAdjust{8};
-        constexpr uint8_t MsgBox{9};
+        constexpr uint8_t UnsavedText{4};
+        constexpr uint8_t UnsavedView{5};
+        constexpr uint8_t OpaqueWhenActive{6};
+        constexpr uint8_t HasDialogContext{7};
+        constexpr uint8_t HasMouseContext{8};
+        constexpr uint8_t OpacityAdjust{9};
+        constexpr uint8_t MsgBox{10};
     }
     using tags_t = std::set<uint8_t>;    
     

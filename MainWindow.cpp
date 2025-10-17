@@ -423,7 +423,7 @@ void MainWindow::ShowContextMenu(const QPoint& pos)
     QMenu* menu = new QMenu(this);
     menu->setWindowFlags(menu->windowFlags() | Qt::NoDropShadowWindowHint);
 
-    m_actionSave->setEnabled(State::has_tag<State::Tag::Unsaved>(m_stateTags) && HasFile());
+    m_actionSave->setEnabled((State::has_tag<State::Tag::UnsavedText>(m_stateTags) || State::has_tag<State::Tag::UnsavedView>(m_stateTags)) && HasFile());
     connect(m_actionSave, &QAction::triggered, this, &MainWindow::at_actionSave_triggered);
     apply_qtbug_74655_workaround(m_actionSave);
     menu->addAction(m_actionSave);
@@ -586,12 +586,16 @@ void MainWindow::at_actionToggleFullscreen_triggered()
 {
     State::toggle_tag<State::Tag::Fullscreen>(m_stateTags);
     UpdatePerFullscreen();
+    State::set_tag<State::Tag::UnsavedView>(m_stateTags);
+    UpdatePerUnsaved();
 }
 
 void MainWindow::at_actionToggleOpaqueWhenActive_triggered()
 {
     State::toggle_tag<State::Tag::OpaqueWhenActive>(m_stateTags);
     UpdatePerOpacity();
+    State::set_tag<State::Tag::UnsavedView>(m_stateTags);
+    UpdatePerUnsaved();
 }
 
 
@@ -610,12 +614,16 @@ void MainWindow::at_actionToggleOnTop_triggered()
 {
     State::toggle_tag<State::Tag::OnTop>(m_stateTags);
     UpdatePerOnTopState();
+    State::set_tag<State::Tag::UnsavedView>(m_stateTags);
+    UpdatePerUnsaved();
 }
 
 void MainWindow::at_actionToggleLocked_triggered()
 {
     State::toggle_tag<State::Tag::Locked>(m_stateTags);
     UpdatePerLocked();
+    State::set_tag<State::Tag::UnsavedView>(m_stateTags);
+    UpdatePerUnsaved();
 }
 
 
@@ -664,13 +672,14 @@ void MainWindow::at_actionNextFont_triggered()
 {
     const QString& currentFont = Style::font_family(m_style);
     auto found = Style::font_families.find(currentFont);
+    style_t newStyle{m_style};
     if (found == Style::font_families.end())
-        Style::font_family(m_style) = Style::font_families.begin()->first;
+        Style::font_family(newStyle) = Style::font_families.begin()->first;
     else if (++found == Style::font_families.end())
-        Style::font_family(m_style) = Style::font_families.begin()->first;
+        Style::font_family(newStyle) = Style::font_families.begin()->first;
     else
-        Style::font_family(m_style) = found->first;
-    UpdatePerStyle();
+        Style::font_family(newStyle) = found->first;
+    SetStyle(newStyle);
 }
 
 void MainWindow::at_actionSetFont_triggered()
@@ -678,8 +687,9 @@ void MainWindow::at_actionSetFont_triggered()
     const QString name = Property::FontFamily::get(sender());
     if(!Style::font_families.count(name))
         return;
-    Style::font_family(m_style) = name;
-    UpdatePerStyle();
+    style_t newStyle{m_style};
+    Style::font_family(newStyle) = name;
+    SetStyle(newStyle);
 }
 
 
@@ -716,10 +726,7 @@ void MainWindow::at_actionSetFontSize_triggered()
 
 void MainWindow::at_actionSetOpacity_triggered()
 {
-    m_opacity = Property::Opacity::get(sender());
-    State::set_tag<State::Tag::OpacityAdjust>(m_stateTags);
-    m_opacityAdjustTimer.start();
-    UpdatePerOpacity();
+    SetOpacity(Property::Opacity::get(sender()));
 }
 
 
@@ -729,7 +736,22 @@ void MainWindow::SetStyle(const style_t& style)
         return;
     m_style = style;
     UpdatePerStyle();
+    State::set_tag<State::Tag::UnsavedView>(m_stateTags);
+    UpdatePerUnsaved();
 }
+
+void MainWindow::SetOpacity(float opacity)
+{
+    if (std::fabs(m_opacity - opacity) < .02f)
+        return;
+    m_opacity = Window::clamp_opacity(opacity);
+    State::set_tag<State::Tag::OpacityAdjust>(m_stateTags);
+    m_opacityAdjustTimer.start();
+    UpdatePerOpacity();
+    State::set_tag<State::Tag::UnsavedView>(m_stateTags);
+    UpdatePerUnsaved();
+}
+
 
 void MainWindow::UpdatePerStyle()
 {
@@ -790,8 +812,9 @@ void MainWindow::DecreaseFontSize()
 	auto found = std::lower_bound(Style::font_sizes.cbegin(), Style::font_sizes.cend(), sz);
 	if (found == Style::font_sizes.cbegin())
 		return;
-	Style::font_size(m_style) = *(--found);
-	UpdatePerStyle();
+    style_t newStyle{ m_style };
+	Style::font_size(newStyle) = *(--found);
+    SetStyle(newStyle);
 }
 
 void MainWindow::IncreaseFontSize()
@@ -800,29 +823,20 @@ void MainWindow::IncreaseFontSize()
 	const auto found = std::upper_bound(Style::font_sizes.cbegin(), Style::font_sizes.cend(), sz);
 	if (found == Style::font_sizes.cend())
 		return;
-	Style::font_size(m_style) = *found;
-	UpdatePerStyle();
+    style_t newStyle{ m_style };
+	Style::font_size(newStyle) = *found;
+    SetStyle(newStyle);
 }
 
 
 void MainWindow::DecreaseOpacity()
 {
-    if (State::has_tag<State::Tag::Fullscreen>(m_stateTags))
-        return;
-	m_opacity = Window::clamp_opacity(m_opacity - .08f);
-    State::set_tag<State::Tag::OpacityAdjust>(m_stateTags);
-    m_opacityAdjustTimer.start();
-	UpdatePerOpacity();
+    SetOpacity(Window::clamp_opacity(m_opacity - .08f));
 }
 
 void MainWindow::IncreaseOpacity()
 {
-    if (State::has_tag<State::Tag::Fullscreen>(m_stateTags))
-        return;
-	m_opacity = Window::clamp_opacity(m_opacity + .08f);
-    State::set_tag<State::Tag::OpacityAdjust>(m_stateTags);
-    m_opacityAdjustTimer.start();
-	UpdatePerOpacity();
+    SetOpacity(Window::clamp_opacity(m_opacity + .08f));
 }
 
 QString MainWindow::GetBrowseFilename()
@@ -847,9 +861,9 @@ void MainWindow::About()
 void MainWindow::at_document_contentsChanged()
 {
     if (m_textEdit->document()->isModified())
-        State::set_tag<State::Tag::Unsaved>(m_stateTags);
+        State::set_tag<State::Tag::UnsavedText>(m_stateTags);
     else
-        State::clear_tag<State::Tag::Unsaved>(m_stateTags);
+        State::clear_tag<State::Tag::UnsavedText>(m_stateTags);
     UpdatePerUnsaved();
 }
 
@@ -990,8 +1004,11 @@ QByteArray MainWindow::PeekGeometry() const
 
 bool MainWindow::ResolveUnsavedChanges()
 {
-    if (!State::has_tag<State::Tag::Unsaved>(m_stateTags))
+    if (!State::has_tag<State::Tag::UnsavedText>(m_stateTags)
+        && !State::has_tag<State::Tag::UnsavedView>(m_stateTags))
+    {
         return true;
+    }
 
     QMessageBox msgBox(this);
     msgBox.setWindowTitle("PureNote");
@@ -1085,7 +1102,8 @@ bool MainWindow::Save(const QString filePath)
 void MainWindow::SetFile(const QString &filePath)
 {
     m_filePath = filePath;
-    State::clear_tag<State::Tag::Unsaved>(m_stateTags);
+    State::clear_tag<State::Tag::UnsavedText>(m_stateTags);
+    State::clear_tag<State::Tag::UnsavedView>(m_stateTags);
     m_textEdit->document()->setModified(false);
     UpdatePerUnsaved();
     UpdateStatusBar();
@@ -1093,10 +1111,16 @@ void MainWindow::SetFile(const QString &filePath)
 
 void MainWindow::UpdatePerUnsaved()
 {
-    static bool lastValue{false};
-    if (lastValue == State::has_tag<State::Tag::Unsaved>(m_stateTags))
+    static bool unsavedText{false};
+    static bool unsavedView{false};
+    if (unsavedText == State::has_tag<State::Tag::UnsavedText>(m_stateTags)
+        && unsavedView == State::has_tag<State::Tag::UnsavedView>(m_stateTags))
+    {
         return;
-    lastValue = State::has_tag<State::Tag::Unsaved>(m_stateTags);
+    }
+    unsavedText = State::has_tag<State::Tag::UnsavedText>(m_stateTags);
+    unsavedView = State::has_tag<State::Tag::UnsavedView>(m_stateTags);
+    m_actionSave->setEnabled(unsavedText || unsavedView);
     UpdateStatusBar();
 }
 
@@ -1105,12 +1129,16 @@ void MainWindow::UpdateStatusBar()
     const QString filePath = HasFile()
         ? m_filePath
         : "[No file]";
-    const QString unsavedMarker = (State::has_tag<State::Tag::Unsaved>(m_stateTags))
+    const QString unsavedTextMark = (State::has_tag<State::Tag::UnsavedText>(m_stateTags))
         ? "*"
         : "";
-    setWindowTitle(filePath + unsavedMarker + " | PureNote");
-    m_statusLabel->setText(filePath + unsavedMarker);
-    m_statusLabel->setToolTip(filePath + unsavedMarker);
+    const QString unsavedViewMark = (State::has_tag<State::Tag::UnsavedView>(m_stateTags))
+        ? "^"
+        : "";
+    const QString decoratedPath = filePath + unsavedTextMark + unsavedViewMark;
+    setWindowTitle(decoratedPath + " | PureNote");
+    m_statusLabel->setText(decoratedPath);
+    m_statusLabel->setToolTip(decoratedPath);
 }
 
 void MainWindow::UpdatePerOnTopState()

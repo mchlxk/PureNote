@@ -100,6 +100,7 @@ private:
     void UpdatePerUnsaved();
     void UpdateStatusBar();
     void SetStyle(const style_t& style);
+    void SetOpacity(float opacity);
     void UpdatePerStyle();
     void UpdatePerOpacity();
 
