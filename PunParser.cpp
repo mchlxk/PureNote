@@ -34,7 +34,10 @@ Pun::expected<pun_t, QString> PunParser::parse(const QByteArray& input)
 
         if (reader.isStartElement() && reader.name() == "Window")
         {
-			parse_window(reader, pun);
+			const auto window = parse_window(reader);
+            if (!window)
+                return window.get_error();
+            Pun::window(pun) = *window;
             continue;
         }
 
@@ -118,16 +121,21 @@ Pun::expected<std::pair<QString, int>, QString> PunParser::parse_font(QXmlStream
 }
 
 
-QString PunParser::parse_window(QXmlStreamReader& reader, pun_t& output)
+Pun::expected<window_t, QString> PunParser::parse_window(QXmlStreamReader& reader)
 {
-    Pun::opaque_when_active(output) = Utility::parse_bool_attribute(reader, "OpaqueWhenActive");
-    Pun::on_top(output) = Utility::parse_bool_attribute(reader, "OnTop");
-    Pun::fullscreen(output) = Utility::parse_bool_attribute(reader, "Fullscreen");
+    window_t window{ Window::defaults };
+
+    Window::opaque_when_active(window) = Utility::parse_bool_attribute(reader, "OpaqueWhenActive");
+    Window::on_top(window) = Utility::parse_bool_attribute(reader, "OnTop");
+    Window::fullscreen(window) = Utility::parse_bool_attribute(reader, "Fullscreen");
 
     if (reader.attributes().hasAttribute("Opacity"))
-        Pun::opacity(output) = reader.attributes().value("Opacity").toFloat();
-    else
-        Pun::opacity(output) = 1.f;
+    {
+        bool ok{ true };
+        const float opacity = reader.attributes().value("Opacity").toFloat(&ok);
+        if(ok)
+			Window::opacity(window) = opacity;
+    }
 
     while (!Utility::at_element_end(reader, "Window"))
     {
@@ -140,7 +148,7 @@ QString PunParser::parse_window(QXmlStreamReader& reader, pun_t& output)
             const QString geometryText = reader.readElementText();
             if (geometryText.isEmpty())
                 continue;
-            Pun::geometry(output) = QByteArray::fromHex(geometryText.toUtf8());
+            Window::geometry(window) = QByteArray::fromHex(geometryText.toUtf8());
 			continue;
         }
 
@@ -148,7 +156,7 @@ QString PunParser::parse_window(QXmlStreamReader& reader, pun_t& output)
 			reader.skipCurrentElement();
     }
 
-    return "";
+    return window;
 }
 
 Pun::expected<std::pair<QString, bool>, QString> PunParser::parse_content(QXmlStreamReader& reader)

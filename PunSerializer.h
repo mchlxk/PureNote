@@ -11,6 +11,7 @@ namespace PunSerializer
 {
     void serialize(const pun_t& pun, QByteArray* output);
     void write_style(const style_t& style, QXmlStreamWriter& writer);
+    void write_window(const window_t& window, QXmlStreamWriter& writer);
 
     static const std::unordered_map<bool, QString> serialize_bool = { { true, "true"} ,{ false, "false"} };
 

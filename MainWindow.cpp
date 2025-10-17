@@ -10,6 +10,7 @@
 
 #include "PunParser.h"
 #include "PunSerializer.h"
+#include "Window.h"
 
 namespace Property
 {
@@ -50,8 +51,6 @@ static inline void apply_qtbug_74655_workaround(T* item)
     static const QIcon ico(pixmap);
     item->setIcon(ico);
 }
-
-static constexpr float min_opacity{ .15f };
 
 MainWindow::MainWindow()
 : m_textEdit(new QPlainTextEdit)
@@ -810,7 +809,7 @@ void MainWindow::DecreaseOpacity()
 {
     if (State::has_tag<State::Tag::Fullscreen>(m_stateTags))
         return;
-	m_opacity = std::max(m_opacity - .08f, min_opacity);
+	m_opacity = Window::clamp_opacity(m_opacity - .08f);
     State::set_tag<State::Tag::OpacityAdjust>(m_stateTags);
     m_opacityAdjustTimer.start();
 	UpdatePerOpacity();
@@ -820,7 +819,7 @@ void MainWindow::IncreaseOpacity()
 {
     if (State::has_tag<State::Tag::Fullscreen>(m_stateTags))
         return;
-	m_opacity = std::min(m_opacity + .08f, 1.f);
+	m_opacity = Window::clamp_opacity(m_opacity + .08f);
     State::set_tag<State::Tag::OpacityAdjust>(m_stateTags);
     m_opacityAdjustTimer.start();
 	UpdatePerOpacity();
@@ -854,54 +853,70 @@ void MainWindow::at_document_contentsChanged()
     UpdatePerUnsaved();
 }
 
+window_t MainWindow::GetWindow() const
+{
+    window_t window{ Window::defaults };
+    Window::geometry(window) = GetGeometry();
+    Window::opacity(window) = m_opacity;
+    Window::opaque_when_active(window) = State::has_tag<State::Tag::OpaqueWhenActive>(m_stateTags);
+	Window::on_top(window) = State::has_tag<State::Tag::OnTop>(m_stateTags);
+    Window::fullscreen(window) = State::has_tag<State::Tag::Fullscreen>(m_stateTags);
+    return window;
+}
+
 pun_t MainWindow::GetPun() const
 {
     pun_t pun;
-    Pun::geometry(pun) = GetGeometry();
+    Pun::window(pun) = GetWindow();
     Pun::style(pun) = m_style;
-    Pun::opacity(pun) = m_opacity;
-    Pun::opaque_when_active(pun) = State::has_tag<State::Tag::OpaqueWhenActive>(m_stateTags);
     Pun::locked(pun) = State::has_tag<State::Tag::Locked>(m_stateTags);
-    Pun::on_top(pun) = State::has_tag<State::Tag::OnTop>(m_stateTags);
-    Pun::fullscreen(pun) = State::has_tag<State::Tag::Fullscreen>(m_stateTags);
     Pun::content(pun) = m_textEdit->toPlainText();
     return pun;
 }
 
-void MainWindow::SetPun(const pun_t& pun, const QString& filePath)
+void MainWindow::SetWindow(const window_t& window)
 {
-    if (!Pun::geometry(pun).isEmpty())
+    if (!Window::geometry(window).isEmpty())
     {
-        PushGeometry(Pun::geometry(pun));
+        PushGeometry(Window::geometry(window));
         PopGeometry();
     }
-    SetStyle(Pun::style(pun));
 
-    m_opacity = Pun::opacity(pun);
+    m_opacity = Window::clamp_opacity(Window::opacity(window));
 
-    if (Pun::opaque_when_active(pun))
+	if (Window::opaque_when_active(window))
         State::set_tag<State::Tag::OpaqueWhenActive>(m_stateTags);
-    if (Pun::on_top(pun))
+
+    if (Window::on_top(window))
     {
         State::set_tag<State::Tag::OnTop>(m_stateTags);
         UpdatePerOnTopState();
     }
+
+    UpdatePerOpacity();
+
+    if (Window::fullscreen(window))
+    {
+        State::set_tag<State::Tag::Fullscreen>(m_stateTags);
+		UpdatePerFullscreen();
+    }
+}
+
+void MainWindow::SetPun(const pun_t& pun, const QString& filePath)
+{
+    SetStyle(Pun::style(pun));
+
+    m_textEdit->document()->setPlainText(Pun::content(pun));
+
     if (Pun::locked(pun))
     {
         State::set_tag<State::Tag::Locked>(m_stateTags);
         UpdatePerLocked();
     }
 
-    m_textEdit->document()->setPlainText(Pun::content(pun));
+    SetWindow(Pun::window(pun));
+
     SetFile(filePath);
-
-    UpdatePerOpacity();
-
-    if (Pun::fullscreen(pun))
-    {
-        State::set_tag<State::Tag::Fullscreen>(m_stateTags);
-		UpdatePerFullscreen();
-    }
 }
 
 

@@ -6,22 +6,18 @@
 
 #include <QString>
 #include <QSize>
-#include <QRect>
 
 #include "Style.h"
+#include "Window.h"
 
 namespace Pun
 {
-	using T = std::tuple<QByteArray, style_t, float, bool, bool, bool, bool, QString>;
+	using T = std::tuple<style_t, window_t, bool, QString>;
 
-	ELEMENT_EXTRACT(T, 0, geometry)
-	ELEMENT_EXTRACT(T, 1, style)
-	ELEMENT_EXTRACT(T, 2, opacity)
-	ELEMENT_EXTRACT(T, 3, opaque_when_active)
-	ELEMENT_EXTRACT(T, 4, locked)
-	ELEMENT_EXTRACT(T, 5, on_top)
-	ELEMENT_EXTRACT(T, 6, fullscreen)
-	ELEMENT_EXTRACT(T, 7, content)
+	ELEMENT_EXTRACT(T, 0, style)
+	ELEMENT_EXTRACT(T, 1, window)
+	ELEMENT_EXTRACT(T, 2, locked)
+	ELEMENT_EXTRACT(T, 3, content)
 }
 using pun_t = Pun::T;
 

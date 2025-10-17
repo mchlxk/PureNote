@@ -14,14 +14,7 @@ void PunSerializer::serialize(const pun_t& pun, QByteArray* output)
         writer.writeAttribute("Version", "1.0");
 
         write_style(Pun::style(pun), writer);
-
-        { ElementScope windowScope(writer, "Window");
-            writer.writeAttribute("Opacity", QString::number(Pun::opacity(pun)));
-            writer.writeAttribute("OpaqueWhenActive", serialize_bool.at(Pun::opaque_when_active(pun)));
-            writer.writeAttribute("OnTop", serialize_bool.at(Pun::on_top(pun)));
-            writer.writeAttribute("Fullscreen", serialize_bool.at(Pun::fullscreen(pun)));
-            writer.writeTextElement("Geometry", Pun::geometry(pun).toHex());
-        }
+        write_window(Pun::window(pun), writer);
 
         { ElementScope contentScope(writer, "Content");
             writer.writeAttribute("Locked", serialize_bool.at(Pun::locked(pun)));
@@ -34,12 +27,20 @@ void PunSerializer::serialize(const pun_t& pun, QByteArray* output)
 
 void PunSerializer::write_style(const style_t& style, QXmlStreamWriter& writer)
 {
-    { ElementScope styleScope(writer, "Style");
-        writer.writeTextElement("ColorScheme", Style::color_scheme(style));
-        { ElementScope fontScope(writer, "Font");
-            writer.writeTextElement("Size", QString::number(Style::font_size(style)));
-            writer.writeTextElement("Family", Style::font_family(style));
-        }
+    ElementScope styleScope(writer, "Style");
+	writer.writeTextElement("ColorScheme", Style::color_scheme(style));
+	{ ElementScope fontScope(writer, "Font");
+		writer.writeTextElement("Size", QString::number(Style::font_size(style)));
+		writer.writeTextElement("Family", Style::font_family(style));
+	}
+}
 
-    }
+void PunSerializer::write_window(const window_t& window, QXmlStreamWriter& writer)
+{
+	ElementScope windowScope(writer, "Window");
+	writer.writeAttribute("Opacity", QString::number(Window::opacity(window)));
+	writer.writeAttribute("OpaqueWhenActive", serialize_bool.at(Window::opaque_when_active(window)));
+	writer.writeAttribute("OnTop", serialize_bool.at(Window::on_top(window)));
+	writer.writeAttribute("Fullscreen", serialize_bool.at(Window::fullscreen(window)));
+	writer.writeTextElement("Geometry", Window::geometry(window).toHex());
 }

@@ -63,6 +63,8 @@ private slots:
 private:
     pun_t GetPun() const;
     void SetPun(const pun_t& pun, const QString& filePath);
+    window_t GetWindow() const;
+    void SetWindow(const window_t& window);
 
     QByteArray GetGeometry() const;
     void PushGeometry(const QByteArray&);

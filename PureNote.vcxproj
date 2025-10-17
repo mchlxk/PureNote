@@ -103,6 +103,7 @@
     <ClCompile Include="SchemeIcon.cpp" />
     <ClCompile Include="Style.cpp" />
     <ClCompile Include="StyleSheet.cpp" />
+    <ClCompile Include="Window.cpp" />
     <QtRcc Include="qml.qrc" />
     <None Include="main.qml" />
   </ItemGroup>
@@ -123,6 +124,7 @@
     <ClInclude Include="State.h" />
     <ClInclude Include="Style.h" />
     <ClInclude Include="StyleSheet.h" />
+    <ClInclude Include="Window.h" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="PureNote.rc" />
