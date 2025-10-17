@@ -17,9 +17,11 @@ Pun::expected<pun_t, QString> PunParser::parse(const QByteArray& input)
     if(reader.attributes().value("Version") != "1.0")
         return QString("wrong version");
 
-    while (!reader.atEnd() && !reader.hasError()) 
+    while (!(reader.isEndElement() && reader.name() == "Pun") && !reader.atEnd())
     {
-        reader.readNextStartElement();
+        reader.readNext();
+        if (reader.hasError())
+            return reader.errorString();
 
         if (reader.isStartElement() && reader.name() == "Style")
         {
@@ -46,66 +48,9 @@ Pun::expected<pun_t, QString> PunParser::parse(const QByteArray& input)
             continue;
 		}
 
-		reader.skipCurrentElement();
-	}
-
-    /*
-    while (!reader.atEnd() && !reader.hasError()) 
-    {
-        reader.readNext();
-
-        // Detect <book> start element
-        if (reader.isStartElement() && reader.name() == "pun") 
-        {
-            // Read until </book>
-            while (!(reader.isEndElement() && reader.name() == "content")) 
-            {
-                reader.readNext();
-
-
-                if (xml.isStartElement()) 
-                {
-                    if (xml.name() == "title") 
-                    {
-                        book.title = xml.readElementText();
-                    } else if (xml.name() == "author") 
-                    {
-                        book.author = xml.readElementText();
-                    } else 
-                    {
-                        xml.skipCurrentElement(); // ignore unknown elements
-                    }
-                }
-            }
-
-            books.append(book);
-        }
-    }
-    */
-
-
-
-    /*
-        reader.readNextStartElement();
-    if(reader.name() != "content")
-        return QString("parser error 2");
-
-	content = reader.readElementText();
-    */
-
-    /*
-    while (reader.readNextStartElement()) 
-    {
-        if (reader.name() == "content") 
-        {
-            content = reader.readElementText();
-        }
-        else 
-        {
+        if (reader.isStartElement())
             reader.skipCurrentElement();
-        }
-    }
-    */
+	}
 
     return pun;
 }
@@ -114,16 +59,19 @@ Pun::expected<pun_t, QString> PunParser::parse(const QByteArray& input)
 Pun::expected<style_t, QString> PunParser::parse_style(QXmlStreamReader& reader)
 {
     style_t style{ Style::defaults };
-    while (!reader.atEnd() && !reader.hasError() && !reader.isEndElement())
+    while (!(reader.isEndElement() && reader.name() == "Style") && !reader.atEnd())
     {
-        reader.readNextStartElement();
-        if (reader.name() == "ColorScheme")
+        reader.readNext();
+        if (reader.hasError())
+            return reader.errorString();
+
+        if (reader.isStartElement() && reader.name() == "ColorScheme")
         {
             Style::color_scheme(style) = reader.readElementText();
             continue;
         }
 
-        if (reader.name() == "Font")
+        if (reader.isStartElement() && reader.name() == "Font")
         {
             const auto font = parse_font(reader);
             if (!font)
@@ -133,7 +81,8 @@ Pun::expected<style_t, QString> PunParser::parse_style(QXmlStreamReader& reader)
             continue;
         }
 
-        reader.skipCurrentElement();
+        if(reader.isStartElement())
+			reader.skipCurrentElement();
     }
     return style;
 }
@@ -141,9 +90,13 @@ Pun::expected<style_t, QString> PunParser::parse_style(QXmlStreamReader& reader)
 Pun::expected<std::pair<QString, int>, QString> PunParser::parse_font(QXmlStreamReader& reader)
 {
     std::pair<QString, int> font{Style::font_family(Style::defaults), Style::font_size(Style::defaults)};
-    while (!reader.atEnd() && !reader.hasError() && reader.isEndElement())
+    while (!(reader.isEndElement() && reader.name() == "Font") && !reader.atEnd())
     {
-        if (reader.name() == "Size")
+        reader.readNext();
+        if (reader.hasError())
+            return reader.errorString();
+
+        if (reader.isStartElement() && reader.name() == "Size")
         {
             bool ok{ true };
             font.second = reader.readElementText().toUInt(&ok);
@@ -151,10 +104,15 @@ Pun::expected<std::pair<QString, int>, QString> PunParser::parse_font(QXmlStream
                 return QString("error parsing font size (not a number)");
             continue;
         }
-        if (reader.name() == "Family")
+
+        if (reader.isStartElement() && reader.name() == "Family")
         {
             font.first = reader.readElementText();
+            continue;
         }
+
+        if(reader.isStartElement())
+			reader.skipCurrentElement();
     }
     return font;
 }
