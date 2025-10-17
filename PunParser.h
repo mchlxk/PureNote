@@ -13,7 +13,7 @@ namespace PunParser
 
     Pun::expected<style_t, QString> parse_style(QXmlStreamReader& reader);
     Pun::expected<window_t, QString> parse_window(QXmlStreamReader& reader);
-    Pun::expected<std::pair<QString, bool>, QString> parse_content(QXmlStreamReader& reader);
+    Pun::expected<content_t, QString> parse_content(QXmlStreamReader& reader);
     Pun::expected<std::pair<QString, int>, QString> parse_font(QXmlStreamReader& reader);
 
     namespace Utility

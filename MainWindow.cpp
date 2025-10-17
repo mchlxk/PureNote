@@ -853,6 +853,25 @@ void MainWindow::at_document_contentsChanged()
     UpdatePerUnsaved();
 }
 
+content_t MainWindow::GetContent() const
+{
+    content_t content{ Content::defaults };
+    Content::locked(content) = State::has_tag<State::Tag::Locked>(m_stateTags);
+    Content::text(content) = m_textEdit->toPlainText();
+    return content;
+}
+
+void MainWindow::SetContent(const content_t& content)
+{
+    m_textEdit->document()->setPlainText(Content::text(content));
+
+    if (Content::locked(content))
+    {
+        State::set_tag<State::Tag::Locked>(m_stateTags);
+        UpdatePerLocked();
+    }
+}
+
 window_t MainWindow::GetWindow() const
 {
     window_t window{ Window::defaults };
@@ -869,8 +888,7 @@ pun_t MainWindow::GetPun() const
     pun_t pun;
     Pun::window(pun) = GetWindow();
     Pun::style(pun) = m_style;
-    Pun::locked(pun) = State::has_tag<State::Tag::Locked>(m_stateTags);
-    Pun::content(pun) = m_textEdit->toPlainText();
+    Pun::content(pun) = GetContent();
     return pun;
 }
 
@@ -905,17 +923,8 @@ void MainWindow::SetWindow(const window_t& window)
 void MainWindow::SetPun(const pun_t& pun, const QString& filePath)
 {
     SetStyle(Pun::style(pun));
-
-    m_textEdit->document()->setPlainText(Pun::content(pun));
-
-    if (Pun::locked(pun))
-    {
-        State::set_tag<State::Tag::Locked>(m_stateTags);
-        UpdatePerLocked();
-    }
-
+    SetContent(Pun::content(pun));
     SetWindow(Pun::window(pun));
-
     SetFile(filePath);
 }
 

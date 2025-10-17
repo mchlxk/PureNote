@@ -10,16 +10,10 @@ void PunSerializer::serialize(const pun_t& pun, QByteArray* output)
     writer.writeStartDocument();
 
     { ElementScope punScope(writer, "Pun");
-
         writer.writeAttribute("Version", "1.0");
-
         write_style(Pun::style(pun), writer);
         write_window(Pun::window(pun), writer);
-
-        { ElementScope contentScope(writer, "Content");
-            writer.writeAttribute("Locked", serialize_bool.at(Pun::locked(pun)));
-            writer.writeCharacters(Pun::content(pun));
-        }
+		write_content(Pun::content(pun), writer);
     }
 
     writer.writeEndDocument();
@@ -44,3 +38,11 @@ void PunSerializer::write_window(const window_t& window, QXmlStreamWriter& write
 	writer.writeAttribute("Fullscreen", serialize_bool.at(Window::fullscreen(window)));
 	writer.writeTextElement("Geometry", Window::geometry(window).toHex());
 }
+
+void PunSerializer::write_content(const content_t& content, QXmlStreamWriter& writer)
+{
+	ElementScope contentScope(writer, "Content");
+	writer.writeAttribute("Locked", serialize_bool.at(Content::locked(content)));
+	writer.writeCharacters(Content::text(content));
+}
+

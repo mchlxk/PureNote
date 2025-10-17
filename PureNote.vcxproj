@@ -94,10 +94,10 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="ColorScheme.cpp" />
+    <ClCompile Include="Content.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="MainWindow.cpp" />
     <ClCompile Include="MouseEvent.cpp" />
-    <ClCompile Include="Pun.cpp" />
     <ClCompile Include="PunParser.cpp" />
     <ClCompile Include="PunSerializer.cpp" />
     <ClCompile Include="SchemeIcon.cpp" />
@@ -111,6 +111,7 @@
     <QtMoc Include="MainWindow.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Content.h" />
     <ClInclude Include="ElementExtract.h" />
     <ClInclude Include="ColorScheme.h" />
     <ClInclude Include="HashQString.h" />

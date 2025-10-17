@@ -65,6 +65,8 @@ private:
     void SetPun(const pun_t& pun, const QString& filePath);
     window_t GetWindow() const;
     void SetWindow(const window_t& window);
+    content_t GetContent() const;
+    void SetContent(const content_t& content);
 
     QByteArray GetGeometry() const;
     void PushGeometry(const QByteArray&);

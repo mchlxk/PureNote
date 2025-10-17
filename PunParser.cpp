@@ -46,8 +46,7 @@ Pun::expected<pun_t, QString> PunParser::parse(const QByteArray& input)
 			const auto content = parse_content(reader);
             if (!content)
                 return content.get_error();
-            Pun::content(pun) = (*content).first;
-            Pun::locked(pun) = (*content).second;
+            Pun::content(pun) = (*content);
             continue;
 		}
 
@@ -159,11 +158,11 @@ Pun::expected<window_t, QString> PunParser::parse_window(QXmlStreamReader& reade
     return window;
 }
 
-Pun::expected<std::pair<QString, bool>, QString> PunParser::parse_content(QXmlStreamReader& reader)
+Pun::expected<content_t, QString> PunParser::parse_content(QXmlStreamReader& reader)
 {
-    std::pair<QString, bool> content{"", false};
-    content.second = Utility::parse_bool_attribute(reader, "Locked");
-    content.first = reader.readElementText();
+    content_t content{ Content::defaults };
+    Content::locked(content) = Utility::parse_bool_attribute(reader, "Locked");
+    Content::text(content) = reader.readElementText();
     return content;
 }
 
