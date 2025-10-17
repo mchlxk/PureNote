@@ -191,7 +191,7 @@ void MainWindow::SetupActions()
 void MainWindow::SetupStatusLabel()
 {
     m_statusLabel->setAlignment(Qt::AlignLeft);
-    statusBar()->addPermanentWidget(m_statusLabel, 100);
+    statusBar()->addPermanentWidget(m_statusLabel, 90);
 }
 
 void MainWindow::SetupTextEdit()
@@ -347,7 +347,7 @@ bool MainWindow::eventFilter(QObject* obj, QEvent* evt)
         QMouseEvent* mouseEvent = static_cast<QMouseEvent*>(evt);
         mouseStartPos = mouseEvent->globalPos();
         startPos = pos();
-        action = MouseEvent::ActionE::MoveAltLmb;
+        action = MouseEvent::ActionE::MoveLmb;
         return true;
     }
 
@@ -360,6 +360,20 @@ bool MainWindow::eventFilter(QObject* obj, QEvent* evt)
         return true;
     }
 
+    if (MouseEvent::is_lmb_press(evt))
+    {
+        QMouseEvent* mouseEvent = static_cast<QMouseEvent*>(evt);
+        QRect grabArea(statusBar()->frameGeometry());
+        grabArea.setWidth(grabArea.width() - grabArea.height());
+        if (grabArea.contains(mouseEvent->pos()))
+        {
+			mouseStartPos = mouseEvent->globalPos();
+			startPos = pos();
+			action = MouseEvent::ActionE::MoveLmb;
+			return true;
+        }
+    }
+
     if (evt->type() == QEvent::MouseMove)
     {
         switch (action)
@@ -368,7 +382,7 @@ bool MainWindow::eventFilter(QObject* obj, QEvent* evt)
                 break;
 
             case MouseEvent::ActionE::MoveMmb:
-            case MouseEvent::ActionE::MoveAltLmb:
+            case MouseEvent::ActionE::MoveLmb:
             {
                 QMouseEvent* mouseEvent = static_cast<QMouseEvent*> (evt);
                 move(startPos + (mouseEvent->globalPos() - mouseStartPos));
@@ -385,7 +399,7 @@ bool MainWindow::eventFilter(QObject* obj, QEvent* evt)
         }
     }
 
-    if (MouseEvent::is_lmb_release(evt) && action == MouseEvent::ActionE::MoveAltLmb)
+    if (MouseEvent::is_lmb_release(evt) && action == MouseEvent::ActionE::MoveLmb)
     {
         action = MouseEvent::ActionE::None;
         return true;

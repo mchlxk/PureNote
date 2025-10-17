@@ -9,10 +9,11 @@ namespace MouseEvent
     {
         None,
         MoveMmb,
-        MoveAltLmb,
+        MoveLmb,
         ResizeAltRmb
     };
 
+    bool is_lmb_press(const QEvent* evt);
     bool is_alt_lmb_press(const QEvent* evt);
     bool is_lmb_release(const QEvent* evt);
     bool is_alt_rmb_press(const QEvent* evt);

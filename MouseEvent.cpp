@@ -2,6 +2,11 @@
 
 #include "MouseEvent.h"
 
+bool MouseEvent::is_lmb_press(const QEvent* evt)
+{
+    return evt->type() == QEvent::MouseButtonPress
+        && static_cast<const QMouseEvent*>(evt)->button() == Qt::MouseButton::LeftButton;
+}
 
 bool MouseEvent::is_alt_lmb_press(const QEvent* evt)
 {
