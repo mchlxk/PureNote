@@ -283,11 +283,9 @@ bool MainWindow::eventFilter(QObject* obj, QEvent* evt)
     if (evt->type() == QEvent::MouseMove && action == MouseEvent::ActionE::None)
         return false;
 
+    // let QT emit context-menu-requested
     if (MouseEvent::is_rmb_release(evt) && action == MouseEvent::ActionE::None)
-    {
-        emit customContextMenuRequested(static_cast<QMouseEvent*>(evt)->globalPos());
-        return true;
-    }
+        return false;
 
     if (evt->type() == QEvent::WindowActivate)
     {
