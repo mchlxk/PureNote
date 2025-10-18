@@ -97,7 +97,7 @@ private:
 
     bool HasFile() const { return !m_savedFile.isEmpty(); }
     bool IsLocked() const { return m_textEdit->isReadOnly(); }
-    void SetLocked(bool locked) { m_textEdit->setReadOnly(locked); }
+    void SetLocked(bool locked);
 
     void SetupWindowFlags(bool onTop);
 

@@ -474,7 +474,7 @@ void MainWindow::ShowContextMenu(const QPoint& pos)
     apply_qtbug_74655_workaround(m_actionRedo);
     menu->addAction(m_actionRedo);
 
-    m_actionCut->setEnabled(true); // TBD
+    m_actionCut->setEnabled(!IsLocked()); // TBD
     apply_qtbug_74655_workaround(m_actionCut);
     menu->addAction(m_actionCut);
 
@@ -925,6 +925,12 @@ void MainWindow::SetContent(const content_t& content)
     m_textEdit->document()->setPlainText(Content::text(content));
     SetLocked(Content::locked(content));
 }
+
+void MainWindow::SetLocked(bool locked) 
+{
+    m_textEdit->setReadOnly(locked); 
+}
+
 
 window_t MainWindow::GetWindow() const
 {
