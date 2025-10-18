@@ -1189,7 +1189,7 @@ void MainWindow::UpdateStatusBar(bool hasUnsavedMeta, bool hasUnsavedText)
         : "[No file]";
     const QString unsavedTextMark = hasUnsavedText ? "*" : "";
     const QString unsavedMetaMark = hasUnsavedMeta ? "^" : "";
-    const QString decoratedPath = filePath + unsavedTextMark + unsavedMetaMark;
+    const QString decoratedPath = unsavedTextMark + unsavedMetaMark + filePath;
     setWindowTitle(decoratedPath + " | PureNote");
     m_statusLabel->setText(decoratedPath);
     m_statusLabel->setToolTip(decoratedPath);
