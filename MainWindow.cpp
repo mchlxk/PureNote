@@ -890,12 +890,15 @@ void MainWindow::IncreaseOpacity()
 
 QString MainWindow::GetBrowseFilename()
 {
-    QFileDialog dialog(this);
+    QFileDialog dialog(this, "Choose file to save...", "", "*.pun");
     dialog.setWindowModality(Qt::WindowModal);
     dialog.setAcceptMode(QFileDialog::AcceptSave);
     if (dialog.exec() != QDialog::Accepted)
         return "";
-    return dialog.selectedFiles().first();
+    const QString filePath = dialog.selectedFiles().first();
+    if(!filePath.endsWith(".pun"))
+        return filePath + ".pun";
+    return filePath;
 }
 
 
@@ -1183,7 +1186,6 @@ void MainWindow::UpdateStatusBarPerUnsaved(bool hasUnsavedMeta, bool hasUnsavedT
 
 void MainWindow::UpdateStatusBar(bool hasUnsavedMeta, bool hasUnsavedText)
 {
-
     const QString filePath = HasFile()
         ? m_savedFile
         : "[No file]";
