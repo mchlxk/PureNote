@@ -338,7 +338,7 @@ bool MainWindow::eventFilter(QObject* obj, QEvent* evt)
         mouseStartPos = mouseEvent->globalPos();
         startPos = pos();
         action = MouseEvent::ActionE::MoveMmb;
-        return true;
+        return false;
     }
 
     if (MouseEvent::is_alt_lmb_press(evt))
