@@ -151,6 +151,45 @@ void MainWindow::SetupActions()
     m_actionExit->setShortcut(QKeySequence("Alt+X"));
     connect(m_actionExit, &QAction::triggered, this, &MainWindow::at_actionExit_triggered);
     addAction(m_actionExit);
+
+    for (const auto& scheme : ColorScheme::schemas)
+    {
+        const QString name = scheme.first;
+        QAction* action = new QAction(name);
+        Property::ColorScheme::set(action, name);
+        connect(action, &QAction::triggered, this, &MainWindow::at_actionSetColorScheme_triggered);
+        action->setIcon(SchemeIcon::get(scheme.second, 24));
+        m_colorSchemeActions.append(action);
+    }
+
+    for (const uint32_t size : Style::font_sizes)
+    {
+        QAction* action = new QAction(QString::number(size));
+        Property::FontSize::set(action, size);
+        connect(action, &QAction::triggered, this, &MainWindow::at_actionSetFontSize_triggered);
+        m_fontSizeActions.append(action);
+    }
+
+    for (const auto& font : Style::font_families)
+    {
+        const QString name = font.first;
+        QAction* action = new QAction(name);
+        Property::FontFamily::set(action, name);
+        connect(action, &QAction::triggered, this, &MainWindow::at_actionSetFont_triggered);
+        m_fontFamilyActions.append(action);
+    }
+
+	QAction* actionOpauqe = new QAction("Opaque");
+	Property::Opacity::set(actionOpauqe, 1.f);
+	connect(actionOpauqe, &QAction::triggered, this, &MainWindow::at_actionSetOpacity_triggered);
+	m_opacityActions.append(actionOpauqe);
+    for (const float opacity : std::vector<float>({ .9f, .8f, .7f, .6f, .5f, .4f, .3f, .15f}))
+    {
+        QAction* action = new QAction(QString::number(opacity));
+        Property::Opacity::set(action, opacity);
+        connect(action, &QAction::triggered, this, &MainWindow::at_actionSetOpacity_triggered);
+        m_opacityActions.append(action);
+    }
 }
 
 
@@ -436,63 +475,27 @@ void MainWindow::ShowContextMenu(const QPoint& pos)
 
     menu->addSeparator();
 
-
     QMenu* colorSchemesSubmenu = new QMenu("Color Scheme\t(F5)", this);
     colorSchemesSubmenu->setWindowFlags(colorSchemesSubmenu->windowFlags() | Qt::NoDropShadowWindowHint);
-    for (const auto& scheme : ColorScheme::schemas)
-    {
-        const QString name = scheme.first;
-        QAction* actionScheme = new QAction(name);
-        Property::ColorScheme::set(actionScheme, name);
-        connect(actionScheme, &QAction::triggered, this, &MainWindow::at_actionSetColorScheme_triggered);
-        actionScheme->setIcon(SchemeIcon::get(scheme.second, 24));
-        colorSchemesSubmenu->addAction(actionScheme);
-    }
+    colorSchemesSubmenu->addActions(m_colorSchemeActions);
     apply_qtbug_74655_workaround(colorSchemesSubmenu);
     menu->addMenu(colorSchemesSubmenu);
 
     QMenu* fontSubmenu = new QMenu("Font\t(F4)", this);
     fontSubmenu->setWindowFlags(fontSubmenu->windowFlags() | Qt::NoDropShadowWindowHint);
-    for (const auto& font : Style::font_families)
-    {
-        const QString name = font.first;
-        QAction* actionFont = new QAction(name);
-        Property::FontFamily::set(actionFont, name);
-        connect(actionFont, &QAction::triggered, this, &MainWindow::at_actionSetFont_triggered);
-        if (name == Style::font_family(m_style))
-            actionFont->setEnabled(false);
-        fontSubmenu->addAction(actionFont);
-    }
+    fontSubmenu->addActions(m_fontFamilyActions);
     apply_qtbug_74655_workaround(fontSubmenu);
     menu->addMenu(fontSubmenu);
 
     QMenu* fontSizeSubmenu = new QMenu("Font Size\t(Ctrl+Wheel)", this);
     fontSizeSubmenu->setWindowFlags(fontSizeSubmenu->windowFlags() | Qt::NoDropShadowWindowHint);
-    for (const uint32_t size : Style::font_sizes)
-    {
-        QAction* actionSize = new QAction(QString::number(size));
-        Property::FontSize::set(actionSize, size);
-        connect(actionSize, &QAction::triggered, this, &MainWindow::at_actionSetFontSize_triggered);
-        if (size == Style::font_size(m_style))
-            actionSize->setEnabled(false);
-        fontSizeSubmenu->addAction(actionSize);
-    }
+    fontSizeSubmenu->addActions(m_fontSizeActions);
     apply_qtbug_74655_workaround(fontSizeSubmenu);
     menu->addMenu(fontSizeSubmenu);
 
     QMenu* opacitySubmenu = new QMenu("Opacity\t(Alt+Wheel)", this);
     opacitySubmenu->setWindowFlags(opacitySubmenu->windowFlags() | Qt::NoDropShadowWindowHint);
-	QAction* actionOpauqe = new QAction("Opaque");
-	Property::Opacity::set(actionOpauqe, 1.f);
-	connect(actionOpauqe, &QAction::triggered, this, &MainWindow::at_actionSetOpacity_triggered);
-	opacitySubmenu->addAction(actionOpauqe);
-    for (const float opacity : std::vector<float>({ .8f, .6f, .5f, .4f, .3f, .15f}))
-    {
-        QAction* actionOpacity = new QAction(QString::number(opacity));
-        Property::Opacity::set(actionOpacity, opacity);
-        connect(actionOpacity, &QAction::triggered, this, &MainWindow::at_actionSetOpacity_triggered);
-        opacitySubmenu->addAction(actionOpacity);
-    }
+    opacitySubmenu->addActions(m_opacityActions);
     apply_qtbug_74655_workaround(opacitySubmenu);
     menu->addMenu(opacitySubmenu);
 

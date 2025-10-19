@@ -135,6 +135,11 @@ private:
     QAction* m_actionToggleOpaqueWhenActive{ nullptr };
     QAction* m_actionExit{ nullptr };
 
+    QList<QAction*> m_colorSchemeActions;
+    QList<QAction*> m_fontSizeActions;
+    QList<QAction*> m_fontFamilyActions;
+    QList<QAction*> m_opacityActions;
+
     QPlainTextEdit *m_textEdit{ nullptr };
     QLabel* m_statusLabel{ nullptr };
 
