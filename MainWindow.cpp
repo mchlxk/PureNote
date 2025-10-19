@@ -970,6 +970,15 @@ QByteArray MainWindow::PeekGeometry() const
 }
 
 
+void MainWindow::ShowMessageBox(std::function<void()> show_func)
+{
+    State::set_tag<State::Tag::MsgBox>(m_stateTags);
+    UpdatePerOpacity();
+    show_func();
+    State::clear_tag<State::Tag::MsgBox>(m_stateTags);
+    UpdatePerOpacity();
+}
+
 
 bool MainWindow::ResolveUnsavedChanges()
 {
@@ -982,11 +991,8 @@ bool MainWindow::ResolveUnsavedChanges()
     msgBox.setStandardButtons(QMessageBox::Save | QMessageBox::Discard | QMessageBox::Cancel);
     msgBox.setWindowFlags(msgBox.windowFlags() | Qt::FramelessWindowHint);
 
-    State::set_tag<State::Tag::MsgBox>(m_stateTags);
-    UpdatePerOpacity();
-    const auto ret = msgBox.exec();
-    State::clear_tag<State::Tag::MsgBox>(m_stateTags);
-    UpdatePerOpacity();
+    int ret{ 0 };
+    ShowMessageBox([&ret, &msgBox]() { ret = msgBox.exec(); } );
 
     switch (ret) 
     {
@@ -1006,7 +1012,10 @@ bool MainWindow::ResolveUnsavedChanges()
     QFile file(filePath);
     if (!file.open(QFile::ReadOnly | QFile::Text)) 
     {
-        QMessageBox::warning(this, tr("Application"), tr("Cannot read file %1:\n%2.") .arg(QDir::toNativeSeparators(filePath), file.errorString()));
+        const QString error = file.errorString();
+        ShowMessageBox( [this, &filePath, &error] () {
+            QMessageBox::warning(this, "PureNote", QString("Cannot read file %1, details::\n%2.").arg(QDir::toNativeSeparators(filePath), error));
+		});
         return;
     }
 
@@ -1022,7 +1031,10 @@ bool MainWindow::ResolveUnsavedChanges()
 
     if (!pun)
     {
-        QMessageBox::warning(this, "PureNote", "Cannot parse input file, parser error: "+pun.get_error());
+        const QString error = pun.get_error();
+        ShowMessageBox([this, &error]() {
+			QMessageBox::warning(this, "PureNote", "Cannot parse input file (parser error), details:\n" + error);
+		} );
         return;
     }
 
