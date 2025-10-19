@@ -1012,7 +1012,8 @@ bool MainWindow::ResolveUnsavedChanges()
     if (!file.open(QFile::ReadOnly | QFile::Text)) 
     {
 		QMessageBox msgBox(this);
-        msgBox.setIcon(QMessageBox::Warning);
+        const QString schemaName = Style::color_scheme(m_style);
+        msgBox.setIconPixmap(SchemeIcon::get_warning(ColorScheme::schemas.at(schemaName), 32));
 		msgBox.setText(QString("Cannot read file %1\nDetails: %2").arg(QDir::toNativeSeparators(filePath), file.errorString()));
 		msgBox.setStandardButtons(QMessageBox::Ok);
 		msgBox.setWindowFlags(msgBox.windowFlags() | Qt::FramelessWindowHint);
@@ -1033,7 +1034,8 @@ bool MainWindow::ResolveUnsavedChanges()
     if (!pun)
     {
 		QMessageBox msgBox(this);
-        msgBox.setIcon(QMessageBox::Warning);
+        const QString schemaName = Style::color_scheme(m_style);
+        msgBox.setIconPixmap(SchemeIcon::get_warning(ColorScheme::schemas.at(schemaName), 32));
 		msgBox.setText("Cannot parse input file (parser error)\nDetails: " + pun.get_error());
 		msgBox.setStandardButtons(QMessageBox::Ok);
 		msgBox.setWindowFlags(msgBox.windowFlags() | Qt::FramelessWindowHint);
@@ -1055,7 +1057,8 @@ pun_optional_t<pun_t> MainWindow::Save(const QString& filePath)
         return *savedPun;
 
 	QMessageBox msgBox(this);
-	msgBox.setIcon(QMessageBox::Warning);
+	const QString schemaName = Style::color_scheme(m_style);
+	msgBox.setIconPixmap(SchemeIcon::get_warning(ColorScheme::schemas.at(schemaName), 32));
 	msgBox.setText(QString("Error saveing file %1\nDetails: %2").arg(QDir::toNativeSeparators(filePath), savedPun.get_error()));
 	msgBox.setStandardButtons(QMessageBox::Ok);
 	msgBox.setWindowFlags(msgBox.windowFlags() | Qt::FramelessWindowHint);
