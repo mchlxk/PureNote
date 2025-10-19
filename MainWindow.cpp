@@ -87,11 +87,13 @@ void MainWindow::SetupActions()
     m_actionSave = new QAction("Save", this);
     m_actionSave->setShortcut(QKeySequence("Ctrl+S"));
     connect(m_actionSave, &QAction::triggered, this, &MainWindow::at_actionSave_triggered);
+    apply_qtbug_74655_workaround(m_actionSave);
     addAction(m_actionSave);
 
     m_actionSaveAs = new QAction("Save As...", this);
     m_actionSaveAs->setShortcut(QKeySequence("Ctrl+Shift+S"));
     connect(m_actionSaveAs, &QAction::triggered, this, &MainWindow::at_actionSaveAs_triggered);
+    apply_qtbug_74655_workaround(m_actionSaveAs);
     addAction(m_actionSaveAs);
 
     m_actionNextColorScheme = new QAction("Next ColorScheme", this);
@@ -150,6 +152,7 @@ void MainWindow::SetupActions()
     m_actionExit = new QAction("Exit", this);
     m_actionExit->setShortcut(QKeySequence("Alt+X"));
     connect(m_actionExit, &QAction::triggered, this, &MainWindow::at_actionExit_triggered);
+    apply_qtbug_74655_workaround(m_actionExit);
     addAction(m_actionExit);
 
     for (const auto& scheme : ColorScheme::schemas)
@@ -457,20 +460,14 @@ void MainWindow::ShowContextMenu(const QPoint& pos)
     menu->setWindowFlags(menu->windowFlags() | Qt::NoDropShadowWindowHint);
 
     m_actionSave->setEnabled(CanSave());
-    connect(m_actionSave, &QAction::triggered, this, &MainWindow::at_actionSave_triggered);
-    apply_qtbug_74655_workaround(m_actionSave);
     menu->addAction(m_actionSave);
 
-    apply_qtbug_74655_workaround(m_actionSaveAs);
     menu->addAction(m_actionSaveAs);
 
     menu->addSeparator();
 
     // defaults -> submenu
 
-    // Text Edit Actions
-    menu->addSeparator();
-    
     menu->addActions(m_textEdit->createStandardContextMenu()->actions());
 
     menu->addSeparator();
@@ -513,7 +510,6 @@ void MainWindow::ShowContextMenu(const QPoint& pos)
     m_actionToggleFullscreen->setChecked(State::has_tag<State::Tag::Fullscreen>(m_stateTags));
     menu->addAction(m_actionToggleFullscreen);
 
-    apply_qtbug_74655_workaround(m_actionExit);
     menu->addAction(m_actionExit);
 
     menu->exec(pos);
