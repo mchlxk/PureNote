@@ -94,40 +94,6 @@ void MainWindow::SetupActions()
     connect(m_actionSaveAs, &QAction::triggered, this, &MainWindow::at_actionSaveAs_triggered);
     addAction(m_actionSaveAs);
 
-    m_actionUndo = new QAction("Undo", this);
-    m_actionUndo->setShortcut(QKeySequence("Ctrl+Z"));
-    connect(m_actionUndo, &QAction::triggered, this, &MainWindow::at_actionUndo_triggered);
-    addAction(m_actionUndo);
-
-    m_actionRedo = new QAction("Redo", this);
-    m_actionRedo->setShortcut(QKeySequence("Ctrl+Shift+Y"));
-    connect(m_actionRedo, &QAction::triggered, this, &MainWindow::at_actionRedo_triggered);
-    addAction(m_actionRedo);
-
-    m_actionCut = new QAction("Cut", this);
-    m_actionCut->setShortcut(QKeySequence("Ctrl+X"));
-    connect(m_actionCut, &QAction::triggered, this, &MainWindow::at_actionCut_triggered);
-    addAction(m_actionCut);
-
-    m_actionCopy = new QAction("Copy", this);
-    m_actionCopy->setShortcut(QKeySequence("Ctrl+C"));
-    connect(m_actionCopy, &QAction::triggered, this, &MainWindow::at_actionCopy_triggered);
-    addAction(m_actionCopy);
-
-    m_actionPaste = new QAction("Paste", this);
-    m_actionPaste->setShortcut(QKeySequence("Ctrl+V"));
-    connect(m_actionPaste, &QAction::triggered, this, &MainWindow::at_actionPaste_triggered);
-    addAction(m_actionPaste);
-
-    m_actionDelete = new QAction("Delete", this);
-    connect(m_actionDelete , &QAction::triggered, this, &MainWindow::at_actionDelete_triggered);
-    addAction(m_actionDelete);
-
-    m_actionSelectAll = new QAction("Select All", this);
-    m_actionSelectAll->setShortcut(QKeySequence("Ctrl+A"));
-    connect(m_actionSelectAll, &QAction::triggered, this, &MainWindow::at_actionSelectAll_triggered);
-    addAction(m_actionSelectAll);
-
     m_actionNextColorScheme = new QAction("Next ColorScheme", this);
     m_actionNextColorScheme->setShortcut(QKeySequence("F5"));
     connect(m_actionNextColorScheme, &QAction::triggered, this, &MainWindow::at_actionNextColorScheme_triggered);
@@ -465,34 +431,8 @@ void MainWindow::ShowContextMenu(const QPoint& pos)
 
     // Text Edit Actions
     menu->addSeparator();
-
-    m_actionUndo->setEnabled(!IsLocked() && m_textEdit->document()->isUndoAvailable());
-    apply_qtbug_74655_workaround(m_actionUndo);
-    menu->addAction(m_actionUndo);
-
-    m_actionRedo->setEnabled(!IsLocked() && m_textEdit->document()->isRedoAvailable());
-    apply_qtbug_74655_workaround(m_actionRedo);
-    menu->addAction(m_actionRedo);
-
-    m_actionCut->setEnabled(!IsLocked()); // TBD
-    apply_qtbug_74655_workaround(m_actionCut);
-    menu->addAction(m_actionCut);
-
-    m_actionCopy->setEnabled(true); // TBD
-    apply_qtbug_74655_workaround(m_actionCopy);
-    menu->addAction(m_actionCopy);
-
-    m_actionPaste->setEnabled(true); // TBD
-    apply_qtbug_74655_workaround(m_actionPaste);
-    menu->addAction(m_actionPaste);
-
-    m_actionDelete->setEnabled(true); // TBD
-    apply_qtbug_74655_workaround(m_actionDelete);
-    menu->addAction(m_actionDelete);
-
-    m_actionSelectAll->setEnabled(true); // TBD
-    apply_qtbug_74655_workaround(m_actionSelectAll);
-    menu->addAction(m_actionSelectAll);
+    
+    menu->addActions(m_textEdit->createStandardContextMenu()->actions());
 
     menu->addSeparator();
 
@@ -654,29 +594,6 @@ void MainWindow::at_actionToggleLocked_triggered()
     m_textEdit->setReadOnly(!IsLocked());
     UpdatePerUnsaved();
 }
-
-
-void MainWindow::at_actionUndo_triggered()
-{
-    if(IsLocked())
-        return;
-    m_textEdit->document()->undo();
-}
-
-void MainWindow::at_actionRedo_triggered()
-{
-    if (IsLocked())
-        return;
-    m_textEdit->document()->redo();
-}
-
-
-// TBD
-void MainWindow::at_actionCut_triggered() {}
-void MainWindow::at_actionCopy_triggered() {}
-void MainWindow::at_actionPaste_triggered() {}
-void MainWindow::at_actionDelete_triggered() {}
-void MainWindow::at_actionSelectAll_triggered() {}
 
 void MainWindow::at_actionSetColorScheme_triggered()
 {
