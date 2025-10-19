@@ -10,6 +10,7 @@
 #include "State.h"
 #include "Style.h"
 #include "Pun.h"
+#include "Save.h"
 
 class MainWindow : public QMainWindow
 {
@@ -79,14 +80,16 @@ private:
     void writeSettings();
 
     bool ResolveUnsavedChanges();
+
     bool Save();
     bool SaveAs();
-    bool Save(const QString filePath);
-    void SetFile(const QString &filePath);
+    pun_optional_t<pun_t> Save(const QString filePath);
+    void SetSave(const save_t& save);
+
     void About();
     QString GetBrowseFilename();
 
-    bool HasFile() const { return !m_savedFile.isEmpty(); }
+    bool HasFile() const { return !Save::file_path(m_save).isEmpty(); }
     bool IsLocked() const { return m_textEdit->isReadOnly(); }
     void SetLocked(bool locked);
 
@@ -139,8 +142,7 @@ private:
     float m_opacity{ 1.f };
     std::stack<QByteArray> m_geometryStack;
 
-    QString m_savedFile;
-    pun_t m_savedPun;
+    save_t m_save{ Save::no_save };
 
     State::tags_t m_stateTags;
     QTimer m_opacityAdjustTimer;

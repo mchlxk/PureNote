@@ -100,6 +100,7 @@
     <ClCompile Include="MouseEvent.cpp" />
     <ClCompile Include="PunParser.cpp" />
     <ClCompile Include="PunSerializer.cpp" />
+    <ClCompile Include="Save.cpp" />
     <ClCompile Include="SchemeIcon.cpp" />
     <ClCompile Include="Style.cpp" />
     <ClCompile Include="StyleSheet.cpp" />
@@ -118,9 +119,11 @@
     <ClInclude Include="MouseEvent.h" />
     <ClInclude Include="Pun.h" />
     <ClInclude Include="PunExpected.h" />
+    <ClInclude Include="PunOptional.h" />
     <ClInclude Include="PunParser.h" />
     <ClInclude Include="PunSerializer.h" />
     <ClInclude Include="resource.h" />
+    <ClInclude Include="Save.h" />
     <ClInclude Include="SchemeIcon.h" />
     <ClInclude Include="State.h" />
     <ClInclude Include="Style.h" />

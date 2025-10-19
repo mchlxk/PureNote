@@ -58,6 +58,9 @@
     <ClCompile Include="Content.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Save.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <QtMoc Include="MainWindow.h">
@@ -106,6 +109,12 @@
       <Filter>Source Files</Filter>
     </ClInclude>
     <ClInclude Include="Content.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="PunOptional.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Save.h">
       <Filter>Source Files</Filter>
     </ClInclude>
   </ItemGroup>

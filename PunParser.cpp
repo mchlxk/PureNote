@@ -2,7 +2,7 @@
 
 #include "PunParser.h"
 
-Pun::expected<pun_t, QString> PunParser::parse(const QByteArray& input)
+pun_expected_t<pun_t, QString> PunParser::parse(const QByteArray& input)
 {
     pun_t pun;
     QXmlStreamReader reader(input);
@@ -58,7 +58,7 @@ Pun::expected<pun_t, QString> PunParser::parse(const QByteArray& input)
 }
 
 
-Pun::expected<style_t, QString> PunParser::parse_style(QXmlStreamReader& reader)
+pun_expected_t<style_t, QString> PunParser::parse_style(QXmlStreamReader& reader)
 {
     style_t style{ Style::defaults };
     while (!Utility::at_element_end(reader, "Style"))
@@ -89,7 +89,7 @@ Pun::expected<style_t, QString> PunParser::parse_style(QXmlStreamReader& reader)
     return style;
 }
 
-Pun::expected<std::pair<QString, int>, QString> PunParser::parse_font(QXmlStreamReader& reader)
+pun_expected_t<std::pair<QString, int>, QString> PunParser::parse_font(QXmlStreamReader& reader)
 {
     std::pair<QString, int> font{Style::font_family(Style::defaults), Style::font_size(Style::defaults)};
     while (!Utility::at_element_end(reader, "Font"))
@@ -120,7 +120,7 @@ Pun::expected<std::pair<QString, int>, QString> PunParser::parse_font(QXmlStream
 }
 
 
-Pun::expected<window_t, QString> PunParser::parse_window(QXmlStreamReader& reader)
+pun_expected_t<window_t, QString> PunParser::parse_window(QXmlStreamReader& reader)
 {
     window_t window{ Window::defaults };
 
@@ -158,7 +158,7 @@ Pun::expected<window_t, QString> PunParser::parse_window(QXmlStreamReader& reade
     return window;
 }
 
-Pun::expected<content_t, QString> PunParser::parse_content(QXmlStreamReader& reader)
+pun_expected_t<content_t, QString> PunParser::parse_content(QXmlStreamReader& reader)
 {
     content_t content{ Content::defaults };
     Content::locked(content) = Utility::parse_bool_attribute(reader, "Locked");

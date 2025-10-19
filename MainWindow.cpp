@@ -71,7 +71,7 @@ MainWindow::MainWindow()
 
     SetupContextMenu();
 
-    SetFile(QString());
+    SetSave(Save::no_save);
 
     m_opacityAdjustTimer.setSingleShot(true);
     m_opacityAdjustTimer.setInterval(1000);
@@ -519,13 +519,14 @@ void MainWindow::ShowContextMenu(const QPoint& pos)
 bool MainWindow::Save()
 {
     const QString filePath = HasFile()
-        ? m_savedFile
+        ? Save::file_path(m_save)
         : GetBrowseFilename();
     if (filePath.isEmpty())
         return false;
-    if(!Save(filePath))
+    const auto savedPun = Save(filePath);
+    if(!savedPun)
         return false;
-	SetFile(filePath);
+	SetSave(save_t(filePath, savedPun));
     return true;
 }
 
@@ -534,9 +535,10 @@ bool MainWindow::SaveAs()
     const QString filePath = GetBrowseFilename();
     if (filePath.isEmpty())
         return false;
-    if (!Save(filePath))
+    const auto savedPun = Save(filePath);
+    if(!savedPun)
         return false;
-	SetFile(filePath);
+	SetSave(save_t(filePath, savedPun));
 	return true;
 }
 
@@ -689,11 +691,13 @@ bool MainWindow::HasUnsavedMeta() const
 {
     if (!HasFile() && m_textEdit->document()->isEmpty())
         return false;
-    if (Content::locked(Pun::content(m_savedPun)) != IsLocked())
+    if (!Save::pun(m_save))
         return true;
-    if (!Window::equal(Pun::window(m_savedPun), GetWindow()))
+    if (Content::locked(Pun::content(*Save::pun(m_save))) != IsLocked())
         return true;
-    if (Pun::style(m_savedPun) != GetStyle())
+    if (!Window::equal(Pun::window(*Save::pun(m_save)), GetWindow()))
+        return true;
+    if (Pun::style(*Save::pun(m_save)) != GetStyle())
         return true;
     return false;
 }
@@ -905,7 +909,7 @@ void MainWindow::SetPun(const pun_t& pun, const QString& filePath)
     SetStyle(Pun::style(pun));
     SetContent(Pun::content(pun));
     SetWindow(Pun::window(pun));
-    SetFile(filePath);
+    SetSave(save_t(filePath, pun));
 }
 
 
@@ -1028,7 +1032,7 @@ bool MainWindow::ResolveUnsavedChanges()
 
  
  
-bool MainWindow::Save(const QString filePath)
+pun_optional_t<pun_t> MainWindow::Save(const QString filePath)
 {
     QString errorMessage;
 
@@ -1036,14 +1040,18 @@ bool MainWindow::Save(const QString filePath)
     QSaveFile file(filePath);
     if (file.open(QFile::WriteOnly | QFile::Text)) 
     {
+        const auto pun = GetPun();
         QByteArray saveData;
-        PunSerializer::serialize(GetPun(), &saveData);
+        PunSerializer::serialize(pun, &saveData);
         file.write(saveData);
 
         if (!file.commit()) 
         {
             errorMessage = tr("Cannot write file %1:\n%2.").arg(QDir::toNativeSeparators(filePath), file.errorString());
+			return Pun::Optional::none;
         }
+
+        return pun;
     }
     else 
     {
@@ -1054,17 +1062,16 @@ bool MainWindow::Save(const QString filePath)
     if (!errorMessage.isEmpty()) 
     {
         QMessageBox::warning(this, tr("Application"), errorMessage);
-        return false;
+        return Pun::Optional::none;
     }
 
-    return true;
+    return Pun::Optional::none;
 }
 
 
-void MainWindow::SetFile(const QString &filePath)
+void MainWindow::SetSave(const save_t& save)
 {
-    m_savedFile = filePath;
-    m_savedPun = GetPun();
+    m_save = save;
     m_textEdit->document()->setModified(false);
     UpdatePerUnsaved();
     UpdateStatusBar(HasUnsavedMeta(), HasUnsavedText());
@@ -1104,7 +1111,7 @@ void MainWindow::UpdateStatusBarPerUnsaved(bool hasUnsavedMeta, bool hasUnsavedT
 void MainWindow::UpdateStatusBar(bool hasUnsavedMeta, bool hasUnsavedText)
 {
     const QString filePath = HasFile()
-        ? m_savedFile
+        ? Save::file_path(m_save)
         : "[No file]";
     const QString unsavedTextMark = hasUnsavedText ? "*" : "";
     const QString unsavedMetaMark = hasUnsavedMeta ? "^" : "";
