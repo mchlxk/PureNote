@@ -1015,7 +1015,7 @@ bool MainWindow::ResolveUnsavedChanges()
 		QMessageBox msgBox(this);
         msgBox.setIcon(QMessageBox::Warning);
 		msgBox.setWindowTitle("PureNote Error");
-		msgBox.setText(QString("Cannot read file %1, details:\n%2.").arg(QDir::toNativeSeparators(filePath), file.errorString()));
+		msgBox.setText(QString("Cannot read file %1\nDetails: %2.").arg(QDir::toNativeSeparators(filePath), file.errorString()));
 		msgBox.setStandardButtons(QMessageBox::Ok);
 		msgBox.setWindowFlags(msgBox.windowFlags() | Qt::FramelessWindowHint);
         MakeMessageBoxContext( [&msgBox] () { msgBox.exec(); });
@@ -1037,7 +1037,7 @@ bool MainWindow::ResolveUnsavedChanges()
 		QMessageBox msgBox(this);
         msgBox.setIcon(QMessageBox::Warning);
 		msgBox.setWindowTitle("PureNote Error");
-		msgBox.setText("Cannot parse input file (parser error), details:\n" + pun.get_error());
+		msgBox.setText("Cannot parse input file (parser error)\nDetails: " + pun.get_error());
 		msgBox.setStandardButtons(QMessageBox::Ok);
 		msgBox.setWindowFlags(msgBox.windowFlags() | Qt::FramelessWindowHint);
         MakeMessageBoxContext( [&msgBox] () { msgBox.exec(); });

@@ -18,25 +18,27 @@ QString StyleSheet::format_menu(const style_t& style)
 }
 
 
-QString StyleSheet::format_push_button()
+QString StyleSheet::format_push_button(const style_t& style)
 {
+    const auto& schema = ColorScheme::schemas.at(Style::color_scheme(style));
     return QString(
         "QPushButton{border: 0; color: %1; background-color: %3; padding: 5 25px 5 25px;}"
         "QPushButton:hover{color: %4;}"
         "QPushButton:pressed{color: %4; background-color: %2;}" ).arg(
-            ColorScheme::Ui::color,
-            ColorScheme::Ui::background,
-			ColorScheme::Ui::accent,
-            ColorScheme::Ui::dimmed);
+            ColorScheme::color(schema),
+            ColorScheme::accent(schema),
+			ColorScheme::background(schema),
+            ColorScheme::disabled(schema));
 }
 
-QString StyleSheet::format_message_box()
+QString StyleSheet::format_message_box(const style_t& style)
 {
+    const auto& schema = ColorScheme::schemas.at(Style::color_scheme(style));
     return QString(
         "QMessageBox{ color: %1; background: %2;}" 
         "QMessageBox QLabel{ color: %1;}" ).arg(
-            ColorScheme::Ui::color,
-			ColorScheme::Ui::background );
+            ColorScheme::color(schema),
+			ColorScheme::accent(schema) );
 }
 
 
@@ -53,9 +55,9 @@ QString StyleSheet::format_global(const style_t& style)
 {
     return format_main_window(style) 
         + format_scrollbar(style) 
-        + format_push_button() 
+        + format_push_button(style) 
         + format_menu(style)
-        + format_message_box();
+        + format_message_box(style);
 }
 
 
