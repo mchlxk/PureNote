@@ -986,7 +986,6 @@ bool MainWindow::ResolveUnsavedChanges()
         return true;
 
     QMessageBox msgBox(this);
-    msgBox.setWindowTitle("PureNote");
     msgBox.setText("The document has been modified.\nDo you want to save your changes?");
     msgBox.setStandardButtons(QMessageBox::Save | QMessageBox::Discard | QMessageBox::Cancel);
     msgBox.setWindowFlags(msgBox.windowFlags() | Qt::FramelessWindowHint);
@@ -1014,8 +1013,7 @@ bool MainWindow::ResolveUnsavedChanges()
     {
 		QMessageBox msgBox(this);
         msgBox.setIcon(QMessageBox::Warning);
-		msgBox.setWindowTitle("PureNote Error");
-		msgBox.setText(QString("Cannot read file %1\nDetails: %2.").arg(QDir::toNativeSeparators(filePath), file.errorString()));
+		msgBox.setText(QString("Cannot read file %1\nDetails: %2").arg(QDir::toNativeSeparators(filePath), file.errorString()));
 		msgBox.setStandardButtons(QMessageBox::Ok);
 		msgBox.setWindowFlags(msgBox.windowFlags() | Qt::FramelessWindowHint);
         MakeMessageBoxContext( [&msgBox] () { msgBox.exec(); });
@@ -1036,7 +1034,6 @@ bool MainWindow::ResolveUnsavedChanges()
     {
 		QMessageBox msgBox(this);
         msgBox.setIcon(QMessageBox::Warning);
-		msgBox.setWindowTitle("PureNote Error");
 		msgBox.setText("Cannot parse input file (parser error)\nDetails: " + pun.get_error());
 		msgBox.setStandardButtons(QMessageBox::Ok);
 		msgBox.setWindowFlags(msgBox.windowFlags() | Qt::FramelessWindowHint);
@@ -1049,40 +1046,39 @@ bool MainWindow::ResolveUnsavedChanges()
 
  
  
-pun_optional_t<pun_t> MainWindow::Save(const QString filePath)
+pun_optional_t<pun_t> MainWindow::Save(const QString& filePath)
 {
-    QString errorMessage;
-
     QGuiApplication::setOverrideCursor(Qt::WaitCursor);
-    QSaveFile file(filePath);
-    if (file.open(QFile::WriteOnly | QFile::Text)) 
-    {
-        const auto pun = GetPun();
-        QByteArray saveData;
-        PunSerializer::serialize(pun, &saveData);
-        file.write(saveData);
-
-        if (!file.commit()) 
-        {
-            errorMessage = tr("Cannot write file %1:\n%2.").arg(QDir::toNativeSeparators(filePath), file.errorString());
-			return Pun::Optional::none;
-        }
-
-        return pun;
-    }
-    else 
-    {
-        errorMessage = tr("Cannot open file %1 for writing:\n%2.").arg(QDir::toNativeSeparators(filePath), file.errorString());
-    }
+    const auto savedPun = SaveImpl(filePath);
     QGuiApplication::restoreOverrideCursor();
+    if (savedPun)
+        return *savedPun;
 
-    if (!errorMessage.isEmpty()) 
-    {
-        QMessageBox::warning(this, tr("Application"), errorMessage);
-        return Pun::Optional::none;
-    }
+	QMessageBox msgBox(this);
+	msgBox.setIcon(QMessageBox::Warning);
+	msgBox.setText(QString("Error saveing file %1\nDetails: %2").arg(QDir::toNativeSeparators(filePath), savedPun.get_error()));
+	msgBox.setStandardButtons(QMessageBox::Ok);
+	msgBox.setWindowFlags(msgBox.windowFlags() | Qt::FramelessWindowHint);
+	MakeMessageBoxContext( [&msgBox] () { msgBox.exec(); });
 
     return Pun::Optional::none;
+}
+
+pun_expected_t<pun_t, QString> MainWindow::SaveImpl(const QString& filePath)
+{
+    QSaveFile file(filePath);
+    if (!file.open(QFile::WriteOnly | QFile::Text)) 
+		return QString("Cannot open file %1 for writing\nDetails: %2").arg(QDir::toNativeSeparators(filePath), file.errorString());
+
+	const auto pun = GetPun();
+	QByteArray saveData;
+	PunSerializer::serialize(pun, &saveData);
+	file.write(saveData);
+
+	if (!file.commit()) 
+		return QString("Cannot write file %1\nDetails: %2").arg(QDir::toNativeSeparators(filePath), file.errorString());
+
+	return pun;
 }
 
 

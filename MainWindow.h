@@ -12,6 +12,10 @@
 #include "Pun.h"
 #include "Save.h"
 
+#include "PunOptional.h"
+#include "PunExpected.h"
+
+
 class MainWindow : public QMainWindow
 {
     Q_OBJECT
@@ -83,7 +87,8 @@ private:
 
     bool Save();
     bool SaveAs();
-    pun_optional_t<pun_t> Save(const QString filePath);
+    pun_optional_t<pun_t> Save(const QString& filePath);
+    pun_expected_t<pun_t, QString> SaveImpl(const QString& filePath);
     void SetSave(const save_t& save);
 
     void About();
