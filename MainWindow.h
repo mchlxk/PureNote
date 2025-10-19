@@ -102,7 +102,7 @@ private:
 
     void ShowContextMenu(const QPoint& pos);
 
-    void ShowMessageBox(std::function<void()> show_func);
+    void MakeMessageBoxContext(std::function<void()> run_within_context);
 
     void StartOpacityAdjustPeriod();
     void ScheduleUpdatePerUnsaved();

@@ -970,11 +970,11 @@ QByteArray MainWindow::PeekGeometry() const
 }
 
 
-void MainWindow::ShowMessageBox(std::function<void()> show_func)
+ void MainWindow::MakeMessageBoxContext(std::function<void()> run_within_context)
 {
     State::set_tag<State::Tag::MsgBox>(m_stateTags);
     UpdatePerOpacity();
-    show_func();
+    run_within_context();
     State::clear_tag<State::Tag::MsgBox>(m_stateTags);
     UpdatePerOpacity();
 }
@@ -990,9 +990,8 @@ bool MainWindow::ResolveUnsavedChanges()
     msgBox.setText("The document has been modified.\nDo you want to save your changes?");
     msgBox.setStandardButtons(QMessageBox::Save | QMessageBox::Discard | QMessageBox::Cancel);
     msgBox.setWindowFlags(msgBox.windowFlags() | Qt::FramelessWindowHint);
-
     int ret{ 0 };
-    ShowMessageBox([&ret, &msgBox]() { ret = msgBox.exec(); } );
+    MakeMessageBoxContext([&ret, &msgBox]() { ret = msgBox.exec(); } );
 
     switch (ret) 
     {
@@ -1000,6 +999,7 @@ bool MainWindow::ResolveUnsavedChanges()
 			return Save();
 		case QMessageBox::Cancel:
 			return false;
+		case QMessageBox::Discard: // fallthrough
 		default:
 			break;
     }
@@ -1012,10 +1012,13 @@ bool MainWindow::ResolveUnsavedChanges()
     QFile file(filePath);
     if (!file.open(QFile::ReadOnly | QFile::Text)) 
     {
-        const QString error = file.errorString();
-        ShowMessageBox( [this, &filePath, &error] () {
-            QMessageBox::warning(this, "PureNote", QString("Cannot read file %1, details::\n%2.").arg(QDir::toNativeSeparators(filePath), error));
-		});
+		QMessageBox msgBox(this);
+        msgBox.setIcon(QMessageBox::Warning);
+		msgBox.setWindowTitle("PureNote Error");
+		msgBox.setText(QString("Cannot read file %1, details:\n%2.").arg(QDir::toNativeSeparators(filePath), file.errorString()));
+		msgBox.setStandardButtons(QMessageBox::Ok);
+		msgBox.setWindowFlags(msgBox.windowFlags() | Qt::FramelessWindowHint);
+        MakeMessageBoxContext( [&msgBox] () { msgBox.exec(); });
         return;
     }
 
@@ -1031,10 +1034,13 @@ bool MainWindow::ResolveUnsavedChanges()
 
     if (!pun)
     {
-        const QString error = pun.get_error();
-        ShowMessageBox([this, &error]() {
-			QMessageBox::warning(this, "PureNote", "Cannot parse input file (parser error), details:\n" + error);
-		} );
+		QMessageBox msgBox(this);
+        msgBox.setIcon(QMessageBox::Warning);
+		msgBox.setWindowTitle("PureNote Error");
+		msgBox.setText("Cannot parse input file (parser error), details:\n" + pun.get_error());
+		msgBox.setStandardButtons(QMessageBox::Ok);
+		msgBox.setWindowFlags(msgBox.windowFlags() | Qt::FramelessWindowHint);
+        MakeMessageBoxContext( [&msgBox] () { msgBox.exec(); });
         return;
     }
 
