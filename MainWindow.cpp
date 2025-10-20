@@ -161,7 +161,7 @@ void MainWindow::SetupActions()
         QAction* action = new QAction(name);
         Property::ColorScheme::set(action, name);
         connect(action, &QAction::triggered, this, &MainWindow::at_actionSetColorScheme_triggered);
-        action->setIcon(SchemeIcon::get(scheme.second, 24));
+        action->setIcon(SchemeIcon::get_menu_icon(scheme.second, 24));
         m_colorSchemeActions.append(action);
     }
 
@@ -736,6 +736,7 @@ void MainWindow::UpdatePerStyle()
     m_textEdit->setStyleSheet(StyleSheet::format_text_edit(m_style));
     statusBar()->setStyleSheet(StyleSheet::format_status_bar(m_style));
     m_statusLabel->setStyleSheet(StyleSheet::format_status_label(m_style));
+    setWindowIcon(SchemeIcon::get_window_icon(ColorScheme::schemas.at(Style::color_scheme(m_style)), 32));
 }
 
 
@@ -1013,7 +1014,7 @@ bool MainWindow::ResolveUnsavedChanges()
     {
 		QMessageBox msgBox(this);
         const QString schemaName = Style::color_scheme(m_style);
-        msgBox.setIconPixmap(SchemeIcon::get_warning(ColorScheme::schemas.at(schemaName), 32));
+        msgBox.setIconPixmap(SchemeIcon::get_warning_icon(ColorScheme::schemas.at(schemaName), 32));
 		msgBox.setText(QString("Cannot read file %1\nDetails: %2").arg(QDir::toNativeSeparators(filePath), file.errorString()));
 		msgBox.setStandardButtons(QMessageBox::Ok);
 		msgBox.setWindowFlags(msgBox.windowFlags() | Qt::FramelessWindowHint);
@@ -1035,7 +1036,7 @@ bool MainWindow::ResolveUnsavedChanges()
     {
 		QMessageBox msgBox(this);
         const QString schemaName = Style::color_scheme(m_style);
-        msgBox.setIconPixmap(SchemeIcon::get_warning(ColorScheme::schemas.at(schemaName), 32));
+        msgBox.setIconPixmap(SchemeIcon::get_warning_icon(ColorScheme::schemas.at(schemaName), 32));
 		msgBox.setText("Cannot parse input file (parser error)\nDetails: " + pun.get_error());
 		msgBox.setStandardButtons(QMessageBox::Ok);
 		msgBox.setWindowFlags(msgBox.windowFlags() | Qt::FramelessWindowHint);
@@ -1058,7 +1059,7 @@ pun_optional_t<pun_t> MainWindow::Save(const QString& filePath)
 
 	QMessageBox msgBox(this);
 	const QString schemaName = Style::color_scheme(m_style);
-	msgBox.setIconPixmap(SchemeIcon::get_warning(ColorScheme::schemas.at(schemaName), 32));
+	msgBox.setIconPixmap(SchemeIcon::get_warning_icon(ColorScheme::schemas.at(schemaName), 32));
 	msgBox.setText(QString("Error saveing file %1\nDetails: %2").arg(QDir::toNativeSeparators(filePath), savedPun.get_error()));
 	msgBox.setStandardButtons(QMessageBox::Ok);
 	msgBox.setWindowFlags(msgBox.windowFlags() | Qt::FramelessWindowHint);

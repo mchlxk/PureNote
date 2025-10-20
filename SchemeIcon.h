@@ -6,7 +6,8 @@
 
 namespace SchemeIcon
 {
-	QIcon get(const color_scheme_t& scheme, const uint32_t size);
-	QPixmap get_warning(const color_scheme_t& scheme, const uint32_t size);
+	QPixmap get_menu_icon(const color_scheme_t& scheme, int size);
+	QPixmap get_warning_icon(const color_scheme_t& scheme, int size);
+	QPixmap get_window_icon(const color_scheme_t& scheme, int size);
 }
 
