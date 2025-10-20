@@ -6,6 +6,7 @@
 #include <QPlainTextEdit>
 #include <QLabel>
 #include <QTimer>
+#include <QMessageBox>
 
 #include "State.h"
 #include "Style.h"
@@ -107,7 +108,7 @@ private:
 
     void ShowContextMenu(const QPoint& pos);
 
-    void MakeMessageBoxContext(std::function<void()> run_within_context);
+    int ShowMessageBox(QMessageBox&);
 
     void StartOpacityAdjustPeriod();
     void ScheduleUpdatePerUnsaved();

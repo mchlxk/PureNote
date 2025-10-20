@@ -510,6 +510,8 @@ void MainWindow::ShowContextMenu(const QPoint& pos)
     m_actionToggleFullscreen->setChecked(State::has_tag<State::Tag::Fullscreen>(m_stateTags));
     menu->addAction(m_actionToggleFullscreen);
 
+    menu->addSeparator();
+
     menu->addAction(m_actionExit);
 
     menu->exec(pos);
@@ -971,13 +973,15 @@ QByteArray MainWindow::PeekGeometry() const
 }
 
 
- void MainWindow::MakeMessageBoxContext(std::function<void()> run_within_context)
+
+int MainWindow::ShowMessageBox(QMessageBox& msgBox)
 {
     State::set_tag<State::Tag::MsgBox>(m_stateTags);
     UpdatePerOpacity();
-    run_within_context();
+    const int ret = msgBox.exec();
     State::clear_tag<State::Tag::MsgBox>(m_stateTags);
     UpdatePerOpacity();
+    return ret;
 }
 
 
@@ -990,8 +994,7 @@ bool MainWindow::ResolveUnsavedChanges()
     msgBox.setText("The document has been modified.\nDo you want to save your changes?");
     msgBox.setStandardButtons(QMessageBox::Save | QMessageBox::Discard | QMessageBox::Cancel);
     msgBox.setWindowFlags(msgBox.windowFlags() | Qt::FramelessWindowHint);
-    int ret{ 0 };
-    MakeMessageBoxContext([&ret, &msgBox]() { ret = msgBox.exec(); } );
+    const int ret = ShowMessageBox(msgBox);
 
     switch (ret) 
     {
@@ -1018,7 +1021,7 @@ bool MainWindow::ResolveUnsavedChanges()
 		msgBox.setText(QString("Cannot read file %1\nDetails: %2").arg(QDir::toNativeSeparators(filePath), file.errorString()));
 		msgBox.setStandardButtons(QMessageBox::Ok);
 		msgBox.setWindowFlags(msgBox.windowFlags() | Qt::FramelessWindowHint);
-        MakeMessageBoxContext( [&msgBox] () { msgBox.exec(); });
+        ShowMessageBox(msgBox);
         return;
     }
 
@@ -1040,7 +1043,7 @@ bool MainWindow::ResolveUnsavedChanges()
 		msgBox.setText("Cannot parse input file (parser error)\nDetails: " + pun.get_error());
 		msgBox.setStandardButtons(QMessageBox::Ok);
 		msgBox.setWindowFlags(msgBox.windowFlags() | Qt::FramelessWindowHint);
-        MakeMessageBoxContext( [&msgBox] () { msgBox.exec(); });
+        ShowMessageBox(msgBox);
         return;
     }
 
@@ -1063,7 +1066,7 @@ pun_optional_t<pun_t> MainWindow::Save(const QString& filePath)
 	msgBox.setText(QString("Error saveing file %1\nDetails: %2").arg(QDir::toNativeSeparators(filePath), savedPun.get_error()));
 	msgBox.setStandardButtons(QMessageBox::Ok);
 	msgBox.setWindowFlags(msgBox.windowFlags() | Qt::FramelessWindowHint);
-	MakeMessageBoxContext( [&msgBox] () { msgBox.exec(); });
+	ShowMessageBox(msgBox);
 
     return Pun::Optional::none;
 }
