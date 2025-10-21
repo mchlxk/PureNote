@@ -1,0 +1,35 @@
+#pragma once
+
+#include <QToolButton>
+
+class TopBar
+: public QObject
+{
+	Q_OBJECT
+
+public:
+	TopBar(QWidget* parent, int buttonSize);
+
+	void UpdatePerParentGeometry();
+	void SetColorScheme(const QString& colorScheme);
+
+	void Show();
+	void Hide();
+
+	bool Contains(const QPoint& point) const;
+
+signals:
+	void top_lock();
+	void minimize();
+	void close();
+
+private:
+	QWidget* m_parent{ nullptr };
+	const int m_buttonSize;
+
+	QToolButton* m_buttonTopLock{ nullptr };
+	QToolButton* m_buttonMinimize{ nullptr };
+	QToolButton* m_buttonClose{ nullptr };
+};
+
+

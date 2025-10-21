@@ -61,12 +61,15 @@
     <ClCompile Include="Save.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="FloatingButton.cpp">
+    <ClCompile Include="TopBar.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <QtMoc Include="MainWindow.h">
+      <Filter>Source Files</Filter>
+    </QtMoc>
+    <QtMoc Include="TopBar.h">
       <Filter>Source Files</Filter>
     </QtMoc>
   </ItemGroup>
@@ -118,9 +121,6 @@
       <Filter>Source Files</Filter>
     </ClInclude>
     <ClInclude Include="Save.h">
-      <Filter>Source Files</Filter>
-    </ClInclude>
-    <ClInclude Include="FloatingButton.h">
       <Filter>Source Files</Filter>
     </ClInclude>
   </ItemGroup>

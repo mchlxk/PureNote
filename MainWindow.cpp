@@ -68,9 +68,9 @@ MainWindow::MainWindow()
 
     setUnifiedTitleAndToolBarOnMac(true);
 
-    SetupContextMenu();
-
     SetupTopBar();
+
+    SetupContextMenu();
 
     SetSave(Save::no_save);
 
@@ -221,29 +221,47 @@ void MainWindow::SetupContextMenu()
 
 void MainWindow::SetupTopBar()
 {
-    FloatingButton* btnClose = new FloatingButton(this);
-    btnClose->setGeometry(width()-50, 0, 32, 32);
-    btnClose->setIcon(SchemeIcon::get_close_icon(ColorScheme::schemas.at(Style::color_scheme(m_style)), 32));
-    btnClose->setIconSize(QSize(32, 32));
+    m_topBar = new TopBar(this, 24);
+    //connect(m_topBar, &TopBar::top_lock, this, &MainWindow::at_buttonTopLock_clicked);
+    //connect(m_topBar, &TopBar::minimize, this, &MainWindow::at_buttonMinimize_clicked);
+    //connect(m_topBar, &TopBar::close, this, &MainWindow::at_buttonClose_clicked);
+
+
+    //m_topBar->UpdatePerParentGeometry();
+    //m_topBar->SetColorScheme(Style::color_scheme(m_style));
+    //m_topBar->Show();
+
+
+    // TBD
+
+    const int size = 24;
+
+    QToolButton* btnClose = new QToolButton(this);
+    btnClose->setGeometry(0 , 0, size , size );
+    btnClose->setIcon(SchemeIcon::get_close_icon(ColorScheme::schemas.at(Style::color_scheme(m_style)), size));
+    btnClose->setIconSize(QSize(size , size ));
     btnClose->setStyleSheet("QToolButton{ border: 0;}");
     connect(btnClose, &QPushButton::clicked, this, &MainWindow::at_buttonClose_clicked);
     btnClose->show();
 
+    /*
+
     FloatingButton* btnMinimize = new FloatingButton(this);
-    btnMinimize->setGeometry(width()-50-32-16, 0, 32, 32);
-    btnMinimize->setIcon(SchemeIcon::get_minimize_icon(ColorScheme::schemas.at(Style::color_scheme(m_style)), 32));
-    btnMinimize->setIconSize(QSize(32, 32));
+    btnMinimize->setGeometry(width()-size-size -(size/2), 0, size , size );
+    btnMinimize->setIcon(SchemeIcon::get_minimize_icon(ColorScheme::schemas.at(Style::color_scheme(m_style)), size));
+    btnMinimize->setIconSize(QSize(size , size ));
     btnMinimize->setStyleSheet("QToolButton{ border: 0;}");
     connect(btnMinimize, &QPushButton::clicked, this, &MainWindow::at_buttonMinimize_clicked);
     btnMinimize->show();
 
     FloatingButton* btnTopLock = new FloatingButton(this);
-    btnTopLock->setGeometry(width()-50-32-16-32-16, 0, 32, 32);
-    btnTopLock->setIcon(SchemeIcon::get_top_lock_off_icon(ColorScheme::schemas.at(Style::color_scheme(m_style)), 32));
-    btnTopLock->setIconSize(QSize(32, 32));
+    btnTopLock->setGeometry(width()-size-size -(size/2)-size -(size/2), 0, size , size );
+    btnTopLock->setIcon(SchemeIcon::get_top_lock_off_icon(ColorScheme::schemas.at(Style::color_scheme(m_style)), size));
+    btnTopLock->setIconSize(QSize(size, size));
     btnTopLock->setStyleSheet("QToolButton{ border: 0;}");
     connect(btnTopLock, &QPushButton::clicked, this, &MainWindow::at_buttonTopLock_clicked);
     btnTopLock->show();
+    */
 }
 
 void MainWindow::closeEvent(QCloseEvent *event)
@@ -262,6 +280,8 @@ void MainWindow::closeEvent(QCloseEvent *event)
 void MainWindow::resizeEvent(QResizeEvent* event)
 {
     ScheduleUpdatePerUnsaved();
+    //m_topBar->UpdatePerParentGeometry();
+    //m_topBar->Show();
 }
 
 void MainWindow::moveEvent(QMoveEvent* event)
@@ -747,6 +767,7 @@ void MainWindow::UpdatePerStyle()
     statusBar()->setStyleSheet(StyleSheet::format_status_bar(m_style));
     m_statusLabel->setStyleSheet(StyleSheet::format_status_label(m_style));
     setWindowIcon(SchemeIcon::get_window_icon(ColorScheme::schemas.at(Style::color_scheme(m_style)), 32));
+    //m_topBar->SetColorScheme(Style::color_scheme(m_style));
 }
 
 

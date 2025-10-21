@@ -16,7 +16,7 @@
 #include "PunOptional.h"
 #include "PunExpected.h"
 
-#include "FloatingButton.h"
+#include "TopBar.h"
 
 
 class MainWindow : public QMainWindow
@@ -160,7 +160,7 @@ private:
     QPlainTextEdit *m_textEdit{ nullptr };
     QLabel* m_statusLabel{ nullptr };
 
-    QWidget* m_topBar{ nullptr };
+    TopBar* m_topBar{ nullptr };
 
     style_t m_style{ Style::defaults };
     float m_opacity{ 1.f };

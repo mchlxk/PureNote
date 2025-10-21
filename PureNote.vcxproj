@@ -95,7 +95,6 @@
   <ItemGroup>
     <ClCompile Include="ColorScheme.cpp" />
     <ClCompile Include="Content.cpp" />
-    <ClCompile Include="FloatingButton.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="MainWindow.cpp" />
     <ClCompile Include="MouseEvent.cpp" />
@@ -105,6 +104,7 @@
     <ClCompile Include="SchemeIcon.cpp" />
     <ClCompile Include="Style.cpp" />
     <ClCompile Include="StyleSheet.cpp" />
+    <ClCompile Include="TopBar.cpp" />
     <ClCompile Include="Window.cpp" />
     <QtRcc Include="qml.qrc" />
     <None Include="main.qml" />
@@ -116,7 +116,6 @@
     <ClInclude Include="Content.h" />
     <ClInclude Include="ElementExtract.h" />
     <ClInclude Include="ColorScheme.h" />
-    <ClInclude Include="FloatingButton.h" />
     <ClInclude Include="HashQString.h" />
     <ClInclude Include="MouseEvent.h" />
     <ClInclude Include="Pun.h" />
@@ -130,6 +129,7 @@
     <ClInclude Include="State.h" />
     <ClInclude Include="Style.h" />
     <ClInclude Include="StyleSheet.h" />
+    <QtMoc Include="TopBar.h" />
     <ClInclude Include="Window.h" />
   </ItemGroup>
   <ItemGroup>
