@@ -240,45 +240,6 @@ void MainWindow::SetupTopBar()
 }
 
 
-
-/*
-void MainWindow::createActions()
-{
-    QMenu *fileMenu = menuBar()->addMenu(tr("&File"));
-    QToolBar *fileToolBar = addToolBar(tr("File"));
-    const QIcon newIcon = QIcon::fromTheme("document-new", QIcon(":/images/new.png"));
-    QAction *newAct = new QAction(newIcon, tr("&New"), this);
-    newAct->setShortcuts(QKeySequence::New);
-    newAct->setStatusTip(tr("Create a new file"));
-    connect(newAct, &QAction::triggered, this, &MainWindow::newFile);
-    fileMenu->addAction(newAct);
-    fileToolBar->addAction(newAct);
-
-    const QIcon openIcon = QIcon::fromTheme("document-open", QIcon(":/images/open.png"));
-    QAction *openAct = new QAction(openIcon, tr("&Open..."), this);
-    openAct->setShortcuts(QKeySequence::Open);
-    openAct->setStatusTip(tr("Open an existing file"));
-    connect(openAct, &QAction::triggered, this, &MainWindow::open);
-    fileMenu->addAction(openAct);
-    fileToolBar->addAction(openAct);
-    */
-
-    /*
-    QAction *aboutQtAct = helpMenu->addAction(tr("About &Qt"), qApp, &QApplication::aboutQt);
-    aboutQtAct->setStatusTip(tr("Show the Qt library's About box")) ;
-
-
-    #ifndef QT_NO_CLIPBOARD
-    cutAct->setEnabled(false);
-    copyAct->setEnabled(false);
-    connect(textEdit, &QPlainTextEdit::copyAvailable, cutAct, &QAction::setEnabled);
-    connect(textEdit, &QPlainTextEdit::copyAvailable, copyAct, &QAction::setEnabled);
-#endif // !QT_NO_CLIPBOARD
-}
-*/
-
-
-
 void MainWindow::closeEvent(QCloseEvent *event)
 {
     if (ResolveUnsavedChanges()) 
@@ -764,7 +725,6 @@ void MainWindow::UpdatePerStyle()
 }
 
 
-
 void MainWindow::UpdatePerFullscreen()
 {
     if (State::has_tag<State::Tag::Fullscreen>(m_stateTags))
@@ -844,15 +804,6 @@ QString MainWindow::GetBrowseFilename()
     if(!filePath.endsWith(".pun"))
         return filePath + ".pun";
     return filePath;
-}
-
-
-void MainWindow::About()
-{
-   QMessageBox::about(this, tr("About Application"),
-            tr("The <b>Application</b> example demonstrates how to "
-               "write modern GUI applications using Qt, with a menu bar, "
-               "toolbars, and a status bar."));
 }
 
 void MainWindow::at_document_contentsChanged()
@@ -1062,7 +1013,7 @@ bool MainWindow::ResolveUnsavedChanges()
 		QMessageBox msgBox(this);
         const QString schemaName = Style::color_scheme(m_style);
         msgBox.setIconPixmap(SchemeIcon::get_warning_icon(ColorScheme::schemas.at(schemaName), 32));
-		msgBox.setText("Cannot parse input file (parser error)\nDetails: " + pun.get_error());
+		msgBox.setText("Cannot load input file (parser error)\nDetails: " + pun.get_error());
 		msgBox.setStandardButtons(QMessageBox::Ok);
 		msgBox.setWindowFlags(msgBox.windowFlags() | Qt::FramelessWindowHint);
         ShowMessageBox(msgBox);
@@ -1155,9 +1106,9 @@ void MainWindow::UpdateStatusBar(bool hasUnsavedMeta, bool hasUnsavedText)
     const QString filePath = HasFile()
         ? Save::file_path(m_save)
         : "[No file]";
-    const QString unsavedTextMark = hasUnsavedText ? "*" : "";
     const QString unsavedMetaMark = hasUnsavedMeta ? "^" : "";
-    const QString decoratedPath = unsavedTextMark + unsavedMetaMark + filePath;
+    const QString unsavedTextMark = hasUnsavedText ? "*" : "";
+    const QString decoratedPath = unsavedMetaMark + unsavedTextMark + filePath;
     setWindowTitle(decoratedPath + " | PureNote");
     m_statusLabel->setText(decoratedPath);
     m_statusLabel->setToolTip(decoratedPath);

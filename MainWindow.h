@@ -92,7 +92,6 @@ private:
     pun_expected_t<pun_t, QString> SaveImpl(const QString& filePath);
     void SetSave(const save_t& save);
 
-    void About();
     QString GetBrowseFilename();
 
     bool HasFile() const { return !Save::file_path(m_save).isEmpty(); }
