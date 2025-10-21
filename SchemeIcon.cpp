@@ -88,6 +88,26 @@ QPixmap SchemeIcon::get_minimize_icon(const color_scheme_t& scheme, int size)
 	return icon;
 }
 
+QPixmap SchemeIcon::get_top_lock_on_icon(const color_scheme_t& scheme, int size)
+{
+	QPixmap icon(size, size);
+	icon.fill(QColor(ColorScheme::accent(scheme)));
+	QPainter painter(&icon);
+	painter.setRenderHint(QPainter::Antialiasing);
+
+	const int margin = size / 8;
+	const int squareSize = (size-2*margin) / 3;
+
+	const QBrush fillBrush(QColor(ColorScheme::background(scheme)));
+	painter.fillRect(margin, margin, 2*squareSize, 2*squareSize, fillBrush);
+	painter.fillRect(margin+squareSize, margin+squareSize, 2*squareSize, 2*squareSize, fillBrush);
+
+	const QBrush unfillBrush(QColor(ColorScheme::accent(scheme)));
+	painter.fillRect(margin+squareSize, margin+squareSize, squareSize, squareSize, unfillBrush);
+
+	return icon;
+}
+
 QPixmap SchemeIcon::get_top_lock_off_icon(const color_scheme_t& scheme, int size)
 {
 	QPixmap icon(size, size);
@@ -99,10 +119,10 @@ QPixmap SchemeIcon::get_top_lock_off_icon(const color_scheme_t& scheme, int size
 	const int squareSize = (size-2*margin) / 3;
 
 	const QBrush fillBrush(QColor(ColorScheme::background(scheme)));
-	painter.fillRect(margin, margin, 3*squareSize, 3*squareSize, fillBrush);
+	painter.fillRect(margin+squareSize, margin+squareSize, 2*squareSize, 2*squareSize, fillBrush);
 
-	const QBrush clearBrush(QColor(ColorScheme::accent(scheme)));
-	painter.fillRect(margin+squareSize, margin+ squareSize, squareSize, squareSize, clearBrush);
+	const QBrush unfillBrush(QColor(ColorScheme::accent(scheme)));
+	painter.fillRect(margin+squareSize, margin+squareSize, squareSize, squareSize, unfillBrush);
 
 	return icon;
 }

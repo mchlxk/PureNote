@@ -11,6 +11,7 @@ namespace SchemeIcon
 	QPixmap get_window_icon(const color_scheme_t& scheme, int size);
 	QPixmap get_close_icon(const color_scheme_t& scheme, int size);
 	QPixmap get_minimize_icon(const color_scheme_t& scheme, int size);
+	QPixmap get_top_lock_on_icon(const color_scheme_t& scheme, int size);
 	QPixmap get_top_lock_off_icon(const color_scheme_t& scheme, int size);
 }
 

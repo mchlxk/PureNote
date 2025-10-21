@@ -62,9 +62,9 @@ private slots:
     void at_opacityAdjustTimer_expired();
     void at_delayedUnsavedUpdateTimer_expired();
 
-    void at_buttonClose_clicked();
-    void at_buttonMinimize_clicked();
-    void at_buttonTopLock_clicked();
+    void at_topBar_close();
+    void at_topBar_minimize();
+    void at_topBar_topLock();
 
 private:
     pun_t GetPun() const;
@@ -110,8 +110,6 @@ private:
     void SetupStatusBar();
     void SetupTextEdit();
     void SetupContextMenu();
-
-    void SetupTopBar();
 
     void ShowContextMenu(const QPoint& pos);
 
