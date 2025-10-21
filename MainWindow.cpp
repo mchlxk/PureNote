@@ -81,10 +81,12 @@ MainWindow::MainWindow()
     m_delayedUnsavedUpdateTimer.setInterval(1000);
     connect(&m_delayedUnsavedUpdateTimer, &QTimer::timeout, this, &MainWindow::at_delayedUnsavedUpdateTimer_expired);
 
+    connect(m_buttonBar, &ButtonBar::button_clicked, this, &MainWindow::at_buttonBar_buttonClicked);
+    m_buttonBar->AddButton("close");
+    m_buttonBar->AddButton("minimize");
+    m_buttonBar->AddButton("top_lock");
     m_buttonBar->Hide();
-    connect(m_buttonBar, &ButtonBar::close, this, &MainWindow::at_buttonBar_close);
-    connect(m_buttonBar, &ButtonBar::minimize, this, &MainWindow::at_buttonBar_minimize);
-    connect(m_buttonBar, &ButtonBar::top_lock, this, &MainWindow::at_buttonBar_topLock);
+    UpdatePerStyle(); // update per style again to style button-bar buttons
     setMinimumWidth(m_buttonBar->GetMinimumWidth());
     setMinimumHeight(1.5*m_buttonBar->GetMinimumWidth());
 }
@@ -260,7 +262,7 @@ bool MainWindow::eventFilter(QObject* obj, QEvent* evt)
     if (evt->type() == QEvent::MouseMove && action == MouseEvent::ActionE::None)
     {
 		QMouseEvent* mouseEvent = static_cast<QMouseEvent*> (evt);
-        if(m_buttonBar->Contains(mouseEvent->pos()))
+        if(m_buttonBar->Contains(mouseEvent->globalPos()))
             m_buttonBar->Show();
         else
             m_buttonBar->Hide();
@@ -658,19 +660,14 @@ void MainWindow::at_actionSetOpacity_triggered()
     SetOpacity(Property::Opacity::get(sender()));
 }
 
-void MainWindow::at_buttonBar_close()
+void MainWindow::at_buttonBar_buttonClicked(const QString& name)
 {
-    emit close();
-}
-
-void MainWindow::at_buttonBar_minimize()
-{
-    setWindowState(Qt::WindowState::WindowMinimized);
-}
-
-void MainWindow::at_buttonBar_topLock()
-{
-    ToggleOnTop();
+    if (name == "close")
+        emit close();
+    else if (name == "minimize")
+        setWindowState(Qt::WindowState::WindowMinimized);
+    else if(name == "top_lock")
+		ToggleOnTop();
 }
 
 
@@ -733,8 +730,14 @@ void MainWindow::UpdatePerStyle()
     m_textEdit->setStyleSheet(StyleSheet::format_text_edit(m_style));
     statusBar()->setStyleSheet(StyleSheet::format_status_bar(m_style));
     m_statusLabel->setStyleSheet(StyleSheet::format_status_label(m_style));
-    setWindowIcon(SchemeIcon::get_window_icon(ColorScheme::schemas.at(Style::color_scheme(m_style)), 32));
-    m_buttonBar->SetColorScheme(Style::color_scheme(m_style));
+
+    const auto schema = ColorScheme::schemas.at(Style::color_scheme(m_style));
+
+    setWindowIcon(SchemeIcon::get_window_icon(schema, 32));
+
+	m_buttonBar->SetButtonIcon("close", SchemeIcon::get_close_icon(schema, m_buttonBar->GetButtonSize()));
+	m_buttonBar->SetButtonIcon("minimize", SchemeIcon::get_minimize_icon(schema, m_buttonBar->GetButtonSize()));
+	m_buttonBar->SetButtonIcon("top_lock", SchemeIcon::get_top_lock_off_icon(schema, m_buttonBar->GetButtonSize()));
 }
 
 
@@ -1134,7 +1137,12 @@ void MainWindow::UpdatePerOnTopState()
     if (State::has_tag<State::Tag::Fullscreen>(m_stateTags))
         return;
     SetupWindowFlags(State::has_tag<State::Tag::OnTop>(m_stateTags));
-    m_buttonBar->SetTopLockChecked(State::has_tag<State::Tag::OnTop>(m_stateTags));
+
+    const auto schema = ColorScheme::schemas.at(Style::color_scheme(m_style));
+    if(State::has_tag<State::Tag::OnTop>(m_stateTags))
+		m_buttonBar->SetButtonIcon("top_lock", SchemeIcon::get_top_lock_on_icon(schema, m_buttonBar->GetButtonSize()));
+    else
+		m_buttonBar->SetButtonIcon("top_lock", SchemeIcon::get_top_lock_off_icon(schema, m_buttonBar->GetButtonSize()));
 }
 
 void MainWindow::UpdatePerOpacity()

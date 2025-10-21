@@ -1,6 +1,11 @@
 #pragma once
 
+#include <unordered_map>
+
+#include <QString>
 #include <QToolButton>
+
+#include "HashQString.h"
 
 class ButtonBar
 : public QObject
@@ -15,19 +20,22 @@ public:
 	~ButtonBar() {}
 
 	void UpdatePerParentGeometry();
-	void SetColorScheme(const QString& colorScheme);
-	void SetTopLockChecked(bool checked);
-
 	void Show();
 	void Hide();
 
-	bool Contains(const QPoint& point) const;
+	bool Contains(const QPoint& globalPos) const;
 	int GetMinimumWidth() const;
 
+	void AddButton(const QString& name);
+	void SetButtonIcon(const QString& name, const QIcon& icon);
+
+	int GetButtonSize() const { return m_buttonSize; }
+
 signals:
-	void top_lock();
-	void minimize();
-	void close();
+	void button_clicked(const QString& name);
+
+private slots:
+	void at_buttonClicked();
 
 private:
 	QWidget* const m_parent{ nullptr };
@@ -36,6 +44,10 @@ private:
 	QToolButton* ButtonClose();
 	QToolButton* ButtonMinimize();
 	QToolButton* ButtonTopLock();
+
+	QToolButton* GetButton(const QString& name);
+
+	std::unordered_map<QString, QToolButton*, hash_qstring> m_buttons;
 };
 
 

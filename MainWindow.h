@@ -62,9 +62,7 @@ private slots:
     void at_opacityAdjustTimer_expired();
     void at_delayedUnsavedUpdateTimer_expired();
 
-    void at_buttonBar_close();
-    void at_buttonBar_minimize();
-    void at_buttonBar_topLock();
+    void at_buttonBar_buttonClicked(const QString& name);
 
 private:
     pun_t GetPun() const;
