@@ -56,7 +56,7 @@ static inline void apply_qtbug_74655_workaround(T* item)
 MainWindow::MainWindow()
 : m_textEdit(new QPlainTextEdit)
 , m_statusLabel (new QLabel)
-, m_topBar(new TopBar(this, 24))
+, m_buttonBar(new ButtonBar(this, 24))
 {
     QCoreApplication::instance()->installEventFilter(this);
     setContentsMargins(0, 0, 0, 0);
@@ -81,12 +81,12 @@ MainWindow::MainWindow()
     m_delayedUnsavedUpdateTimer.setInterval(1000);
     connect(&m_delayedUnsavedUpdateTimer, &QTimer::timeout, this, &MainWindow::at_delayedUnsavedUpdateTimer_expired);
 
-    m_topBar->Hide();
-    connect(m_topBar, &TopBar::close, this, &MainWindow::at_topBar_close);
-    connect(m_topBar, &TopBar::minimize, this, &MainWindow::at_topBar_minimize);
-    connect(m_topBar, &TopBar::top_lock, this, &MainWindow::at_topBar_topLock);
-    setMinimumWidth(m_topBar->GetMinimumWidth());
-    setMinimumHeight(1.5*m_topBar->GetMinimumWidth());
+    m_buttonBar->Hide();
+    connect(m_buttonBar, &ButtonBar::close, this, &MainWindow::at_buttonBar_close);
+    connect(m_buttonBar, &ButtonBar::minimize, this, &MainWindow::at_buttonBar_minimize);
+    connect(m_buttonBar, &ButtonBar::top_lock, this, &MainWindow::at_buttonBar_topLock);
+    setMinimumWidth(m_buttonBar->GetMinimumWidth());
+    setMinimumHeight(1.5*m_buttonBar->GetMinimumWidth());
 }
 
 void MainWindow::SetupActions()
@@ -241,7 +241,7 @@ void MainWindow::closeEvent(QCloseEvent *event)
 void MainWindow::resizeEvent(QResizeEvent* event)
 {
     ScheduleUpdatePerUnsaved();
-    m_topBar->UpdatePerParentGeometry();
+    m_buttonBar->UpdatePerParentGeometry();
 }
 
 void MainWindow::moveEvent(QMoveEvent* event)
@@ -260,10 +260,10 @@ bool MainWindow::eventFilter(QObject* obj, QEvent* evt)
     if (evt->type() == QEvent::MouseMove && action == MouseEvent::ActionE::None)
     {
 		QMouseEvent* mouseEvent = static_cast<QMouseEvent*> (evt);
-        if(m_topBar->Contains(mouseEvent->pos()))
-            m_topBar->Show();
+        if(m_buttonBar->Contains(mouseEvent->pos()))
+            m_buttonBar->Show();
         else
-            m_topBar->Hide();
+            m_buttonBar->Hide();
         return false;
     }
 
@@ -658,17 +658,17 @@ void MainWindow::at_actionSetOpacity_triggered()
     SetOpacity(Property::Opacity::get(sender()));
 }
 
-void MainWindow::at_topBar_close()
+void MainWindow::at_buttonBar_close()
 {
     emit close();
 }
 
-void MainWindow::at_topBar_minimize()
+void MainWindow::at_buttonBar_minimize()
 {
     setWindowState(Qt::WindowState::WindowMinimized);
 }
 
-void MainWindow::at_topBar_topLock()
+void MainWindow::at_buttonBar_topLock()
 {
     ToggleOnTop();
 }
@@ -734,7 +734,7 @@ void MainWindow::UpdatePerStyle()
     statusBar()->setStyleSheet(StyleSheet::format_status_bar(m_style));
     m_statusLabel->setStyleSheet(StyleSheet::format_status_label(m_style));
     setWindowIcon(SchemeIcon::get_window_icon(ColorScheme::schemas.at(Style::color_scheme(m_style)), 32));
-    m_topBar->SetColorScheme(Style::color_scheme(m_style));
+    m_buttonBar->SetColorScheme(Style::color_scheme(m_style));
 }
 
 
@@ -1134,7 +1134,7 @@ void MainWindow::UpdatePerOnTopState()
     if (State::has_tag<State::Tag::Fullscreen>(m_stateTags))
         return;
     SetupWindowFlags(State::has_tag<State::Tag::OnTop>(m_stateTags));
-    m_topBar->SetTopLockChecked(State::has_tag<State::Tag::OnTop>(m_stateTags));
+    m_buttonBar->SetTopLockChecked(State::has_tag<State::Tag::OnTop>(m_stateTags));
 }
 
 void MainWindow::UpdatePerOpacity()

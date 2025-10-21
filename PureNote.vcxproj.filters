@@ -61,7 +61,7 @@
     <ClCompile Include="Save.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="TopBar.cpp">
+    <ClCompile Include="ButtonBar.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -69,7 +69,7 @@
     <QtMoc Include="MainWindow.h">
       <Filter>Source Files</Filter>
     </QtMoc>
-    <QtMoc Include="TopBar.h">
+    <QtMoc Include="ButtonBar.h">
       <Filter>Source Files</Filter>
     </QtMoc>
   </ItemGroup>

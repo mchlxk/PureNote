@@ -104,7 +104,7 @@
     <ClCompile Include="SchemeIcon.cpp" />
     <ClCompile Include="Style.cpp" />
     <ClCompile Include="StyleSheet.cpp" />
-    <ClCompile Include="TopBar.cpp" />
+    <ClCompile Include="ButtonBar.cpp" />
     <ClCompile Include="Window.cpp" />
     <QtRcc Include="qml.qrc" />
     <None Include="main.qml" />
@@ -129,7 +129,7 @@
     <ClInclude Include="State.h" />
     <ClInclude Include="Style.h" />
     <ClInclude Include="StyleSheet.h" />
-    <QtMoc Include="TopBar.h" />
+    <QtMoc Include="ButtonBar.h" />
     <ClInclude Include="Window.h" />
   </ItemGroup>
   <ItemGroup>

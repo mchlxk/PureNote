@@ -16,7 +16,7 @@
 #include "PunOptional.h"
 #include "PunExpected.h"
 
-#include "TopBar.h"
+#include "ButtonBar.h"
 
 
 class MainWindow : public QMainWindow
@@ -62,9 +62,9 @@ private slots:
     void at_opacityAdjustTimer_expired();
     void at_delayedUnsavedUpdateTimer_expired();
 
-    void at_topBar_close();
-    void at_topBar_minimize();
-    void at_topBar_topLock();
+    void at_buttonBar_close();
+    void at_buttonBar_minimize();
+    void at_buttonBar_topLock();
 
 private:
     pun_t GetPun() const;
@@ -158,7 +158,7 @@ private:
     QPlainTextEdit *m_textEdit{ nullptr };
     QLabel* m_statusLabel{ nullptr };
 
-    TopBar* m_topBar{ nullptr };
+    ButtonBar* m_buttonBar{ nullptr };
 
     style_t m_style{ Style::defaults };
     float m_opacity{ 1.f };

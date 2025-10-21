@@ -2,17 +2,17 @@
 
 #include <QToolButton>
 
-class TopBar
+class ButtonBar
 : public QObject
 {
 	Q_OBJECT
 
 public:
-	TopBar(QWidget* parent, int buttonSize);
-	TopBar() = delete;
-	TopBar(const TopBar&) = delete;
-	TopBar& operator=(const TopBar&) = delete;
-	~TopBar() {}
+	ButtonBar(QWidget* parent, int buttonSize);
+	ButtonBar() = delete;
+	ButtonBar(const ButtonBar&) = delete;
+	ButtonBar& operator=(const ButtonBar&) = delete;
+	~ButtonBar() {}
 
 	void UpdatePerParentGeometry();
 	void SetColorScheme(const QString& colorScheme);
