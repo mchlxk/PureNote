@@ -1,5 +1,6 @@
 #include <QtWidgets>
 #include <QTextDocument>
+#include <QHboxLayout>
 
 #include "Mainwindow.h"
 #include "MouseEvent.h"
@@ -68,6 +69,8 @@ MainWindow::MainWindow()
     setUnifiedTitleAndToolBarOnMac(true);
 
     SetupContextMenu();
+
+    SetupTopBar();
 
     SetSave(Save::no_save);
 
@@ -216,6 +219,23 @@ void MainWindow::SetupContextMenu()
     connect(this, &MainWindow::customContextMenuRequested, this, &MainWindow::at_customContextMenuRequested);
 }
 
+void MainWindow::SetupTopBar()
+{
+    /*
+    m_topBar = new QWidget(this);
+    QLabel* lbl = new QLabel(m_topBar);
+    lbl->setText("alsdfjdsla");
+    m_topBar->setLayout(new QHBoxLayout(m_topBar));
+    m_topBar->layout()->addWidget(lbl);
+
+    QToolButton* btn = new QToolButton(m_topBar);
+    btn->setText("X");
+    m_topBar->layout()->addWidget(btn);
+
+    m_topBar->setGeometry(0, 0, 200, 50);
+    m_topBar->show();
+    */
+}
 
 void MainWindow::closeEvent(QCloseEvent *event)
 {
@@ -702,7 +722,6 @@ void MainWindow::UpdatePerStyle()
 }
 
 
-
 void MainWindow::UpdatePerFullscreen()
 {
     if (State::has_tag<State::Tag::Fullscreen>(m_stateTags))
@@ -783,7 +802,6 @@ QString MainWindow::GetBrowseFilename()
         return filePath + ".pun";
     return filePath;
 }
-
 
 void MainWindow::at_document_contentsChanged()
 {
@@ -994,7 +1012,7 @@ bool MainWindow::ResolveUnsavedChanges()
 		QMessageBox msgBox(this);
         const QString schemaName = Style::color_scheme(m_style);
         msgBox.setIconPixmap(SchemeIcon::get_warning_icon(ColorScheme::schemas.at(schemaName), 32));
-		msgBox.setText("Cannot parse input file (parser error)\nDetails: " + pun.get_error());
+		msgBox.setText("Cannot load input file (parser error)\nDetails: " + pun.get_error());
 		msgBox.setStandardButtons(QMessageBox::Ok);
 		msgBox.setWindowFlags(msgBox.windowFlags() | Qt::FramelessWindowHint);
         ShowMessageBox(msgBox);
@@ -1087,9 +1105,9 @@ void MainWindow::UpdateStatusBar(bool hasUnsavedMeta, bool hasUnsavedText)
     const QString filePath = HasFile()
         ? Save::file_path(m_save)
         : "[No file]";
-    const QString unsavedTextMark = hasUnsavedText ? "*" : "";
     const QString unsavedMetaMark = hasUnsavedMeta ? "^" : "";
-    const QString decoratedPath = unsavedTextMark + unsavedMetaMark + filePath;
+    const QString unsavedTextMark = hasUnsavedText ? "*" : "";
+    const QString decoratedPath = unsavedMetaMark + unsavedTextMark + filePath;
     setWindowTitle(decoratedPath + " | PureNote");
     m_statusLabel->setText(decoratedPath);
     m_statusLabel->setToolTip(decoratedPath);
