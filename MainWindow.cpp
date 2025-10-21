@@ -65,8 +65,6 @@ MainWindow::MainWindow()
     SetupStatusBar();
     SetupActions();
 
-    readSettings();
-
     setUnifiedTitleAndToolBarOnMac(true);
 
     SetupContextMenu();
@@ -219,49 +217,11 @@ void MainWindow::SetupContextMenu()
 }
 
 
-/*
-void MainWindow::createActions()
-{
-    QMenu *fileMenu = menuBar()->addMenu(tr("&File"));
-    QToolBar *fileToolBar = addToolBar(tr("File"));
-    const QIcon newIcon = QIcon::fromTheme("document-new", QIcon(":/images/new.png"));
-    QAction *newAct = new QAction(newIcon, tr("&New"), this);
-    newAct->setShortcuts(QKeySequence::New);
-    newAct->setStatusTip(tr("Create a new file"));
-    connect(newAct, &QAction::triggered, this, &MainWindow::newFile);
-    fileMenu->addAction(newAct);
-    fileToolBar->addAction(newAct);
-
-    const QIcon openIcon = QIcon::fromTheme("document-open", QIcon(":/images/open.png"));
-    QAction *openAct = new QAction(openIcon, tr("&Open..."), this);
-    openAct->setShortcuts(QKeySequence::Open);
-    openAct->setStatusTip(tr("Open an existing file"));
-    connect(openAct, &QAction::triggered, this, &MainWindow::open);
-    fileMenu->addAction(openAct);
-    fileToolBar->addAction(openAct);
-    */
-
-    /*
-    QAction *aboutQtAct = helpMenu->addAction(tr("About &Qt"), qApp, &QApplication::aboutQt);
-    aboutQtAct->setStatusTip(tr("Show the Qt library's About box")) ;
-
-
-    #ifndef QT_NO_CLIPBOARD
-    cutAct->setEnabled(false);
-    copyAct->setEnabled(false);
-    connect(textEdit, &QPlainTextEdit::copyAvailable, cutAct, &QAction::setEnabled);
-    connect(textEdit, &QPlainTextEdit::copyAvailable, copyAct, &QAction::setEnabled);
-#endif // !QT_NO_CLIPBOARD
-}
-*/
-
-
-
 void MainWindow::closeEvent(QCloseEvent *event)
 {
     if (ResolveUnsavedChanges()) 
     {
-        writeSettings();
+        WriteSettings();
         event->accept();
     }
     else 
@@ -825,14 +785,6 @@ QString MainWindow::GetBrowseFilename()
 }
 
 
-void MainWindow::About()
-{
-   QMessageBox::about(this, tr("About Application"),
-            tr("The <b>Application</b> example demonstrates how to "
-               "write modern GUI applications using Qt, with a menu bar, "
-               "toolbars, and a status bar."));
-}
-
 void MainWindow::at_document_contentsChanged()
 {
     UpdatePerUnsaved();
@@ -949,9 +901,9 @@ QByteArray MainWindow::PeekGeometry() const
 }
 
 
- void MainWindow::readSettings()
+ void MainWindow::ReadSettings()
 {
-     /*
+ /*
      QSettings settings(QCoreApplication::organizationName(), QCoreApplication::applicationName());
     const QByteArray geometry = settings.value("geometry", QByteArray()).toByteArray();
     if (geometry.isEmpty()) {
@@ -962,14 +914,16 @@ QByteArray MainWindow::PeekGeometry() const
     } else {
         restoreGeometry(geometry);
     }
-    */
+*/
 }
 
  
- void MainWindow::writeSettings()
+ void MainWindow::WriteSettings()
 {
+ /*
     QSettings settings(QCoreApplication::organizationName(), QCoreApplication::applicationName());
     settings.setValue("geometry", saveGeometry());
+*/
 }
 
 

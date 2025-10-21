@@ -81,8 +81,8 @@ private:
     bool CanPopGeometry() const;
     QByteArray PeekGeometry() const;
 
-    void readSettings();
-    void writeSettings();
+    void ReadSettings();
+    void WriteSettings();
 
     bool ResolveUnsavedChanges();
 
@@ -92,7 +92,6 @@ private:
     pun_expected_t<pun_t, QString> SaveImpl(const QString& filePath);
     void SetSave(const save_t& save);
 
-    void About();
     QString GetBrowseFilename();
 
     bool HasFile() const { return !Save::file_path(m_save).isEmpty(); }
