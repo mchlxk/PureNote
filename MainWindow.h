@@ -16,6 +16,8 @@
 #include "PunOptional.h"
 #include "PunExpected.h"
 
+#include "FloatingButton.h"
+
 
 class MainWindow : public QMainWindow
 {
@@ -59,6 +61,10 @@ private slots:
 
     void at_opacityAdjustTimer_expired();
     void at_delayedUnsavedUpdateTimer_expired();
+
+    void at_buttonClose_clicked();
+    void at_buttonMinimize_clicked();
+    void at_buttonTopLock_clicked();
 
 private:
     pun_t GetPun() const;
@@ -127,6 +133,8 @@ private:
     void IncreaseFontSize();
     void DecreaseOpacity();
     void IncreaseOpacity();
+
+    void ToggleOnTop();
 
     // file actions
     QAction* m_actionSave{ nullptr };

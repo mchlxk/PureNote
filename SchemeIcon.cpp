@@ -54,3 +54,57 @@ QPixmap SchemeIcon::get_window_icon(const color_scheme_t& scheme, int size)
 	return icon;
 }
 
+QPixmap SchemeIcon::get_close_icon(const color_scheme_t& scheme, int size)
+{
+	QPixmap icon(size, size);
+	icon.fill(QColor(ColorScheme::accent(scheme)));
+	QPainter painter(&icon);
+	painter.setRenderHint(QPainter::Antialiasing);
+
+	const QBrush fillBrush(QColor(ColorScheme::background(scheme)));
+	const int margin = size / 8;
+	const int squareSize = (size-2*margin) / 3;
+	painter.fillRect(margin, margin, squareSize, squareSize, fillBrush);
+	painter.fillRect(margin+2*squareSize, margin, squareSize, squareSize, fillBrush);
+	painter.fillRect(margin+squareSize, margin+squareSize, squareSize, squareSize, fillBrush);
+	painter.fillRect(margin, margin+2*squareSize, squareSize, squareSize, fillBrush);
+	painter.fillRect(margin+2*squareSize, margin+2*squareSize, squareSize, squareSize, fillBrush);
+
+	return icon;
+}
+
+QPixmap SchemeIcon::get_minimize_icon(const color_scheme_t& scheme, int size)
+{
+	QPixmap icon(size, size);
+	icon.fill(QColor(ColorScheme::accent(scheme)));
+	QPainter painter(&icon);
+	painter.setRenderHint(QPainter::Antialiasing);
+
+	const QBrush fillBrush(QColor(ColorScheme::background(scheme)));
+	const int margin = size / 8;
+	const int squareSize = (size-2*margin) / 3;
+	painter.fillRect(margin, margin+2*squareSize, 3*squareSize, squareSize, fillBrush);
+
+	return icon;
+}
+
+QPixmap SchemeIcon::get_top_lock_off_icon(const color_scheme_t& scheme, int size)
+{
+	QPixmap icon(size, size);
+	icon.fill(QColor(ColorScheme::accent(scheme)));
+	QPainter painter(&icon);
+	painter.setRenderHint(QPainter::Antialiasing);
+
+	const int margin = size / 8;
+	const int squareSize = (size-2*margin) / 3;
+
+	const QBrush fillBrush(QColor(ColorScheme::background(scheme)));
+	painter.fillRect(margin, margin, 3*squareSize, 3*squareSize, fillBrush);
+
+	const QBrush clearBrush(QColor(ColorScheme::accent(scheme)));
+	painter.fillRect(margin+squareSize, margin+ squareSize, squareSize, squareSize, clearBrush);
+
+	return icon;
+}
+
+

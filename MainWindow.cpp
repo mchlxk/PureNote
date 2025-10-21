@@ -221,20 +221,29 @@ void MainWindow::SetupContextMenu()
 
 void MainWindow::SetupTopBar()
 {
-    /*
-    m_topBar = new QWidget(this);
-    QLabel* lbl = new QLabel(m_topBar);
-    lbl->setText("alsdfjdsla");
-    m_topBar->setLayout(new QHBoxLayout(m_topBar));
-    m_topBar->layout()->addWidget(lbl);
+    FloatingButton* btnClose = new FloatingButton(this);
+    btnClose->setGeometry(width()-50, 0, 32, 32);
+    btnClose->setIcon(SchemeIcon::get_close_icon(ColorScheme::schemas.at(Style::color_scheme(m_style)), 32));
+    btnClose->setIconSize(QSize(32, 32));
+    btnClose->setStyleSheet("QToolButton{ border: 0;}");
+    connect(btnClose, &QPushButton::clicked, this, &MainWindow::at_buttonClose_clicked);
+    btnClose->show();
 
-    QToolButton* btn = new QToolButton(m_topBar);
-    btn->setText("X");
-    m_topBar->layout()->addWidget(btn);
+    FloatingButton* btnMinimize = new FloatingButton(this);
+    btnMinimize->setGeometry(width()-50-32-16, 0, 32, 32);
+    btnMinimize->setIcon(SchemeIcon::get_minimize_icon(ColorScheme::schemas.at(Style::color_scheme(m_style)), 32));
+    btnMinimize->setIconSize(QSize(32, 32));
+    btnMinimize->setStyleSheet("QToolButton{ border: 0;}");
+    connect(btnMinimize, &QPushButton::clicked, this, &MainWindow::at_buttonMinimize_clicked);
+    btnMinimize->show();
 
-    m_topBar->setGeometry(0, 0, 200, 50);
-    m_topBar->show();
-    */
+    FloatingButton* btnTopLock = new FloatingButton(this);
+    btnTopLock->setGeometry(width()-50-32-16-32-16, 0, 32, 32);
+    btnTopLock->setIcon(SchemeIcon::get_top_lock_off_icon(ColorScheme::schemas.at(Style::color_scheme(m_style)), 32));
+    btnTopLock->setIconSize(QSize(32, 32));
+    btnTopLock->setStyleSheet("QToolButton{ border: 0;}");
+    connect(btnTopLock, &QPushButton::clicked, this, &MainWindow::at_buttonTopLock_clicked);
+    btnTopLock->show();
 }
 
 void MainWindow::closeEvent(QCloseEvent *event)
@@ -564,8 +573,12 @@ void MainWindow::at_delayedUnsavedUpdateTimer_expired()
     UpdatePerUnsaved();
 }
 
-
 void MainWindow::at_actionToggleOnTop_triggered()
+{
+    ToggleOnTop();
+}
+
+void MainWindow::ToggleOnTop()
 {
     State::toggle_tag<State::Tag::OnTop>(m_stateTags);
     UpdatePerOnTopState();
@@ -656,6 +669,21 @@ void MainWindow::at_actionSetFontSize_triggered()
 void MainWindow::at_actionSetOpacity_triggered()
 {
     SetOpacity(Property::Opacity::get(sender()));
+}
+
+void MainWindow::at_buttonClose_clicked()
+{
+    emit close();
+}
+
+void MainWindow::at_buttonMinimize_clicked()
+{
+    setWindowState(Qt::WindowState::WindowMinimized);
+}
+
+void MainWindow::at_buttonTopLock_clicked()
+{
+    ToggleOnTop();
 }
 
 
