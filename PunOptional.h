@@ -2,6 +2,7 @@
 
 namespace Pun
 {
+	// Implemented 'Optional' to avoid dependency on boost or recent C++
 	namespace Optional
 	{
 		struct none_t {};

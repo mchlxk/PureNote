@@ -9,7 +9,7 @@ pun_expected_t<pun_t, QString> PunParser::parse(const QByteArray& input)
 
     reader.readNextStartElement();
     if (reader.name() != "Pun")
-        return QString("Pun element not found");
+        return QString("'Pun' element not found");
 
     if(!reader.attributes().hasAttribute("Version"))
         return QString("unknown version");

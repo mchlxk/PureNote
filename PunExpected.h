@@ -2,6 +2,7 @@
 
 namespace Pun
 {
+	// Implemented 'Expected' to avoid dependency on boost or recent C++
 	namespace Expected
 	{
 		template<typename STORAGE_T, typename ERROR_T>
