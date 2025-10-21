@@ -24,12 +24,12 @@ signals:
 	void close();
 
 private:
-	QWidget* m_parent{ nullptr };
+	QWidget* const m_parent{ nullptr };
 	const int m_buttonSize;
 
-	QToolButton* m_buttonTopLock{ nullptr };
-	QToolButton* m_buttonMinimize{ nullptr };
-	QToolButton* m_buttonClose{ nullptr };
+	QToolButton* ButtonClose();
+	QToolButton* ButtonMinimize();
+	QToolButton* ButtonTopLock();
 };
 
 

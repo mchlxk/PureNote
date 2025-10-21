@@ -56,6 +56,7 @@ static inline void apply_qtbug_74655_workaround(T* item)
 MainWindow::MainWindow()
 : m_textEdit(new QPlainTextEdit)
 , m_statusLabel (new QLabel)
+, m_topBar(new TopBar(this, 24))
 {
     QCoreApplication::instance()->installEventFilter(this);
     setContentsMargins(0, 0, 0, 0);
@@ -67,8 +68,6 @@ MainWindow::MainWindow()
     SetupActions();
 
     setUnifiedTitleAndToolBarOnMac(true);
-
-    SetupTopBar();
 
     SetupContextMenu();
 
@@ -221,7 +220,7 @@ void MainWindow::SetupContextMenu()
 
 void MainWindow::SetupTopBar()
 {
-    m_topBar = new TopBar(this, 24);
+    //m_topBar = new TopBar(this, 24);
     //connect(m_topBar, &TopBar::top_lock, this, &MainWindow::at_buttonTopLock_clicked);
     //connect(m_topBar, &TopBar::minimize, this, &MainWindow::at_buttonMinimize_clicked);
     //connect(m_topBar, &TopBar::close, this, &MainWindow::at_buttonClose_clicked);
@@ -234,6 +233,7 @@ void MainWindow::SetupTopBar()
 
     // TBD
 
+    /*
     const int size = 24;
 
     QToolButton* btnClose = new QToolButton(this);
@@ -243,6 +243,7 @@ void MainWindow::SetupTopBar()
     btnClose->setStyleSheet("QToolButton{ border: 0;}");
     connect(btnClose, &QPushButton::clicked, this, &MainWindow::at_buttonClose_clicked);
     btnClose->show();
+    */
 
     /*
 
@@ -280,8 +281,7 @@ void MainWindow::closeEvent(QCloseEvent *event)
 void MainWindow::resizeEvent(QResizeEvent* event)
 {
     ScheduleUpdatePerUnsaved();
-    //m_topBar->UpdatePerParentGeometry();
-    //m_topBar->Show();
+    m_topBar->UpdatePerParentGeometry();
 }
 
 void MainWindow::moveEvent(QMoveEvent* event)
@@ -298,7 +298,14 @@ bool MainWindow::eventFilter(QObject* obj, QEvent* evt)
 
     // Exit early on plain mouse-move
     if (evt->type() == QEvent::MouseMove && action == MouseEvent::ActionE::None)
+    {
+		QMouseEvent* mouseEvent = static_cast<QMouseEvent*> (evt);
+        if(m_topBar->Contains(mouseEvent->pos()))
+            m_topBar->Show();
+        else
+            m_topBar->Hide();
         return false;
+    }
 
     // let QT emit context-menu-requested
     if (MouseEvent::is_rmb_release(evt) && action == MouseEvent::ActionE::None)
@@ -767,7 +774,7 @@ void MainWindow::UpdatePerStyle()
     statusBar()->setStyleSheet(StyleSheet::format_status_bar(m_style));
     m_statusLabel->setStyleSheet(StyleSheet::format_status_label(m_style));
     setWindowIcon(SchemeIcon::get_window_icon(ColorScheme::schemas.at(Style::color_scheme(m_style)), 32));
-    //m_topBar->SetColorScheme(Style::color_scheme(m_style));
+    m_topBar->SetColorScheme(Style::color_scheme(m_style));
 }
 
 
