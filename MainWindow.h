@@ -106,6 +106,8 @@ private:
     void SetupTextEdit();
     void SetupContextMenu();
 
+    void SetupTopBar();
+
     void ShowContextMenu(const QPoint& pos);
 
     int ShowMessageBox(QMessageBox&);
@@ -150,6 +152,8 @@ private:
 
     QPlainTextEdit *m_textEdit{ nullptr };
     QLabel* m_statusLabel{ nullptr };
+
+    QWidget* m_topBar{ nullptr };
 
     style_t m_style{ Style::defaults };
     float m_opacity{ 1.f };

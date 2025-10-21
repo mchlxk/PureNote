@@ -1,5 +1,6 @@
 #include <QtWidgets>
 #include <QTextDocument>
+#include <QHboxLayout>
 
 #include "Mainwindow.h"
 #include "MouseEvent.h"
@@ -70,6 +71,8 @@ MainWindow::MainWindow()
     setUnifiedTitleAndToolBarOnMac(true);
 
     SetupContextMenu();
+
+    SetupTopBar();
 
     SetSave(Save::no_save);
 
@@ -217,6 +220,25 @@ void MainWindow::SetupContextMenu()
     setContextMenuPolicy(Qt::CustomContextMenu);
     connect(this, &MainWindow::customContextMenuRequested, this, &MainWindow::at_customContextMenuRequested);
 }
+
+void MainWindow::SetupTopBar()
+{
+    /*
+    m_topBar = new QWidget(this);
+    QLabel* lbl = new QLabel(m_topBar);
+    lbl->setText("alsdfjdsla");
+    m_topBar->setLayout(new QHBoxLayout(m_topBar));
+    m_topBar->layout()->addWidget(lbl);
+
+    QToolButton* btn = new QToolButton(m_topBar);
+    btn->setText("X");
+    m_topBar->layout()->addWidget(btn);
+
+    m_topBar->setGeometry(0, 0, 200, 50);
+    m_topBar->show();
+    */
+}
+
 
 
 /*
