@@ -11,7 +11,7 @@ const std::unordered_map<QString, QStringList, hash_qstring> Style::font_familie
 	,{"Monospace", { "Lucida Console", "Cascadia Code", "Cascadia Mono", "Consolas", "Fira Code", "Courier New" }}
 	,{"Serif", { "Constantia", "Georgia", "Palatino Linotype", "Adobe Garamond Pro", "Times New Roman" }}
 	,{"Comic", { "Bad Comic", "Comic Sans MS" }}
-	,{"Handwritten", { "Segoe Print", "Ink Free", "MV Boli" }}
+	,{"Shorthand", { "Segoe Print", "Ink Free", "MV Boli" }}
 	,{"Script", { "Lucida Handwriting", "Segoe Script", "Brush Script Std", "Script" }}
 };
 
