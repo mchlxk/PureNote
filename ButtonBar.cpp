@@ -40,7 +40,7 @@ bool ButtonBar::T::Contains(const QPoint& globalPos) const
 
 int ButtonBar::T::GetMinimumWidth() const
 {
-	return Geometry::get_width(m_buttons.size(), m_buttonSize);
+	return Geometry::get_width((int)m_buttons.size(), m_buttonSize);
 }
 
 void ButtonBar::T::AddButton(const QString& name)
