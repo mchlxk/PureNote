@@ -158,7 +158,7 @@ private:
     QPlainTextEdit *m_textEdit{ nullptr };
     QLabel* m_statusLabel{ nullptr };
 
-    ButtonBar* m_buttonBar{ nullptr };
+    button_bar_t* m_buttonBar{ nullptr };
 
     style_t m_style{ Style::defaults };
     float m_opacity{ 1.f };

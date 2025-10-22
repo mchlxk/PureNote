@@ -56,7 +56,7 @@ static inline void apply_qtbug_74655_workaround(T* item)
 MainWindow::MainWindow()
 : m_textEdit(new QPlainTextEdit)
 , m_statusLabel (new QLabel)
-, m_buttonBar(new ButtonBar(this, 24))
+, m_buttonBar(new button_bar_t(this, 24))
 {
     QCoreApplication::instance()->installEventFilter(this);
     setContentsMargins(0, 0, 0, 0);
@@ -222,7 +222,7 @@ void MainWindow::SetupContextMenu()
 
 void MainWindow::SetupButtonBar()
 {
-    connect(m_buttonBar, &ButtonBar::button_clicked, this, &MainWindow::at_buttonBar_buttonClicked);
+    connect(m_buttonBar, &button_bar_t::button_clicked, this, &MainWindow::at_buttonBar_buttonClicked);
     m_buttonBar->AddButton("close");
     m_buttonBar->SetButtonStyleSheet("close", "QToolButton{ border: 0;}" + StyleSheet::format_tooltip());
     m_buttonBar->SetButtonTooltip("close", "Close");

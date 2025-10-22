@@ -5,82 +5,104 @@
 #include "Style.h"
 #include "SchemeIcon.h"
 
-ButtonBar::ButtonBar(QWidget* parent, int buttonSize)
+
+int ButtonBar::Geometry::get_width(int numButtons, int buttonSize)
+{
+	return ((1.5*numButtons) - 0.5) * buttonSize;
+}
+
+QPoint ButtonBar::Geometry::get_button_pos(int barWidth, int buttonIdx, int buttonSize)
+{
+	return QPoint(barWidth - buttonSize - (buttonIdx * 1.5 * buttonSize), 0);
+}
+
+void ButtonBar::Property::set_name(QObject* target, const QString& name)
+{
+	target->setProperty("name", name);
+}
+
+QString ButtonBar::Property::get_name(const QObject* target)
+{
+	return target->property("name").toString();
+}
+
+ButtonBar::T::T(QWidget* parent, int buttonSize)
 : m_parent(parent)
 , m_buttonSize(buttonSize)
 { 
 }
 
-bool ButtonBar::Contains(const QPoint& globalPos) const
+bool ButtonBar::T::Contains(const QPoint& globalPos) const
 {
 	const QPoint topLeft = m_parent->mapToGlobal(QPoint(0, 0));
 	return QRect(topLeft.x(), topLeft.y(), m_parent->width(), m_buttonSize).contains(globalPos);
 }
 
-int ButtonBar::GetMinimumWidth() const
+int ButtonBar::T::GetMinimumWidth() const
 {
-	return ((1.5*m_buttons.size()) - 0.5) * m_buttonSize;
+	return Geometry::get_width(m_buttons.size(), m_buttonSize);
 }
 
-void ButtonBar::AddButton(const QString& name)
+void ButtonBar::T::AddButton(const QString& name)
 {
 	GetButton(name);
 }
 
-void ButtonBar::SetButtonIcon(const QString& name, const QIcon& icon)
+void ButtonBar::T::SetButtonIcon(const QString& name, const QIcon& icon)
 {
 	GetButton(name)->setIcon(icon);
 }
 
-void ButtonBar::SetButtonStyleSheet(const QString& name, const QString& styleSheet)
+void ButtonBar::T::SetButtonStyleSheet(const QString& name, const QString& styleSheet)
 {
 	GetButton(name)->setStyleSheet(styleSheet);
 }
 
-void ButtonBar::SetButtonTooltip(const QString& name, const QString& tooltip)
+void ButtonBar::T::SetButtonTooltip(const QString& name, const QString& tooltip)
 {
 	GetButton(name)->setToolTip(tooltip);
 }
 
-void ButtonBar::UpdatePerParentGeometry()
+void ButtonBar::T::UpdatePerParentGeometry()
 {
-	int x = m_parent->width() - m_buttonSize;
+	int idx = 0;
 	for (auto& btn : m_buttons)
 	{
-		btn.second->setGeometry(x, 0, m_buttonSize, m_buttonSize);
-		x -= 1.5*m_buttonSize;
+		const auto pos = Geometry::get_button_pos(m_parent->width(), idx, m_buttonSize);
+		btn.second->setGeometry(pos.x(), pos.y(), m_buttonSize, m_buttonSize);
+		++idx;
 	}
 }
 
-void ButtonBar::Show()
+void ButtonBar::T::Show()
 {
 	std::for_each(m_buttons.begin(), m_buttons.end(), [] (std::pair<const QString, QToolButton*>& btn) {
 		btn.second->show();
 	});
 }
 
-void ButtonBar::Hide()
+void ButtonBar::T::Hide()
 {
 	std::for_each(m_buttons.begin(), m_buttons.end(), [] (std::pair<const QString, QToolButton*>& btn) {
 		btn.second->hide();
 	});
 }
 
-QToolButton* ButtonBar::GetButton(const QString& name)
+QToolButton* ButtonBar::T::GetButton(const QString& name)
 {
 	if (!m_buttons.count(name))
 	{
 		QToolButton* b = new QToolButton(this->m_parent);
 		b->setIconSize(QSize(this->m_buttonSize, this->m_buttonSize));
-		b->setProperty("name", name);
-		connect(b, &QToolButton::clicked, this, &ButtonBar::at_buttonClicked);
+		Property::set_name(b, name);
+		connect(b, &QToolButton::clicked, this, &T::at_buttonClicked);
 		m_buttons[name] = b;
 	}
 	return m_buttons.at(name);
 }
 
-void ButtonBar::at_buttonClicked()
+void ButtonBar::T::at_buttonClicked()
 {
-	emit button_clicked(sender()->property("name").toString());
+	emit button_clicked(Property::get_name(sender()));
 }
 

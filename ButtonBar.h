@@ -7,45 +7,62 @@
 
 #include "HashQString.h"
 
-class ButtonBar
-: public QObject
+namespace ButtonBar
 {
-	Q_OBJECT
+	namespace Geometry
+	{
+		constexpr int default_button_size{ 24 };
+		int get_width(int numButtons, int buttonSize);
+		QPoint get_button_pos(int barWidth, int buttonIdx, int buttonSize);
+	}
 
-public:
-	ButtonBar(QWidget* parent, int buttonSize);
-	ButtonBar() = delete;
-	ButtonBar(const ButtonBar&) = delete;
-	ButtonBar& operator=(const ButtonBar&) = delete;
-	~ButtonBar() {}
+	namespace Property
+	{
+		void set_name(QObject* target, const QString& name);
+		QString get_name(const QObject* target);
+	}
 
-	void UpdatePerParentGeometry();
-	void Show();
-	void Hide();
+	class T
+	: public QObject
+	{
+		Q_OBJECT
 
-	bool Contains(const QPoint& globalPos) const;
-	int GetMinimumWidth() const;
+	public:
+		T(QWidget* parent, int buttonSize);
+		T() = delete;
+		T(const T&) = delete;
+		T& operator=(const T&) = delete;
+		~T() {}
 
-	void AddButton(const QString& name);
-	void SetButtonIcon(const QString& name, const QIcon& icon);
-	void SetButtonStyleSheet(const QString& name, const QString& styleSheet);
-	void SetButtonTooltip(const QString& name, const QString& tooltip);
+		void UpdatePerParentGeometry();
+		void Show();
+		void Hide();
 
-	int GetButtonSize() const { return m_buttonSize; }
+		bool Contains(const QPoint& globalPos) const;
+		int GetMinimumWidth() const;
 
-signals:
-	void button_clicked(const QString& name);
+		void AddButton(const QString& name);
+		void SetButtonIcon(const QString& name, const QIcon& icon);
+		void SetButtonStyleSheet(const QString& name, const QString& styleSheet);
+		void SetButtonTooltip(const QString& name, const QString& tooltip);
 
-private slots:
-	void at_buttonClicked();
+		int GetButtonSize() const { return m_buttonSize; }
 
-private:
-	QWidget* const m_parent{ nullptr };
-	const int m_buttonSize;
+	signals:
+		void button_clicked(const QString& name);
 
-	QToolButton* GetButton(const QString& name);
+	private slots:
+		void at_buttonClicked();
 
-	std::unordered_map<QString, QToolButton*, hash_qstring> m_buttons;
-};
+	private:
+		QWidget* const m_parent{ nullptr };
+		const int m_buttonSize;
+
+		QToolButton* GetButton(const QString& name);
+
+		std::unordered_map<QString, QToolButton*, hash_qstring> m_buttons;
+	};
+}
+using button_bar_t = ButtonBar::T;
 
 
