@@ -32,6 +32,16 @@ void ButtonBar::SetButtonIcon(const QString& name, const QIcon& icon)
 	GetButton(name)->setIcon(icon);
 }
 
+void ButtonBar::SetButtonStyleSheet(const QString& name, const QString& styleSheet)
+{
+	GetButton(name)->setStyleSheet(styleSheet);
+}
+
+void ButtonBar::SetButtonTooltip(const QString& name, const QString& tooltip)
+{
+	GetButton(name)->setToolTip(tooltip);
+}
+
 void ButtonBar::UpdatePerParentGeometry()
 {
 	int x = m_parent->width() - m_buttonSize;
@@ -61,7 +71,6 @@ QToolButton* ButtonBar::GetButton(const QString& name)
 	if (!m_buttons.count(name))
 	{
 		QToolButton* b = new QToolButton(this->m_parent);
-		b->setStyleSheet("QToolButton{ border: 0;}");
 		b->setIconSize(QSize(this->m_buttonSize, this->m_buttonSize));
 		b->setProperty("name", name);
 		connect(b, &QToolButton::clicked, this, &ButtonBar::at_buttonClicked);

@@ -103,11 +103,11 @@ private:
     void SetLocked(bool locked);
 
     void SetupWindowFlags(bool onTop);
-
     void SetupActions();
     void SetupStatusBar();
     void SetupTextEdit();
     void SetupContextMenu();
+    void SetupButtonBar();
 
     void ShowContextMenu(const QPoint& pos);
 
@@ -124,6 +124,8 @@ private:
 
     void UpdatePerOnTopState();
     void UpdatePerFullscreen();
+
+    void UpdateButtonBarIcons();
 
     void DecreaseFontSize();
     void IncreaseFontSize();

@@ -81,14 +81,7 @@ MainWindow::MainWindow()
     m_delayedUnsavedUpdateTimer.setInterval(1000);
     connect(&m_delayedUnsavedUpdateTimer, &QTimer::timeout, this, &MainWindow::at_delayedUnsavedUpdateTimer_expired);
 
-    connect(m_buttonBar, &ButtonBar::button_clicked, this, &MainWindow::at_buttonBar_buttonClicked);
-    m_buttonBar->AddButton("close");
-    m_buttonBar->AddButton("minimize");
-    m_buttonBar->AddButton("top_lock");
-    m_buttonBar->Hide();
-    UpdatePerStyle(); // update per style again to style button-bar buttons
-    setMinimumWidth(m_buttonBar->GetMinimumWidth());
-    setMinimumHeight(1.5*m_buttonBar->GetMinimumWidth());
+    SetupButtonBar();
 }
 
 void MainWindow::SetupActions()
@@ -135,7 +128,7 @@ void MainWindow::SetupActions()
     connect(m_actionIncreaseOpacity, &QAction::triggered, this, &MainWindow::at_actionIncreaseOpacity_triggered);
     addAction(m_actionIncreaseOpacity);
 
-    m_actionToggleOnTop = new QAction("Stay On Top", this);
+    m_actionToggleOnTop = new QAction("Stay on Top", this);
     m_actionToggleOnTop->setCheckable(true);
     m_actionToggleOnTop->setChecked(State::has_tag<State::Tag::OnTop>(m_stateTags));
     connect(m_actionToggleOnTop, &QAction::triggered, this, &MainWindow::at_actionToggleOnTop_triggered);
@@ -227,6 +220,24 @@ void MainWindow::SetupContextMenu()
     connect(this, &MainWindow::customContextMenuRequested, this, &MainWindow::at_customContextMenuRequested);
 }
 
+void MainWindow::SetupButtonBar()
+{
+    connect(m_buttonBar, &ButtonBar::button_clicked, this, &MainWindow::at_buttonBar_buttonClicked);
+    m_buttonBar->AddButton("close");
+    m_buttonBar->SetButtonStyleSheet("close", "QToolButton{ border: 0;}" + StyleSheet::format_tooltip());
+    m_buttonBar->SetButtonTooltip("close", "Close");
+    m_buttonBar->AddButton("minimize");
+    m_buttonBar->SetButtonStyleSheet("minimize", "QToolButton{ border: 0;}" + StyleSheet::format_tooltip());
+    m_buttonBar->SetButtonTooltip("minimize", "Minimize");
+    m_buttonBar->AddButton("top_lock");
+    m_buttonBar->SetButtonStyleSheet("top_lock", "QToolButton{ border: 0;}" + StyleSheet::format_tooltip());
+    m_buttonBar->SetButtonTooltip("top_lock", "Stay on Top");
+    m_buttonBar->Hide();
+    UpdateButtonBarIcons();
+    setMinimumWidth(m_buttonBar->GetMinimumWidth());
+    setMinimumHeight(1.5 * m_buttonBar->GetMinimumWidth());
+}
+
 void MainWindow::closeEvent(QCloseEvent *event)
 {
     if (ResolveUnsavedChanges()) 
@@ -298,6 +309,7 @@ bool MainWindow::eventFilter(QObject* obj, QEvent* evt)
     {
         State::clear_tag<State::Tag::HasMouseContext>(m_stateTags);
         UpdatePerOpacity();
+        m_buttonBar->Hide();
         return false;
     }
 
@@ -732,13 +744,22 @@ void MainWindow::UpdatePerStyle()
     m_statusLabel->setStyleSheet(StyleSheet::format_status_label(m_style));
 
     const auto schema = ColorScheme::schemas.at(Style::color_scheme(m_style));
-
     setWindowIcon(SchemeIcon::get_window_icon(schema, 32));
+    UpdateButtonBarIcons();
+}
 
+void MainWindow::UpdateButtonBarIcons()
+{
+    const auto schema = ColorScheme::schemas.at(Style::color_scheme(m_style));
 	m_buttonBar->SetButtonIcon("close", SchemeIcon::get_close_icon(schema, m_buttonBar->GetButtonSize()));
 	m_buttonBar->SetButtonIcon("minimize", SchemeIcon::get_minimize_icon(schema, m_buttonBar->GetButtonSize()));
-	m_buttonBar->SetButtonIcon("top_lock", SchemeIcon::get_top_lock_off_icon(schema, m_buttonBar->GetButtonSize()));
+
+    if(State::has_tag<State::Tag::OnTop>(m_stateTags))
+        m_buttonBar->SetButtonIcon("top_lock", SchemeIcon::get_top_lock_on_icon(schema, m_buttonBar->GetButtonSize()));
+    else
+        m_buttonBar->SetButtonIcon("top_lock", SchemeIcon::get_top_lock_off_icon(schema, m_buttonBar->GetButtonSize()));
 }
+
 
 
 void MainWindow::UpdatePerFullscreen()
@@ -1137,12 +1158,7 @@ void MainWindow::UpdatePerOnTopState()
     if (State::has_tag<State::Tag::Fullscreen>(m_stateTags))
         return;
     SetupWindowFlags(State::has_tag<State::Tag::OnTop>(m_stateTags));
-
-    const auto schema = ColorScheme::schemas.at(Style::color_scheme(m_style));
-    if(State::has_tag<State::Tag::OnTop>(m_stateTags))
-		m_buttonBar->SetButtonIcon("top_lock", SchemeIcon::get_top_lock_on_icon(schema, m_buttonBar->GetButtonSize()));
-    else
-		m_buttonBar->SetButtonIcon("top_lock", SchemeIcon::get_top_lock_off_icon(schema, m_buttonBar->GetButtonSize()));
+    UpdateButtonBarIcons();
 }
 
 void MainWindow::UpdatePerOpacity()

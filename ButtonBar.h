@@ -28,6 +28,8 @@ public:
 
 	void AddButton(const QString& name);
 	void SetButtonIcon(const QString& name, const QIcon& icon);
+	void SetButtonStyleSheet(const QString& name, const QString& styleSheet);
+	void SetButtonTooltip(const QString& name, const QString& tooltip);
 
 	int GetButtonSize() const { return m_buttonSize; }
 
@@ -40,10 +42,6 @@ private slots:
 private:
 	QWidget* const m_parent{ nullptr };
 	const int m_buttonSize;
-
-	QToolButton* ButtonClose();
-	QToolButton* ButtonMinimize();
-	QToolButton* ButtonTopLock();
 
 	QToolButton* GetButton(const QString& name);
 
