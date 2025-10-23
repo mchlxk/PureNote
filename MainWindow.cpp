@@ -60,12 +60,13 @@ MainWindow::MainWindow()
 {
     QCoreApplication::instance()->installEventFilter(this);
     setContentsMargins(0, 0, 0, 0);
+    SetupActions();
+    connect(&m_state, &state_t::state_changed, this, &MainWindow::at_stateChanged);
+
     SetupTextEdit();
     UpdatePerStyle();
 
-    UpdatePerOnTopState();
     SetupStatusBar();
-    SetupActions();
 
     setUnifiedTitleAndToolBarOnMac(true);
 
@@ -73,15 +74,17 @@ MainWindow::MainWindow()
 
     SetSave(Save::no_save);
 
-    m_opacityAdjustTimer.setSingleShot(true);
-    m_opacityAdjustTimer.setInterval(1000);
-    connect(&m_opacityAdjustTimer, &QTimer::timeout, this, &MainWindow::at_opacityAdjustTimer_expired);
+    m_opacityInteractionTimer.setSingleShot(true);
+    m_opacityInteractionTimer.setInterval(1000);
+    connect(&m_opacityInteractionTimer, &QTimer::timeout, this, &MainWindow::at_opacityInteractionTimer_expired);
 
     m_delayedUnsavedUpdateTimer.setSingleShot(true);
     m_delayedUnsavedUpdateTimer.setInterval(1000);
     connect(&m_delayedUnsavedUpdateTimer, &QTimer::timeout, this, &MainWindow::at_delayedUnsavedUpdateTimer_expired);
 
     SetupButtonBar();
+
+	SetupWindowFlags(false);
 }
 
 void MainWindow::SetupActions()
@@ -130,13 +133,11 @@ void MainWindow::SetupActions()
 
     m_actionToggleOnTop = new QAction("Stay on Top", this);
     m_actionToggleOnTop->setCheckable(true);
-    m_actionToggleOnTop->setChecked(State::has_tag<State::Tag::OnTop>(m_stateTags));
     connect(m_actionToggleOnTop, &QAction::triggered, this, &MainWindow::at_actionToggleOnTop_triggered);
     addAction(m_actionToggleOnTop);
 
     m_actionToggleLocked = new QAction("Lock Edits", this);
     m_actionToggleLocked->setCheckable(true);
-    m_actionToggleLocked->setChecked(!IsLocked());
     connect(m_actionToggleLocked, &QAction::triggered, this, &MainWindow::at_actionToggleLocked_triggered);
     addAction(m_actionToggleLocked);
 
@@ -286,30 +287,25 @@ bool MainWindow::eventFilter(QObject* obj, QEvent* evt)
 
     if (evt->type() == QEvent::WindowActivate)
     {
-        State::set_tag<State::Tag::HasDialogContext>(m_stateTags);
-        UpdatePerOpacity();
+        m_state.Set(State::Tag::HasDialogContext);
         return false;
     }
 
     if (evt->type() == QEvent::WindowDeactivate)
     {
-        State::clear_tag<State::Tag::HasDialogContext>(m_stateTags);
-        UpdatePerOpacity();
+        m_state.Clear(State::Tag::HasDialogContext);
         return false;
     }
 
     if (evt->type() == QEvent::Enter)
     {
-        State::set_tag<State::Tag::HasMouseContext>(m_stateTags);
-        UpdatePerOpacity();
+        m_state.Set(State::Tag::HasMouseContext);
         return false;
     }
 
     if (evt->type() == QEvent::Leave)
     {
-        State::clear_tag<State::Tag::HasMouseContext>(m_stateTags);
-        UpdatePerOpacity();
-        m_buttonBar->Hide();
+        m_state.Clear(State::Tag::HasMouseContext);
         return false;
     }
 
@@ -327,7 +323,7 @@ bool MainWindow::eventFilter(QObject* obj, QEvent* evt)
 
 
     // Do not process any of the following events in fullscreen mode
-    if (State::has_tag<State::Tag::Fullscreen>(m_stateTags))
+    if (m_state.Get(State::Tag::Fullscreen))
         return false;
 
     if (MouseEvent::is_mmb_press(evt))
@@ -486,18 +482,12 @@ void MainWindow::ShowContextMenu(const QPoint& pos)
     apply_qtbug_74655_workaround(opacitySubmenu);
     menu->addMenu(opacitySubmenu);
 
-    m_actionToggleOpaqueWhenActive->setChecked(State::has_tag<State::Tag::OpaqueWhenActive>(m_stateTags));
     menu->addAction(m_actionToggleOpaqueWhenActive);
 
     menu->addSeparator();
 
-    m_actionToggleOnTop->setChecked(State::has_tag<State::Tag::OnTop>(m_stateTags));
     menu->addAction(m_actionToggleOnTop);
-
-    m_actionToggleLocked->setChecked(IsLocked());
     menu->addAction(m_actionToggleLocked);
-
-    m_actionToggleFullscreen->setChecked(State::has_tag<State::Tag::Fullscreen>(m_stateTags));
     menu->addAction(m_actionToggleFullscreen);
 
     menu->addSeparator();
@@ -545,16 +535,12 @@ void MainWindow::at_actionSaveAs_triggered()
 
 void MainWindow::at_actionToggleFullscreen_triggered()
 {
-    State::toggle_tag<State::Tag::Fullscreen>(m_stateTags);
-    UpdatePerFullscreen();
-    UpdatePerUnsaved();
+    m_state.Toggle(State::Tag::Fullscreen);
 }
 
 void MainWindow::at_actionToggleOpaqueWhenActive_triggered()
 {
-    State::toggle_tag<State::Tag::OpaqueWhenActive>(m_stateTags);
-    UpdatePerOpacity();
-    UpdatePerUnsaved();
+    m_state.Toggle(State::Tag::OpaqueWhenActive);
 }
 
 
@@ -563,10 +549,9 @@ void MainWindow::at_actionExit_triggered()
     emit close();
 }
 
-void MainWindow::at_opacityAdjustTimer_expired()
+void MainWindow::at_opacityInteractionTimer_expired()
 {
-    State::clear_tag<State::Tag::OpacityAdjust>(m_stateTags);
-    UpdatePerOpacity();
+    m_state.Clear(State::Tag::OpacityInteraction);
 }
 
 void MainWindow::at_delayedUnsavedUpdateTimer_expired()
@@ -576,20 +561,12 @@ void MainWindow::at_delayedUnsavedUpdateTimer_expired()
 
 void MainWindow::at_actionToggleOnTop_triggered()
 {
-    ToggleOnTop();
-}
-
-void MainWindow::ToggleOnTop()
-{
-    State::toggle_tag<State::Tag::OnTop>(m_stateTags);
-    UpdatePerOnTopState();
-    UpdatePerUnsaved();
+    m_state.Toggle(State::Tag::OnTop);
 }
 
 void MainWindow::at_actionToggleLocked_triggered()
 {
-    m_textEdit->setReadOnly(!IsLocked());
-    UpdatePerUnsaved();
+    m_state.Toggle(State::Tag::Locked);
 }
 
 void MainWindow::at_actionSetColorScheme_triggered()
@@ -678,8 +655,8 @@ void MainWindow::at_buttonBar_buttonClicked(const QString& name)
         emit close();
     else if (name == "minimize")
         setWindowState(Qt::WindowState::WindowMinimized);
-    else if(name == "top_lock")
-		ToggleOnTop();
+    else if (name == "top_lock")
+        m_state.Toggle(State::Tag::OnTop);
 }
 
 
@@ -698,7 +675,7 @@ bool MainWindow::HasUnsavedMeta() const
         return false;
     if (!Save::pun(m_save))
         return true;
-    if (Content::locked(Pun::content(*Save::pun(m_save))) != IsLocked())
+    if (Content::locked(Pun::content(*Save::pun(m_save))) != m_state.Get(State::Tag::Locked))
         return true;
     if (!Window::equal(Pun::window(*Save::pun(m_save)), GetWindow()))
         return true;
@@ -723,15 +700,15 @@ void MainWindow::SetOpacity(float opacity)
     if (Window::equal_opacity(m_opacity, Window::clamp_opacity(opacity)))
         return;
     m_opacity = Window::clamp_opacity(opacity);
-    StartOpacityAdjustPeriod();
+    StartOpacityInteractionPeriod();
     UpdatePerOpacity();
     UpdatePerUnsaved();
 }
 
-void MainWindow::StartOpacityAdjustPeriod()
+void MainWindow::StartOpacityInteractionPeriod()
 {
-    State::set_tag<State::Tag::OpacityAdjust>(m_stateTags);
-    m_opacityAdjustTimer.start();
+    m_state.Set(State::Tag::OpacityInteraction);
+    m_opacityInteractionTimer.start();
 }
 
 void MainWindow::UpdatePerStyle()
@@ -754,7 +731,7 @@ void MainWindow::UpdateButtonBarIcons()
 	m_buttonBar->SetButtonIcon("close", SchemeIcon::get_close_icon(schema, m_buttonBar->GetButtonSize()));
 	m_buttonBar->SetButtonIcon("minimize", SchemeIcon::get_minimize_icon(schema, m_buttonBar->GetButtonSize()));
 
-    if(State::has_tag<State::Tag::OnTop>(m_stateTags))
+    if(m_state.Get(State::Tag::OnTop))
         m_buttonBar->SetButtonIcon("top_lock", SchemeIcon::get_top_lock_on_icon(schema, m_buttonBar->GetButtonSize()));
     else
         m_buttonBar->SetButtonIcon("top_lock", SchemeIcon::get_top_lock_off_icon(schema, m_buttonBar->GetButtonSize()));
@@ -764,7 +741,11 @@ void MainWindow::UpdateButtonBarIcons()
 
 void MainWindow::UpdatePerFullscreen()
 {
-    if (State::has_tag<State::Tag::Fullscreen>(m_stateTags))
+    m_actionToggleFullscreen->blockSignals(true);
+    m_actionToggleFullscreen->setChecked(m_state.Get(State::Tag::Fullscreen));
+    m_actionToggleFullscreen->blockSignals(false);
+
+    if (m_state.Get(State::Tag::Fullscreen))
     {
         PushGeometry();
         UpdatePerOpacity();
@@ -781,7 +762,7 @@ void MainWindow::UpdatePerFullscreen()
         else
         {
             const int hMargin = gm.width() / 20;
-            const int vMargin = gm.height() / 5;
+            const int vMargin = hMargin;
 			setContentsMargins(hMargin, vMargin, hMargin, vMargin);
         }
     }
@@ -796,6 +777,18 @@ void MainWindow::UpdatePerFullscreen()
     }
 }
 
+void MainWindow::UpdatePerContext()
+{
+    if(!m_state.Get(State::Tag::HasDialogContext) && !m_state.Get(State::Tag::HasMouseContext))
+		m_buttonBar->Hide();
+}
+
+void MainWindow::UpdatePerOpaqueWhenActive()
+{
+    m_actionToggleOpaqueWhenActive->blockSignals(true);
+    m_actionToggleOpaqueWhenActive->setChecked(m_state.Get(State::Tag::OpaqueWhenActive));
+    m_actionToggleOpaqueWhenActive->blockSignals(false);
+}
 
 void MainWindow::DecreaseFontSize()
 {
@@ -843,6 +836,41 @@ QString MainWindow::GetBrowseFilename()
     return filePath;
 }
 
+void MainWindow::at_stateChanged(uint8_t tag)
+{
+    switch (tag)
+    {
+		case State::Tag::Fullscreen:
+            UpdatePerFullscreen();
+            break;
+
+        case State::Tag::OnTop:
+            UpdatePerOnTopState();
+            break;
+
+        case State::Tag::HasDialogContext:
+        case State::Tag::HasMouseContext:
+            UpdatePerContext();
+			UpdatePerOpacity();
+            break;
+
+        case State::Tag::OpaqueWhenActive:
+            UpdatePerOpaqueWhenActive();
+            UpdatePerOpacity();
+            break;
+
+        case State::Tag::OpacityInteraction:
+        case State::Tag::MsgBox:
+            UpdatePerOpacity();
+            break;
+
+        case State::Tag::Locked:
+            UpdatePerLocked();
+            break;
+    }
+    UpdatePerUnsaved();
+}
+
 void MainWindow::at_document_contentsChanged()
 {
     UpdatePerUnsaved();
@@ -851,7 +879,7 @@ void MainWindow::at_document_contentsChanged()
 content_t MainWindow::GetContent() const
 {
     content_t content{ Content::defaults };
-    Content::locked(content) = IsLocked();
+    Content::locked(content) = m_state.Get(State::Tag::Locked);
     Content::text(content) = m_textEdit->toPlainText();
     return content;
 }
@@ -859,23 +887,17 @@ content_t MainWindow::GetContent() const
 void MainWindow::SetContent(const content_t& content)
 {
     m_textEdit->document()->setPlainText(Content::text(content));
-    SetLocked(Content::locked(content));
+    m_state.Set(State::Tag::Locked, Content::locked(content));
 }
-
-void MainWindow::SetLocked(bool locked) 
-{
-    m_textEdit->setReadOnly(locked); 
-}
-
 
 window_t MainWindow::GetWindow() const
 {
     window_t window{ Window::defaults };
     Window::geometry(window) = GetGeometry();
     Window::opacity(window) = m_opacity;
-    Window::opaque_when_active(window) = State::has_tag<State::Tag::OpaqueWhenActive>(m_stateTags);
-	Window::on_top(window) = State::has_tag<State::Tag::OnTop>(m_stateTags);
-    Window::fullscreen(window) = State::has_tag<State::Tag::Fullscreen>(m_stateTags);
+    Window::opaque_when_active(window) = m_state.Get(State::Tag::OpaqueWhenActive);
+	Window::on_top(window) = m_state.Get(State::Tag::OnTop);
+    Window::fullscreen(window) = m_state.Get(State::Tag::Fullscreen);
     return window;
 }
 
@@ -895,25 +917,10 @@ void MainWindow::SetWindow(const window_t& window)
         PushGeometry(Window::geometry(window));
         PopGeometry();
     }
-
     m_opacity = Window::clamp_opacity(Window::opacity(window));
-
-	if (Window::opaque_when_active(window))
-        State::set_tag<State::Tag::OpaqueWhenActive>(m_stateTags);
-
-    if (Window::on_top(window))
-    {
-        State::set_tag<State::Tag::OnTop>(m_stateTags);
-        UpdatePerOnTopState();
-    }
-
-    UpdatePerOpacity();
-
-    if (Window::fullscreen(window))
-    {
-        State::set_tag<State::Tag::Fullscreen>(m_stateTags);
-		UpdatePerFullscreen();
-    }
+	m_state.Set(State::Tag::OpaqueWhenActive, Window::opaque_when_active(window));
+	m_state.Set(State::Tag::OnTop, Window::on_top(window));
+	m_state.Set(State::Tag::Fullscreen,Window::fullscreen(window));
 }
 
 void MainWindow::SetPun(const pun_t& pun, const QString& filePath)
@@ -988,11 +995,9 @@ QByteArray MainWindow::PeekGeometry() const
 
 int MainWindow::ShowMessageBox(QMessageBox& msgBox)
 {
-    State::set_tag<State::Tag::MsgBox>(m_stateTags);
-    UpdatePerOpacity();
+    m_state.Set(State::Tag::MsgBox);
     const int ret = msgBox.exec();
-    State::clear_tag<State::Tag::MsgBox>(m_stateTags);
-    UpdatePerOpacity();
+    m_state.Clear(State::Tag::MsgBox);
     return ret;
 }
 
@@ -1155,28 +1160,32 @@ void MainWindow::UpdateStatusBar(bool hasUnsavedMeta, bool hasUnsavedText)
 
 void MainWindow::UpdatePerOnTopState()
 {
-    if (State::has_tag<State::Tag::Fullscreen>(m_stateTags))
+    m_actionToggleOnTop->blockSignals(true);
+    m_actionToggleOnTop->setChecked(m_state.Get(State::Tag::OnTop));
+    m_actionToggleOnTop->blockSignals(false);
+
+    if (m_state.Get(State::Tag::Fullscreen))
         return;
-    SetupWindowFlags(State::has_tag<State::Tag::OnTop>(m_stateTags));
+    SetupWindowFlags(m_state.Get(State::Tag::OnTop));
     UpdateButtonBarIcons();
 }
 
 void MainWindow::UpdatePerOpacity()
 {
-    if(State::has_tag<State::Tag::Fullscreen>(m_stateTags) || State::has_tag<State::Tag::MsgBox>(m_stateTags))
+    if(m_state.Get(State::Tag::Fullscreen) || m_state.Get(State::Tag::MsgBox))
     {
 		setWindowOpacity(1.f);
         return;
     }
 
-    if (State::has_tag<State::Tag::OpacityAdjust>(m_stateTags))
+    if (m_state.Get(State::Tag::OpacityInteraction))
     {
 		setWindowOpacity(m_opacity);
         return;
     }
 
-    if (State::has_tag<State::Tag::OpaqueWhenActive>(m_stateTags)
-        && (State::has_tag<State::Tag::HasMouseContext>(m_stateTags) || State::has_tag<State::Tag::HasDialogContext>(m_stateTags)))
+    if (m_state.Get(State::Tag::OpaqueWhenActive)
+        && (m_state.Get(State::Tag::HasMouseContext) || m_state.Get(State::Tag::HasDialogContext)))
     {
 		setWindowOpacity(1.f);
         return;
@@ -1185,16 +1194,24 @@ void MainWindow::UpdatePerOpacity()
 	setWindowOpacity(m_opacity);
 }
 
+void MainWindow::UpdatePerLocked()
+{
+    m_actionToggleLocked->blockSignals(true);
+    m_actionToggleLocked->setChecked(m_state.Get(State::Tag::Locked));
+    m_actionToggleLocked->blockSignals(false);
+    m_textEdit->setReadOnly(m_state.Get(State::Tag::Locked));
+}
+
 void MainWindow::SetupWindowFlags(bool onTop)
 {
-    if(!State::has_tag<State::Tag::Fullscreen>(m_stateTags))
+    if(!m_state.Get(State::Tag::Fullscreen))
 		PushGeometry();
     if(onTop)
         setWindowFlags(Qt::WindowStaysOnTopHint | Qt::FramelessWindowHint);
     else
         setWindowFlags(Qt::FramelessWindowHint);
     show();
-    if(!State::has_tag<State::Tag::Fullscreen>(m_stateTags))
+    if(!m_state.Get(State::Tag::Fullscreen))
 		PopGeometry();
 }
 

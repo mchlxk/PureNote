@@ -35,6 +35,8 @@ protected:
     void moveEvent(QMoveEvent* event);
 
 private slots:
+    void at_stateChanged(uint8_t);
+
     void at_document_contentsChanged();
     void at_customContextMenuRequested(const QPoint&);
     void at_textEdit_customContextMenuRequested(const QPoint&);
@@ -59,7 +61,7 @@ private slots:
     void at_actionToggleOpaqueWhenActive_triggered();
     void at_actionExit_triggered();
 
-    void at_opacityAdjustTimer_expired();
+    void at_opacityInteractionTimer_expired();
     void at_delayedUnsavedUpdateTimer_expired();
 
     void at_buttonBar_buttonClicked(const QString& name);
@@ -99,8 +101,6 @@ private:
     QString GetBrowseFilename();
 
     bool HasFile() const { return !Save::file_path(m_save).isEmpty(); }
-    bool IsLocked() const { return m_textEdit->isReadOnly(); }
-    void SetLocked(bool locked);
 
     void SetupWindowFlags(bool onTop);
     void SetupActions();
@@ -113,7 +113,7 @@ private:
 
     int ShowMessageBox(QMessageBox&);
 
-    void StartOpacityAdjustPeriod();
+    void StartOpacityInteractionPeriod();
     void ScheduleUpdatePerUnsaved();
     void UpdatePerUnsaved();
     void UpdateStatusBar(bool hasUnsavedView, bool hasUnsavedText);
@@ -121,9 +121,12 @@ private:
     void SetOpacity(float opacity);
     void UpdatePerStyle();
     void UpdatePerOpacity();
+    void UpdatePerLocked();
 
     void UpdatePerOnTopState();
     void UpdatePerFullscreen();
+    void UpdatePerContext();
+    void UpdatePerOpaqueWhenActive();
 
     void UpdateButtonBarIcons();
 
@@ -131,8 +134,6 @@ private:
     void IncreaseFontSize();
     void DecreaseOpacity();
     void IncreaseOpacity();
-
-    void ToggleOnTop();
 
     // file actions
     QAction* m_actionSave{ nullptr };
@@ -166,8 +167,9 @@ private:
 
     save_t m_save{ Save::no_save };
 
-    State::tags_t m_stateTags;
-    QTimer m_opacityAdjustTimer;
+    state_t m_state;
+
+    QTimer m_opacityInteractionTimer;
     QTimer m_delayedUnsavedUpdateTimer;
 };
 

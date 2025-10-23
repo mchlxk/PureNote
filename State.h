@@ -2,6 +2,8 @@
 
 #include <set>
 
+#include <QObject>
+
 namespace State
 {
     namespace Tag
@@ -11,14 +13,29 @@ namespace State
         constexpr uint8_t OpaqueWhenActive{3};
         constexpr uint8_t HasDialogContext{4};
         constexpr uint8_t HasMouseContext{5};
-        constexpr uint8_t OpacityAdjust{6};
-        constexpr uint8_t MsgBox{7};
+        constexpr uint8_t OpacityInteraction{6};
+        constexpr uint8_t MsgBox{8};
+        constexpr uint8_t Locked{9};
     }
     using tags_t = std::set<uint8_t>;    
     
-    template<uint8_t TAG> static inline bool has_tag(const tags_t& op) { return op.count(TAG); }
-    template<uint8_t TAG> static inline void clear_tag(tags_t& op) { op.erase(TAG); }
-    template<uint8_t TAG> static inline void set_tag(tags_t& op) { op.insert(TAG); }
-    template<uint8_t TAG> static inline void toggle_tag(tags_t& op) { if (has_tag<TAG>(op)) clear_tag<TAG>(op); else set_tag<TAG>(op); }
+    class T
+	: public QObject
+    {
+        Q_OBJECT
+    
+    public:
+        void Set(uint8_t tag);
+        void Set(uint8_t tag, bool set);
+        void Clear(uint8_t tag);
+        void Toggle(uint8_t tag);
+        bool Get(uint8_t tag) const;
+    signals:
+        void state_changed(uint8_t);
+
+	private:
+        tags_t m_tags;
+    };
 }
+using state_t = State::T;
 

@@ -36,13 +36,13 @@
     <Import Project="$(QtMsBuild)\qt_defaults.props" />
   </ImportGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'" Label="QtSettings">
-    <QtInstall>5.15.2</QtInstall>
+    <QtInstall>5.12.12</QtInstall>
     <QtModules>core;xml;gui;widgets;quick;quick</QtModules>
     <QtBuildConfig>debug</QtBuildConfig>
     <QtQMLDebugEnable>true</QtQMLDebugEnable>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x64'" Label="QtSettings">
-    <QtInstall>5.15.2</QtInstall>
+    <QtInstall>5.12.12</QtInstall>
     <QtModules>core;xml;gui;widgets;quick;core;xml;gui;widgets;quick</QtModules>
     <QtBuildConfig>release</QtBuildConfig>
   </PropertyGroup>
@@ -102,6 +102,7 @@
     <ClCompile Include="PunSerializer.cpp" />
     <ClCompile Include="Save.cpp" />
     <ClCompile Include="SchemeIcon.cpp" />
+    <ClCompile Include="State.cpp" />
     <ClCompile Include="Style.cpp" />
     <ClCompile Include="StyleSheet.cpp" />
     <ClCompile Include="ButtonBar.cpp" />
@@ -126,7 +127,7 @@
     <ClInclude Include="resource.h" />
     <ClInclude Include="Save.h" />
     <ClInclude Include="SchemeIcon.h" />
-    <ClInclude Include="State.h" />
+    <QtMoc Include="State.h" />
     <ClInclude Include="Style.h" />
     <ClInclude Include="StyleSheet.h" />
     <QtMoc Include="ButtonBar.h" />

@@ -64,12 +64,18 @@
     <ClCompile Include="ButtonBar.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="State.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <QtMoc Include="MainWindow.h">
       <Filter>Source Files</Filter>
     </QtMoc>
     <QtMoc Include="ButtonBar.h">
+      <Filter>Source Files</Filter>
+    </QtMoc>
+    <QtMoc Include="State.h">
       <Filter>Source Files</Filter>
     </QtMoc>
   </ItemGroup>
@@ -90,9 +96,6 @@
       <Filter>Source Files</Filter>
     </ClInclude>
     <ClInclude Include="Style.h">
-      <Filter>Source Files</Filter>
-    </ClInclude>
-    <ClInclude Include="State.h">
       <Filter>Source Files</Filter>
     </ClInclude>
     <ClInclude Include="resource.h" />
