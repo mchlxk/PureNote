@@ -58,8 +58,9 @@ static inline void apply_qtbug_74655_workaround(T* item)
 
 MainWindow::MainWindow()
 : m_textEdit(new QPlainTextEdit)
-, m_statusLabel (new QLabel)
+, m_statusLabel(new QLabel)
 , m_buttonBar(new button_bar_t(this, 24))
+, m_urlHighlighter( new UrlHighlighter(m_textEdit->document()) )
 {
     QCoreApplication::instance()->installEventFilter(this);
     setContentsMargins(0, 0, 0, 0);
@@ -88,8 +89,6 @@ MainWindow::MainWindow()
     SetupButtonBar();
 
 	SetupWindowFlags(false);
-
-    new UrlHighlighter(m_textEdit->document());
 }
 
 void MainWindow::SetupActions()
@@ -280,14 +279,21 @@ bool MainWindow::eventFilter(QObject* obj, QEvent* evt)
 		QMouseEvent* mouseEvent = static_cast<QMouseEvent*> (evt);
         if (mouseEvent->modifiers() == Qt::ControlModifier)
         {
+			QTextCursor cursor = m_textEdit->cursorForPosition(m_textEdit->mapFromGlobal(mouseEvent->globalPos()));
+            const bool hasUrl = m_urlHighlighter->HasUrl(cursor.blockNumber(), cursor.positionInBlock());
+
+
 			//const QPoint p = mouseEvent->pos();
 			//const QPoint pp = mouseEvent->globalPos();
 
-			QTextCursor cursor = m_textEdit->cursorForPosition(m_textEdit->mapFromGlobal(mouseEvent->globalPos()));
+			//QTextCursor cursor = m_textEdit->cursorForPosition(m_textEdit->mapFromGlobal(mouseEvent->globalPos()));
 			//QTextCursor cursor = m_textEdit->cursorForPosition(QPoint(200, 200));
-			const QTextCharFormat fmt = cursor.charFormat();
+			//const QTextCharFormat fmt = cursor.charFormat();
+
+            //const auto fmt = m_urlHighlighter->GetFormat(10);
+            
 			//if (fmt.isAnchor())
-			if (fmt.isAnchor())
+			if (hasUrl)
 			{
 				QGuiApplication::setOverrideCursor(Qt::PointingHandCursor);
 				//setCursor(Qt::PointingHandCursor);
@@ -319,9 +325,19 @@ bool MainWindow::eventFilter(QObject* obj, QEvent* evt)
     {
         QMouseEvent* mouseEvent = static_cast<QMouseEvent*> (evt);
 		QTextCursor cursor = m_textEdit->cursorForPosition(m_textEdit->mapFromGlobal(mouseEvent->globalPos()));
+        const QString url = m_urlHighlighter->GetUrl(cursor.blockNumber(), cursor.positionInBlock());
+        
+        if (!url.isEmpty())
+        {
+            QDesktopServices::openUrl(QUrl(url));
+            return true;
+        }
+
+
 		//QTextCursor cursor = m_textEdit->cursorForPosition(QPoint(200, 200));
-		const QTextCharFormat fmt = cursor.charFormat();
+		//const QTextCharFormat fmt = cursor.charFormat();
 		//if (fmt.isAnchor())
+        /*
         if (fmt.isAnchor())
         {
             QString href = fmt.anchorHref();
@@ -331,6 +347,7 @@ bool MainWindow::eventFilter(QObject* obj, QEvent* evt)
                 return true; // prevent default text-edit click 
             }
         }
+        */
         return false;
     }
 
@@ -941,6 +958,7 @@ void MainWindow::SetContent(const content_t& content)
 {
     m_textEdit->document()->setPlainText(Content::text(content));
     m_state.Set(State::Tag::Locked, Content::locked(content));
+    m_urlHighlighter->rehighlight();
 }
 
 window_t MainWindow::GetWindow() const

@@ -17,6 +17,7 @@
 #include "PunExpected.h"
 
 #include "ButtonBar.h"
+#include "UrlHighlighter.h"
 
 
 class MainWindow : public QMainWindow
@@ -158,6 +159,8 @@ private:
 
     QPlainTextEdit *m_textEdit{ nullptr };
     QLabel* m_statusLabel{ nullptr };
+    UrlHighlighter* m_urlHighlighter{ nullptr };
+
 
     button_bar_t* m_buttonBar{ nullptr };
 
