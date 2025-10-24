@@ -19,6 +19,7 @@
 #include "ButtonBar.h"
 
 #include "PostProcessExecutor.h"
+#include "UrlCache.h"
 
 
 class MainWindow : public QMainWindow
@@ -161,6 +162,7 @@ private:
     QPlainTextEdit *m_textEdit{ nullptr };
     QLabel* m_statusLabel{ nullptr };
     PostProcessExecutor* m_postProcess{ nullptr };
+    url_cache_t m_urlCache;
 
     button_bar_t* m_buttonBar{ nullptr };
 

@@ -95,9 +95,10 @@ MainWindow::MainWindow()
     m_postProcess->AppendSlot(
         post_process_slot_t(
 			QRegularExpression(R"(https?://[^\s]+|www\.[^\s]+)")
-            , [] (uint32_t) {}
-            , [] (uint32_t) {}
-            , [formatUrl] (uint32_t, int, int, const QString&) {
+            , [this](uint32_t blockId) { this->m_urlCache[blockId].clear(); }
+            , [this](uint32_t blockId) { this->m_urlCache.erase(blockId); }
+            , [this, formatUrl] (uint32_t blockId, int start, int end, const QString& url) {
+                this->m_urlCache[blockId].emplace_back(start, end, url);
                 return formatUrl;
             }
 	) );
@@ -359,30 +360,17 @@ bool MainWindow::eventFilter(QObject* obj, QEvent* evt)
     {
         QMouseEvent* mouseEvent = static_cast<QMouseEvent*> (evt);
 		QTextCursor cursor = m_textEdit->cursorForPosition(m_textEdit->mapFromGlobal(mouseEvent->globalPos()));
-        //const QString url = m_urlDetector->GetUrl(cursor.blockNumber(), cursor.positionInBlock());
-        const QString url = "";
-        
-        if (!url.isEmpty())
+        const auto* blockData = cursor.block().userData();
+        if (blockData)
         {
-            QDesktopServices::openUrl(QUrl(url));
-            return true;
-        }
-
-
-		//QTextCursor cursor = m_textEdit->cursorForPosition(QPoint(200, 200));
-		//const QTextCharFormat fmt = cursor.charFormat();
-		//if (fmt.isAnchor())
-        /*
-        if (fmt.isAnchor())
-        {
-            QString href = fmt.anchorHref();
-            if (!href.isEmpty())
+            const uint32_t blockId = static_cast<const PostProcessBlock*>(blockData)->GetId();
+            const QString url = UrlCache::get_url(m_urlCache, blockId, cursor.positionInBlock());
+            if (!url.isEmpty())
             {
-                QDesktopServices::openUrl(QUrl(href));
-                return true; // prevent default text-edit click 
+                QDesktopServices::openUrl(QUrl(url));
+                return true;
             }
         }
-        */
         return false;
     }
 

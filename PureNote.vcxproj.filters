@@ -73,6 +73,9 @@
     <ClCompile Include="PostProcessExecutor.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="UrlCache.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <QtMoc Include="MainWindow.h">
@@ -139,6 +142,9 @@
       <Filter>Source Files</Filter>
     </ClInclude>
     <ClInclude Include="PostProcessSlot.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="UrlCache.h">
       <Filter>Source Files</Filter>
     </ClInclude>
   </ItemGroup>
