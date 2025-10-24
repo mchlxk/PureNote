@@ -13,6 +13,8 @@
 #include "PunSerializer.h"
 #include "Window.h"
 
+#include "UrlHighlighter.h"
+
 namespace Property
 {
     namespace ColorScheme
@@ -85,6 +87,8 @@ MainWindow::MainWindow()
     SetupButtonBar();
 
 	SetupWindowFlags(false);
+
+    new UrlHighlighter(m_textEdit->document());
 }
 
 void MainWindow::SetupActions()
@@ -278,6 +282,24 @@ bool MainWindow::eventFilter(QObject* obj, QEvent* evt)
             m_buttonBar->Show();
         else
             m_buttonBar->Hide();
+
+        //const QPoint p = mouseEvent->pos();
+        //const QPoint pp = mouseEvent->globalPos();
+
+        QTextCursor cursor = m_textEdit->cursorForPosition(m_textEdit->mapFromGlobal(mouseEvent->globalPos()));
+        //QTextCursor cursor = m_textEdit->cursorForPosition(QPoint(200, 200));
+        //const QTextCharFormat fmt = cursor.charFormat();
+        //if (fmt.isAnchor())
+        if(cursor.charFormat().isAnchor())
+        {
+            setCursor(Qt::PointingHandCursor);
+            //QTextCharFormat fmtActive(fmt);
+            //fmtActive.setUnderlineStyle(QTextCharFormat::SingleUnderline);
+            //cursor.setCharFormat(fmtActive);
+        }
+        //else
+            //viewport()->setCursor(Qt::IBeamCursor);
+
         return false;
     }
 

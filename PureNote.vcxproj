@@ -131,6 +131,7 @@
     <ClInclude Include="Style.h" />
     <ClInclude Include="StyleSheet.h" />
     <QtMoc Include="ButtonBar.h" />
+    <ClInclude Include="UrlHighlighter.h" />
     <ClInclude Include="Window.h" />
   </ItemGroup>
   <ItemGroup>
