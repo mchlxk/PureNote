@@ -380,7 +380,7 @@ bool MainWindow::eventFilter(QObject* obj, QEvent* evt)
             {
                 QMouseEvent* mouseEvent = static_cast<QMouseEvent*> (evt);
                 move(startPos + (mouseEvent->globalPos() - mouseStartPos));
-                return true;
+                return false;
             }
 
             case MouseEvent::ActionE::ResizeAltRmb:
@@ -388,7 +388,7 @@ bool MainWindow::eventFilter(QObject* obj, QEvent* evt)
                 QMouseEvent* mouseEvent = static_cast<QMouseEvent*> (evt);
                 const auto sizeChange = mouseEvent->globalPos() - mouseStartPos;
                 resize(startSize.width() + sizeChange.x(), startSize.height() + sizeChange.y());
-                return true;
+                return false;
             }
         }
     }
@@ -396,19 +396,19 @@ bool MainWindow::eventFilter(QObject* obj, QEvent* evt)
     if (MouseEvent::is_lmb_release(evt) && action == MouseEvent::ActionE::MoveLmb)
     {
         action = MouseEvent::ActionE::None;
-        return true;
+        return false; // return false to unblock updating mouse cursor
     }
 
     if (MouseEvent::is_mmb_release(evt) && action == MouseEvent::ActionE::MoveMmb)
     {
         action = MouseEvent::ActionE::None;
-        return true;
+        return false; // return false to unblock updating mouse cursor
     }
 
     if (MouseEvent::is_rmb_release(evt) && action == MouseEvent::ActionE::ResizeAltRmb)
     {
         action = MouseEvent::ActionE::None;
-        return true;
+        return false; // return false to unblock updating mouse cursor
     }
 
     if (MouseEvent::is_alt_wheel_down(evt))
