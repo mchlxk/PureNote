@@ -17,3 +17,6 @@ const QString ColorScheme::Ui::dimmed{"#bbbbbb"};
 const QString ColorScheme::Ui::background{"#6a6366"};
 const QString ColorScheme::Ui::accent{"#5a5255"};
 
+const QString ColorScheme::Highlighter::text_light{"#dddddd"};
+const QString ColorScheme::Highlighter::text_dark{"#5a5255"};
+

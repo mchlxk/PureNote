@@ -88,27 +88,36 @@ MainWindow::MainWindow()
 
 	SetupWindowFlags(false);
 
+	QTextCharFormat formatUrl;
+	formatUrl.setFontUnderline(true);
+	formatUrl.setUnderlineStyle(QTextCharFormat::DotLine);
+
     m_postProcess->AppendSlot(
         post_process_slot_t(
 			QRegularExpression(R"(https?://[^\s]+|www\.[^\s]+)")
             , [] (uint32_t) {}
             , [] (uint32_t) {}
-            , [] (uint32_t, int, int, const QString&) {
-                QTextCharFormat fmt;
-				fmt.setFontUnderline(true);
-				fmt.setUnderlineStyle(QTextCharFormat::DotLine);
-                return fmt;
+            , [formatUrl] (uint32_t, int, int, const QString&) {
+                return formatUrl;
             }
 	) );
+
+    const QBrush brushLight = QBrush(QColor(ColorScheme::Highlighter::text_light));
+    const QBrush brushDark = QBrush(QColor(ColorScheme::Highlighter::text_dark));
 
     m_postProcess->AppendSlot(
         post_process_slot_t(
 			QRegularExpression(R"(\#[0-9a-fA-F]{6})")
             , [] (uint32_t) {}
             , [] (uint32_t) {}
-            , [] (uint32_t, int, int, const QString& text) {
+            , [brushLight, brushDark] (uint32_t, int, int, const QString& phrase) {
                 QTextCharFormat fmt;
-                fmt.setBackground(QBrush(QColor(text)));
+                const QColor bgColor(phrase);
+                fmt.setBackground(QBrush(bgColor));
+                if(bgColor.lightness() > 128)
+					fmt.setForeground(brushDark);
+                else
+					fmt.setForeground(brushLight);
                 return fmt;
             }
 	) );

@@ -27,6 +27,12 @@ namespace ColorScheme
 		extern const QString background;
 		extern const QString accent;
 	}
+
+	namespace Highlighter
+	{
+		extern const QString text_light;
+		extern const QString text_dark;
+	}
 }
 
 using color_scheme_t = ColorScheme::T;
