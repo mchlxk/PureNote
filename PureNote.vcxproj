@@ -99,6 +99,7 @@
     <ClCompile Include="MainWindow.cpp" />
     <ClCompile Include="MouseEvent.cpp" />
     <ClCompile Include="PostProcessBlock.cpp" />
+    <ClCompile Include="PostProcessExecutor.cpp" />
     <ClCompile Include="PunParser.cpp" />
     <ClCompile Include="PunSerializer.cpp" />
     <ClCompile Include="Save.cpp" />
