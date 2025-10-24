@@ -1,6 +1,7 @@
 #include <QtWidgets>
 #include <QTextDocument>
 #include <QHboxLayout>
+#include <QGuiApplication>
 
 #include "Mainwindow.h"
 #include "MouseEvent.h"
@@ -274,6 +275,34 @@ bool MainWindow::eventFilter(QObject* obj, QEvent* evt)
     static QPoint mouseStartPos;
     static MouseEvent::ActionE action{ MouseEvent::ActionE::None };
 
+    if (evt->type() == QEvent::MouseMove && action == MouseEvent::ActionE::None)
+    {
+		QMouseEvent* mouseEvent = static_cast<QMouseEvent*> (evt);
+        if (mouseEvent->modifiers() == Qt::ControlModifier)
+        {
+			//const QPoint p = mouseEvent->pos();
+			//const QPoint pp = mouseEvent->globalPos();
+
+			QTextCursor cursor = m_textEdit->cursorForPosition(m_textEdit->mapFromGlobal(mouseEvent->globalPos()));
+			//QTextCursor cursor = m_textEdit->cursorForPosition(QPoint(200, 200));
+			const QTextCharFormat fmt = cursor.charFormat();
+			//if (fmt.isAnchor())
+			if (fmt.isAnchor())
+			{
+				QGuiApplication::setOverrideCursor(Qt::PointingHandCursor);
+				//setCursor(Qt::PointingHandCursor);
+				//QTextCharFormat fmtActive(fmt);
+				//fmtActive.setUnderlineStyle(QTextCharFormat::SingleUnderline);
+				//cursor.mergeCharFormat(fmtActive);
+			}
+			else
+				QGuiApplication::restoreOverrideCursor();
+				//QGuiApplication::setOverrideCursor(Qt::PointingHandCursor);
+				//m_textEdit->setCursor(Qt::IBeamCursor);
+
+        }
+    }
+
     // Exit early on plain mouse-move
     if (evt->type() == QEvent::MouseMove && action == MouseEvent::ActionE::None)
     {
@@ -283,23 +312,25 @@ bool MainWindow::eventFilter(QObject* obj, QEvent* evt)
         else
             m_buttonBar->Hide();
 
-        //const QPoint p = mouseEvent->pos();
-        //const QPoint pp = mouseEvent->globalPos();
+        return false;
+    }
 
-        QTextCursor cursor = m_textEdit->cursorForPosition(m_textEdit->mapFromGlobal(mouseEvent->globalPos()));
-        //QTextCursor cursor = m_textEdit->cursorForPosition(QPoint(200, 200));
-        //const QTextCharFormat fmt = cursor.charFormat();
-        //if (fmt.isAnchor())
-        if(cursor.charFormat().isAnchor())
+    if (MouseEvent::is_ctrl_lmb_press(evt) && action == MouseEvent::ActionE::None)
+    {
+        QMouseEvent* mouseEvent = static_cast<QMouseEvent*> (evt);
+		QTextCursor cursor = m_textEdit->cursorForPosition(m_textEdit->mapFromGlobal(mouseEvent->globalPos()));
+		//QTextCursor cursor = m_textEdit->cursorForPosition(QPoint(200, 200));
+		const QTextCharFormat fmt = cursor.charFormat();
+		//if (fmt.isAnchor())
+        if (fmt.isAnchor())
         {
-            setCursor(Qt::PointingHandCursor);
-            //QTextCharFormat fmtActive(fmt);
-            //fmtActive.setUnderlineStyle(QTextCharFormat::SingleUnderline);
-            //cursor.setCharFormat(fmtActive);
+            QString href = fmt.anchorHref();
+            if (!href.isEmpty())
+            {
+                QDesktopServices::openUrl(QUrl(href));
+                return true; // prevent default text-edit click 
+            }
         }
-        //else
-            //viewport()->setCursor(Qt::IBeamCursor);
-
         return false;
     }
 

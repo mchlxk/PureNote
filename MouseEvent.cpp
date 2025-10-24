@@ -20,6 +20,18 @@ bool MouseEvent::is_alt_lmb_press(const QEvent* evt)
     return true;
 }
 
+bool MouseEvent::is_ctrl_lmb_press(const QEvent* evt)
+{
+    if (evt->type() != QEvent::MouseButtonPress)
+        return false;
+    const QMouseEvent* mouseEvt = static_cast<const QMouseEvent*>(evt);
+    if (mouseEvt->modifiers() != Qt::ControlModifier)
+        return false;
+    if (mouseEvt->button() != Qt::MouseButton::LeftButton)
+        return false;
+    return true;
+}
+
 bool MouseEvent::is_lmb_release(const QEvent* evt)
 {
     return evt->type() == QEvent::MouseButtonRelease
