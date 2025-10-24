@@ -67,6 +67,9 @@
     <ClCompile Include="State.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="UrlDetector.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <QtMoc Include="MainWindow.h">
@@ -126,7 +129,7 @@
     <ClInclude Include="Save.h">
       <Filter>Source Files</Filter>
     </ClInclude>
-    <ClInclude Include="UrlHighlighter.h">
+    <ClInclude Include="UrlDetector.h">
       <Filter>Source Files</Filter>
     </ClInclude>
   </ItemGroup>

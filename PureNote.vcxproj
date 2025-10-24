@@ -106,6 +106,7 @@
     <ClCompile Include="Style.cpp" />
     <ClCompile Include="StyleSheet.cpp" />
     <ClCompile Include="ButtonBar.cpp" />
+    <ClCompile Include="UrlDetector.cpp" />
     <ClCompile Include="Window.cpp" />
     <QtRcc Include="qml.qrc" />
     <None Include="main.qml" />
@@ -131,7 +132,7 @@
     <ClInclude Include="Style.h" />
     <ClInclude Include="StyleSheet.h" />
     <QtMoc Include="ButtonBar.h" />
-    <ClInclude Include="UrlHighlighter.h" />
+    <ClInclude Include="UrlDetector.h" />
     <ClInclude Include="Window.h" />
   </ItemGroup>
   <ItemGroup>

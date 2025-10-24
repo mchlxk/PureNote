@@ -14,8 +14,6 @@
 #include "PunSerializer.h"
 #include "Window.h"
 
-#include "UrlHighlighter.h"
-
 namespace Property
 {
     namespace ColorScheme
@@ -60,7 +58,7 @@ MainWindow::MainWindow()
 : m_textEdit(new QPlainTextEdit)
 , m_statusLabel(new QLabel)
 , m_buttonBar(new button_bar_t(this, 24))
-, m_urlHighlighter( new UrlHighlighter(m_textEdit->document()) )
+, m_urlDetector( new UrlDetector(m_textEdit->document()) )
 {
     QCoreApplication::instance()->installEventFilter(this);
     setContentsMargins(0, 0, 0, 0);
@@ -280,7 +278,7 @@ bool MainWindow::eventFilter(QObject* obj, QEvent* evt)
         if (mouseEvent->modifiers() == Qt::ControlModifier)
         {
 			QTextCursor cursor = m_textEdit->cursorForPosition(m_textEdit->mapFromGlobal(mouseEvent->globalPos()));
-            const bool hasUrl = m_urlHighlighter->HasUrl(cursor.blockNumber(), cursor.positionInBlock());
+            const bool hasUrl = m_urlDetector->HasUrl(cursor.blockNumber(), cursor.positionInBlock());
 
 
 			//const QPoint p = mouseEvent->pos();
@@ -325,7 +323,7 @@ bool MainWindow::eventFilter(QObject* obj, QEvent* evt)
     {
         QMouseEvent* mouseEvent = static_cast<QMouseEvent*> (evt);
 		QTextCursor cursor = m_textEdit->cursorForPosition(m_textEdit->mapFromGlobal(mouseEvent->globalPos()));
-        const QString url = m_urlHighlighter->GetUrl(cursor.blockNumber(), cursor.positionInBlock());
+        const QString url = m_urlDetector->GetUrl(cursor.blockNumber(), cursor.positionInBlock());
         
         if (!url.isEmpty())
         {
@@ -958,7 +956,7 @@ void MainWindow::SetContent(const content_t& content)
 {
     m_textEdit->document()->setPlainText(Content::text(content));
     m_state.Set(State::Tag::Locked, Content::locked(content));
-    m_urlHighlighter->rehighlight();
+    m_urlDetector->rehighlight();
 }
 
 window_t MainWindow::GetWindow() const
