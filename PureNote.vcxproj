@@ -98,6 +98,7 @@
     <ClCompile Include="main.cpp" />
     <ClCompile Include="MainWindow.cpp" />
     <ClCompile Include="MouseEvent.cpp" />
+    <ClCompile Include="PostProcessBlock.cpp" />
     <ClCompile Include="PunParser.cpp" />
     <ClCompile Include="PunSerializer.cpp" />
     <ClCompile Include="Save.cpp" />
@@ -106,7 +107,6 @@
     <ClCompile Include="Style.cpp" />
     <ClCompile Include="StyleSheet.cpp" />
     <ClCompile Include="ButtonBar.cpp" />
-    <ClCompile Include="UrlDetector.cpp" />
     <ClCompile Include="Window.cpp" />
     <QtRcc Include="qml.qrc" />
     <None Include="main.qml" />
@@ -120,6 +120,9 @@
     <ClInclude Include="ColorScheme.h" />
     <ClInclude Include="HashQString.h" />
     <ClInclude Include="MouseEvent.h" />
+    <QtMoc Include="PostProcessBlock.h" />
+    <ClInclude Include="PostProcessExecutor.h" />
+    <ClInclude Include="PostProcessSlot.h" />
     <ClInclude Include="Pun.h" />
     <ClInclude Include="PunExpected.h" />
     <ClInclude Include="PunOptional.h" />
@@ -132,7 +135,6 @@
     <ClInclude Include="Style.h" />
     <ClInclude Include="StyleSheet.h" />
     <QtMoc Include="ButtonBar.h" />
-    <ClInclude Include="UrlDetector.h" />
     <ClInclude Include="Window.h" />
   </ItemGroup>
   <ItemGroup>

@@ -58,7 +58,7 @@ MainWindow::MainWindow()
 : m_textEdit(new QPlainTextEdit)
 , m_statusLabel(new QLabel)
 , m_buttonBar(new button_bar_t(this, 24))
-, m_urlDetector( new UrlDetector(m_textEdit->document()) )
+, m_postProcess( new PostProcessExecutor(m_textEdit->document()) )
 {
     QCoreApplication::instance()->installEventFilter(this);
     setContentsMargins(0, 0, 0, 0);
@@ -87,6 +87,32 @@ MainWindow::MainWindow()
     SetupButtonBar();
 
 	SetupWindowFlags(false);
+
+    m_postProcess->AppendSlot(
+        post_process_slot_t(
+			QRegularExpression(R"(https?://[^\s]+|www\.[^\s]+)")
+            , [] (uint32_t) {}
+            , [] (uint32_t) {}
+            , [] (uint32_t, int, int, const QString&) {
+                QTextCharFormat fmt;
+				fmt.setFontUnderline(true);
+				fmt.setUnderlineStyle(QTextCharFormat::DotLine);
+                return fmt;
+            }
+	) );
+
+    m_postProcess->AppendSlot(
+        post_process_slot_t(
+			QRegularExpression(R"(\#[0-9a-fA-F]{6})")
+            , [] (uint32_t) {}
+            , [] (uint32_t) {}
+            , [] (uint32_t, int, int, const QString& text) {
+                QTextCharFormat fmt;
+                fmt.setBackground(QBrush(QColor(text)));
+                return fmt;
+            }
+	) );
+
 }
 
 void MainWindow::SetupActions()
@@ -277,9 +303,10 @@ bool MainWindow::eventFilter(QObject* obj, QEvent* evt)
 		QMouseEvent* mouseEvent = static_cast<QMouseEvent*> (evt);
         if (mouseEvent->modifiers() == Qt::ControlModifier)
         {
-			QTextCursor cursor = m_textEdit->cursorForPosition(m_textEdit->mapFromGlobal(mouseEvent->globalPos()));
-            const bool hasUrl = m_urlDetector->HasUrl(cursor.blockNumber(), cursor.positionInBlock());
+			//QTextCursor cursor = m_textEdit->cursorForPosition(m_textEdit->mapFromGlobal(mouseEvent->globalPos()));
+            //const bool hasUrl = m_urlDetector->HasUrl(cursor.blockNumber(), cursor.positionInBlock());
 
+            const bool hasUrl = false;
 
 			//const QPoint p = mouseEvent->pos();
 			//const QPoint pp = mouseEvent->globalPos();
@@ -323,7 +350,8 @@ bool MainWindow::eventFilter(QObject* obj, QEvent* evt)
     {
         QMouseEvent* mouseEvent = static_cast<QMouseEvent*> (evt);
 		QTextCursor cursor = m_textEdit->cursorForPosition(m_textEdit->mapFromGlobal(mouseEvent->globalPos()));
-        const QString url = m_urlDetector->GetUrl(cursor.blockNumber(), cursor.positionInBlock());
+        //const QString url = m_urlDetector->GetUrl(cursor.blockNumber(), cursor.positionInBlock());
+        const QString url = "";
         
         if (!url.isEmpty())
         {
@@ -956,7 +984,7 @@ void MainWindow::SetContent(const content_t& content)
 {
     m_textEdit->document()->setPlainText(Content::text(content));
     m_state.Set(State::Tag::Locked, Content::locked(content));
-    m_urlDetector->rehighlight();
+    m_postProcess->rehighlight();
 }
 
 window_t MainWindow::GetWindow() const

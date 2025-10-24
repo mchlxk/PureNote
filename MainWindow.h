@@ -17,7 +17,8 @@
 #include "PunExpected.h"
 
 #include "ButtonBar.h"
-#include "UrlDetector.h"
+
+#include "PostProcessExecutor.h"
 
 
 class MainWindow : public QMainWindow
@@ -159,8 +160,7 @@ private:
 
     QPlainTextEdit *m_textEdit{ nullptr };
     QLabel* m_statusLabel{ nullptr };
-    UrlDetector* m_urlDetector{ nullptr };
-
+    PostProcessExecutor* m_postProcess{ nullptr };
 
     button_bar_t* m_buttonBar{ nullptr };
 
