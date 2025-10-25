@@ -18,6 +18,9 @@ namespace Pun
 			const STORAGE_T& operator*() const { return value_; }
 			STORAGE_T& operator*() { return value_; }
 
+			const STORAGE_T* operator->() const { return &value_; }
+			STORAGE_T* operator->() { return &value_; }
+
 			operator bool() const { return has_value_; }
 
 		private:

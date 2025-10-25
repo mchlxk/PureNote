@@ -55,10 +55,9 @@ static inline void apply_qtbug_74655_workaround(T* item)
 }
 
 MainWindow::MainWindow()
-: m_textEdit(new QPlainTextEdit)
+: m_textEdit(new TextEdit)
 , m_statusLabel(new QLabel)
 , m_buttonBar(new button_bar_t(this, 24))
-, m_postProcess(new PostProcessExecutor(m_textEdit->document()))
 {
     QCoreApplication::instance()->installEventFilter(this);
     setContentsMargins(0, 0, 0, 0);
@@ -92,7 +91,7 @@ MainWindow::MainWindow()
 	formatUrl.setFontUnderline(true);
 	formatUrl.setUnderlineStyle(QTextCharFormat::DotLine);
 
-    m_postProcess->AddPass(
+    m_textEdit->PostProcess()->AddPass(
         post_process_pass_t(
 			QRegularExpression(R"(https?://[^\s]+|www\.[^\s]+)")
             , [this] (uint32_t blockId) { this->m_urlCache[blockId].clear(); }
@@ -106,7 +105,7 @@ MainWindow::MainWindow()
     const QBrush brushLight = QBrush(QColor(ColorScheme::Highlighter::text_light));
     const QBrush brushDark = QBrush(QColor(ColorScheme::Highlighter::text_dark));
 
-    m_postProcess->AddPass(
+    m_textEdit->PostProcess()->AddPass(
         post_process_pass_t(
 			QRegularExpression(R"(\#[0-9a-fA-F]{6})")
             , [] (uint32_t) {}
@@ -358,12 +357,10 @@ bool MainWindow::eventFilter(QObject* obj, QEvent* evt)
     if (MouseEvent::is_ctrl_lmb_press(evt) && action == MouseEvent::ActionE::None)
     {
         QMouseEvent* mouseEvent = static_cast<QMouseEvent*> (evt);
-		QTextCursor cursor = m_textEdit->cursorForPosition(m_textEdit->mapFromGlobal(mouseEvent->globalPos()));
-        const auto* blockData = cursor.block().userData();
-        if (blockData)
+        const auto blockPos = m_textEdit->GetBlockPosition(mouseEvent->globalPos());
+        if (blockPos)
         {
-            const uint32_t blockId = static_cast<const TextBlockTracker*>(blockData)->GetId();
-            const QString url = UrlCache::get_url(m_urlCache, blockId, cursor.positionInBlock());
+            const QString url = UrlCache::get_url(m_urlCache, blockPos->first, blockPos->second);
             if (!url.isEmpty())
             {
                 QDesktopServices::openUrl(QUrl(url));
@@ -980,7 +977,7 @@ void MainWindow::SetContent(const content_t& content)
 {
     m_textEdit->document()->setPlainText(Content::text(content));
     m_state.Set(State::Tag::Locked, Content::locked(content));
-    m_postProcess->rehighlight();
+    m_textEdit->PostProcess()->rehighlight();
 }
 
 window_t MainWindow::GetWindow() const

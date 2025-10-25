@@ -3,7 +3,6 @@
 #include <stack>
 
 #include <QMainWindow>
-#include <QPlainTextEdit>
 #include <QLabel>
 #include <QTimer>
 #include <QMessageBox>
@@ -13,6 +12,7 @@
 #include "Pun.h"
 #include "Save.h"
 
+#include "TextEdit.h"
 #include "PunOptional.h"
 #include "PunExpected.h"
 
@@ -159,9 +159,8 @@ private:
     QList<QAction*> m_fontFamilyActions;
     QList<QAction*> m_opacityActions;
 
-    QPlainTextEdit *m_textEdit{ nullptr };
+    TextEdit* m_textEdit{ nullptr };
     QLabel* m_statusLabel{ nullptr };
-    PostProcessExecutor* m_postProcess{ nullptr };
     url_cache_t m_urlCache;
 
     button_bar_t* m_buttonBar{ nullptr };
