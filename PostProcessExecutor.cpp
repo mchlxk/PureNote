@@ -24,17 +24,15 @@ void PostProcessExecutor::highlightBlock(const QString& text)
 		connect(data, &PostProcessBlock::about_to_be_destroyed, this, &PostProcessExecutor::at_postProcessBlock_aboutToBeDestroyed);
 		setCurrentBlockUserData(data);
 	}
-
 	const auto blockId = static_cast<PostProcessBlock*>(currentBlockUserData())->GetId();
-	for (auto& ppp : m_postProcessStack)
-		PostProcessPass::reset_block(ppp)(blockId);
-
 	for (auto& ppp : m_postProcessStack)
 		ExecutePass(ppp, blockId, text);
 }
 
 void PostProcessExecutor::ExecutePass(post_process_pass_t& ppp, uint32_t blockId, const QString& blockText)
 {
+	PostProcessPass::reset_block(ppp)(blockId);
+
 	auto it = PostProcessPass::phrase_regex(ppp).globalMatch(blockText);
 	while (it.hasNext())
 	{
