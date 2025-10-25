@@ -92,8 +92,8 @@ MainWindow::MainWindow()
 	formatUrl.setFontUnderline(true);
 	formatUrl.setUnderlineStyle(QTextCharFormat::DotLine);
 
-    m_postProcess->AppendSlot(
-        post_process_slot_t(
+    m_postProcess->AddPass(
+        post_process_pass_t(
 			QRegularExpression(R"(https?://[^\s]+|www\.[^\s]+)")
             , [this](uint32_t blockId) { this->m_urlCache[blockId].clear(); }
             , [this](uint32_t blockId) { this->m_urlCache.erase(blockId); }
@@ -106,8 +106,8 @@ MainWindow::MainWindow()
     const QBrush brushLight = QBrush(QColor(ColorScheme::Highlighter::text_light));
     const QBrush brushDark = QBrush(QColor(ColorScheme::Highlighter::text_dark));
 
-    m_postProcess->AppendSlot(
-        post_process_slot_t(
+    m_postProcess->AddPass(
+        post_process_pass_t(
 			QRegularExpression(R"(\#[0-9a-fA-F]{6})")
             , [] (uint32_t) {}
             , [] (uint32_t) {}

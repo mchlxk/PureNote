@@ -141,7 +141,7 @@
     <ClInclude Include="PostProcessExecutor.h">
       <Filter>Source Files</Filter>
     </ClInclude>
-    <ClInclude Include="PostProcessSlot.h">
+    <ClInclude Include="PostProcessPass.h">
       <Filter>Source Files</Filter>
     </ClInclude>
     <ClInclude Include="UrlCache.h">

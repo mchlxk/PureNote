@@ -7,7 +7,7 @@
 
 #include "ElementExtract.h"
 
-namespace PostProcessSlot
+namespace PostProcessPass
 {
     using block_init_t = std::function<void(uint32_t id)>;
     using block_destroyed_t = std::function<void(uint32_t id)>;
@@ -20,5 +20,5 @@ namespace PostProcessSlot
     ELEMENT_EXTRACT(T, 2, block_destroyed)
     ELEMENT_EXTRACT(T, 3, format_phrase)
 }
-using post_process_slot_t = PostProcessSlot::T;
+using post_process_pass_t = PostProcessPass::T;
 

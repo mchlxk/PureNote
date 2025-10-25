@@ -5,15 +5,15 @@ PostProcessExecutor::PostProcessExecutor(QTextDocument* parent)
 {
 }
 
-void PostProcessExecutor::AppendSlot(post_process_slot_t slot)
+void PostProcessExecutor::AddPass(post_process_pass_t ppp)
 {
-	m_postProcessStack.push_back(slot);
+	m_postProcessStack.push_back(ppp);
 }
 
 void PostProcessExecutor::at_postProcessBlock_aboutToBeDestroyed(uint32_t id)
 {
-	for (auto& slot : m_postProcessStack)
-		PostProcessSlot::block_destroyed(slot)(id);
+	for (auto& ppp : m_postProcessStack)
+		PostProcessPass::block_destroyed(ppp)(id);
 }
 
 void PostProcessExecutor::highlightBlock(const QString& text)
@@ -26,22 +26,22 @@ void PostProcessExecutor::highlightBlock(const QString& text)
 	}
 
 	const auto blockId = static_cast<PostProcessBlock*>(currentBlockUserData())->GetId();
-	for (auto& slot : m_postProcessStack)
-		PostProcessSlot::block_init(slot)(blockId);
+	for (auto& ppp : m_postProcessStack)
+		PostProcessPass::block_init(ppp)(blockId);
 
-	for (auto& slot : m_postProcessStack)
-		ProcessPerSlot(slot, blockId, text);
+	for (auto& ppp : m_postProcessStack)
+		ProcessPerPass(ppp, blockId, text);
 }
 
-void PostProcessExecutor::ProcessPerSlot(post_process_slot_t& slot, uint32_t blockId, const QString& blockText)
+void PostProcessExecutor::ProcessPerPass(post_process_pass_t& ppp, uint32_t blockId, const QString& blockText)
 {
-	auto it = PostProcessSlot::phrase_regex(slot).globalMatch(blockText);
+	auto it = PostProcessPass::phrase_regex(ppp).globalMatch(blockText);
 	while (it.hasNext())
 	{
 		auto match = it.next();
 		const int start = match.capturedStart();
 		const int length = match.capturedLength();
-		const auto format = PostProcessSlot::format_phrase(slot)(blockId, start, start+length, match.captured());
+		const auto format = PostProcessPass::format_phrase(ppp)(blockId, start, start+length, match.captured());
 		if (!format.isEmpty())
 			setFormat(start, length, format);
 	}

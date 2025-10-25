@@ -124,7 +124,7 @@
     <ClInclude Include="MouseEvent.h" />
     <QtMoc Include="PostProcessBlock.h" />
     <ClInclude Include="PostProcessExecutor.h" />
-    <ClInclude Include="PostProcessSlot.h" />
+    <ClInclude Include="PostProcessPass.h" />
     <ClInclude Include="Pun.h" />
     <ClInclude Include="PunExpected.h" />
     <ClInclude Include="PunOptional.h" />
