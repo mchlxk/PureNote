@@ -58,7 +58,7 @@ MainWindow::MainWindow()
 : m_textEdit(new QPlainTextEdit)
 , m_statusLabel(new QLabel)
 , m_buttonBar(new button_bar_t(this, 24))
-, m_postProcess( new PostProcessExecutor(m_textEdit->document()) )
+, m_postProcess(new PostProcessExecutor(m_textEdit->document()))
 {
     QCoreApplication::instance()->installEventFilter(this);
     setContentsMargins(0, 0, 0, 0);
@@ -95,8 +95,8 @@ MainWindow::MainWindow()
     m_postProcess->AddPass(
         post_process_pass_t(
 			QRegularExpression(R"(https?://[^\s]+|www\.[^\s]+)")
-            , [this](uint32_t blockId) { this->m_urlCache[blockId].clear(); }
-            , [this](uint32_t blockId) { this->m_urlCache.erase(blockId); }
+            , [this] (uint32_t blockId) { this->m_urlCache[blockId].clear(); }
+            , [this] (uint32_t blockId) { this->m_urlCache.erase(blockId); }
             , [this, formatUrl] (uint32_t blockId, int start, int end, const QString& url) {
                 this->m_urlCache[blockId].emplace_back(start, end, url);
                 return formatUrl;
@@ -115,14 +115,13 @@ MainWindow::MainWindow()
                 QTextCharFormat fmt;
                 const QColor bgColor(phrase);
                 fmt.setBackground(QBrush(bgColor));
-                if(bgColor.lightness() > 128)
+                if(bgColor.lightness() > ColorScheme::Highlighter::text_lightness_threshold)
 					fmt.setForeground(brushDark);
                 else
 					fmt.setForeground(brushLight);
                 return fmt;
             }
 	) );
-
 }
 
 void MainWindow::SetupActions()
@@ -363,7 +362,7 @@ bool MainWindow::eventFilter(QObject* obj, QEvent* evt)
         const auto* blockData = cursor.block().userData();
         if (blockData)
         {
-            const uint32_t blockId = static_cast<const PostProcessBlock*>(blockData)->GetId();
+            const uint32_t blockId = static_cast<const TextBlockTracker*>(blockData)->GetId();
             const QString url = UrlCache::get_url(m_urlCache, blockId, cursor.positionInBlock());
             if (!url.isEmpty())
             {

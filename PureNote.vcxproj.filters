@@ -67,7 +67,7 @@
     <ClCompile Include="State.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="PostProcessBlock.cpp">
+    <ClCompile Include="TextBlockTracker.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="PostProcessExecutor.cpp">
@@ -87,7 +87,7 @@
     <QtMoc Include="State.h">
       <Filter>Source Files</Filter>
     </QtMoc>
-    <QtMoc Include="PostProcessBlock.h">
+    <QtMoc Include="TextBlockTracker.h">
       <Filter>Source Files</Filter>
     </QtMoc>
   </ItemGroup>

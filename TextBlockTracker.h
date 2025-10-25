@@ -1,14 +1,14 @@
 #include <QObject>
 #include <QTextBlockUserData>
 
-class PostProcessBlock
+class TextBlockTracker
 : public QObject
 , public QTextBlockUserData
 {
 Q_OBJECT
 
 public:
-	PostProcessBlock(QObject* parent = nullptr);
+	TextBlockTracker(QObject* parent = nullptr);
 
 	 uint32_t GetId() const;
 

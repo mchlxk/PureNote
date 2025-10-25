@@ -98,7 +98,7 @@
     <ClCompile Include="main.cpp" />
     <ClCompile Include="MainWindow.cpp" />
     <ClCompile Include="MouseEvent.cpp" />
-    <ClCompile Include="PostProcessBlock.cpp" />
+    <ClCompile Include="TextBlockTracker.cpp" />
     <ClCompile Include="PostProcessExecutor.cpp" />
     <ClCompile Include="PunParser.cpp" />
     <ClCompile Include="PunSerializer.cpp" />
@@ -122,7 +122,7 @@
     <ClInclude Include="ColorScheme.h" />
     <ClInclude Include="HashQString.h" />
     <ClInclude Include="MouseEvent.h" />
-    <QtMoc Include="PostProcessBlock.h" />
+    <QtMoc Include="TextBlockTracker.h" />
     <ClInclude Include="PostProcessExecutor.h" />
     <ClInclude Include="PostProcessPass.h" />
     <ClInclude Include="Pun.h" />

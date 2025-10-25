@@ -32,6 +32,7 @@ namespace ColorScheme
 	{
 		extern const QString text_light;
 		extern const QString text_dark;
+		static constexpr int text_lightness_threshold{ 128 };
 	}
 }
 
