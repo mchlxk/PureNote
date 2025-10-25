@@ -22,6 +22,6 @@ protected:
 private:
 	std::vector<post_process_pass_t> m_postProcessStack;
 
-	void ProcessPerPass(post_process_pass_t& ppp, uint32_t blockId, const QString& blockText);
+	void ExecutePass(post_process_pass_t& ppp, uint32_t blockId, const QString& blockText);
 };
 

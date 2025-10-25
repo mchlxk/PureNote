@@ -27,13 +27,13 @@ void PostProcessExecutor::highlightBlock(const QString& text)
 
 	const auto blockId = static_cast<PostProcessBlock*>(currentBlockUserData())->GetId();
 	for (auto& ppp : m_postProcessStack)
-		PostProcessPass::block_init(ppp)(blockId);
+		PostProcessPass::reset_block(ppp)(blockId);
 
 	for (auto& ppp : m_postProcessStack)
-		ProcessPerPass(ppp, blockId, text);
+		ExecutePass(ppp, blockId, text);
 }
 
-void PostProcessExecutor::ProcessPerPass(post_process_pass_t& ppp, uint32_t blockId, const QString& blockText)
+void PostProcessExecutor::ExecutePass(post_process_pass_t& ppp, uint32_t blockId, const QString& blockText)
 {
 	auto it = PostProcessPass::phrase_regex(ppp).globalMatch(blockText);
 	while (it.hasNext())
