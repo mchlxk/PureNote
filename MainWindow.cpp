@@ -121,6 +121,24 @@ MainWindow::MainWindow()
                 return fmt;
             }
 	) );
+
+    m_textEdit->PostProcess()->AddPass(
+        post_process_pass_t(
+			QRegularExpression(R"(^\-{3,}$)")
+            , [] (uint32_t) {}
+            , [] (uint32_t) {}
+            , [this] (uint32_t, int, int, const QString& phrase) {
+                const QString schemeName = Style::color_scheme(this->m_style);
+                const QString bgColor = ColorScheme::background(ColorScheme::schemas.at(schemeName));
+                const QString fgColor = ColorScheme::color(ColorScheme::schemas.at(schemeName));
+                QTextCharFormat fmt;
+                fmt.setForeground(QBrush(QColor(bgColor)));
+                fmt.setFontUnderline(true);
+                fmt.setUnderlineColor(fgColor);
+                fmt.setUnderlineStyle(QTextCharFormat::WaveUnderline);
+                return fmt;
+            }
+	) );
 }
 
 void MainWindow::SetupActions()
@@ -260,15 +278,18 @@ void MainWindow::SetupContextMenu()
 void MainWindow::SetupButtonBar()
 {
     connect(m_buttonBar, &button_bar_t::button_clicked, this, &MainWindow::at_buttonBar_buttonClicked);
+
     m_buttonBar->AddButton("close");
     m_buttonBar->SetButtonStyleSheet("close", "QToolButton{ border: 0;}" + StyleSheet::format_tooltip());
     m_buttonBar->SetButtonTooltip("close", "Close");
+
     m_buttonBar->AddButton("minimize");
     m_buttonBar->SetButtonStyleSheet("minimize", "QToolButton{ border: 0;}" + StyleSheet::format_tooltip());
     m_buttonBar->SetButtonTooltip("minimize", "Minimize");
+
     m_buttonBar->AddButton("top_lock");
     m_buttonBar->SetButtonStyleSheet("top_lock", "QToolButton{ border: 0;}" + StyleSheet::format_tooltip());
-    m_buttonBar->SetButtonTooltip("top_lock", "Stay on Top");
+
     m_buttonBar->Hide();
     UpdateButtonBarIcons();
     setMinimumWidth(m_buttonBar->GetMinimumWidth());
@@ -808,6 +829,7 @@ void MainWindow::UpdatePerStyle()
     m_textEdit->setStyleSheet(StyleSheet::format_text_edit(m_style));
     statusBar()->setStyleSheet(StyleSheet::format_status_bar(m_style));
     m_statusLabel->setStyleSheet(StyleSheet::format_status_label(m_style));
+    m_textEdit->PostProcess()->rehighlight();
 
     const auto schema = ColorScheme::schemas.at(Style::color_scheme(m_style));
     setWindowIcon(SchemeIcon::get_window_icon(schema, 32));
@@ -820,13 +842,17 @@ void MainWindow::UpdateButtonBarIcons()
 	m_buttonBar->SetButtonIcon("close", SchemeIcon::get_close_icon(schema, m_buttonBar->GetButtonSize()));
 	m_buttonBar->SetButtonIcon("minimize", SchemeIcon::get_minimize_icon(schema, m_buttonBar->GetButtonSize()));
 
-    if(m_state.Get(State::Tag::OnTop))
+    if (m_state.Get(State::Tag::OnTop))
+    {
         m_buttonBar->SetButtonIcon("top_lock", SchemeIcon::get_top_lock_on_icon(schema, m_buttonBar->GetButtonSize()));
+		m_buttonBar->SetButtonTooltip("top_lock", "Stay on Top (on)");
+    }
     else
+    {
         m_buttonBar->SetButtonIcon("top_lock", SchemeIcon::get_top_lock_off_icon(schema, m_buttonBar->GetButtonSize()));
+		m_buttonBar->SetButtonTooltip("top_lock", "Stay on Top (off)");
+    }
 }
-
-
 
 void MainWindow::UpdatePerFullscreen()
 {
