@@ -28,7 +28,7 @@ namespace EventHandler
 	struct MmbMove
 	: public T
 	{
-		MmbMove(MainWindow* parent, const QPoint& pos);
+		MmbMove(MainWindow* parent, const QPoint& globalPos);
 		std::pair<bool, T*> operator()(QEvent* evt) override;
 	private:
 		const QPoint m_parentStartPos;

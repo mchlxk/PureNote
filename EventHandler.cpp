@@ -46,6 +46,31 @@ std::pair<bool, EventHandler::T*> EventHandler::Idle::operator()(QEvent* evt)
 		case EvtType::E::MmbPress:
 			return { false, new EventHandler::MmbMove(m_parent, static_cast<QMouseEvent*>(evt)->globalPos()) };
 
+		case EvtType::E::WheelUpCtrl:
+		{
+			m_parent->IncreaseFontSize();
+			return { true, nullptr };
+		}
+
+		case EvtType::E::WheelDownCtrl:
+		{
+			m_parent->DecreaseFontSize();
+			return { true, nullptr };
+		}
+
+		case EvtType::E::WheelUpAlt:
+		{
+			m_parent->IncreaseOpacity();
+			return { true, nullptr };
+		}
+
+		case EvtType::E::WheelDownAlt:
+		{
+			m_parent->DecreaseOpacity();
+			return { true, nullptr };
+		}
+
+
 	}
 
 	return { false, nullptr };
@@ -53,9 +78,9 @@ std::pair<bool, EventHandler::T*> EventHandler::Idle::operator()(QEvent* evt)
 
 
 
-EventHandler::MmbMove::MmbMove(MainWindow* parent, const QPoint& pos)
+EventHandler::MmbMove::MmbMove(MainWindow* parent, const QPoint& globalPos)
 : T(parent)
-, m_mouseStartPos(pos)
+, m_mouseStartPos(globalPos)
 , m_parentStartPos(m_parent->pos()) 
 {
 }
