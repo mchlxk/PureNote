@@ -4,6 +4,7 @@
 
 #include <QEvent>
 #include <QPoint>
+#include <QSize>
 
 class MainWindow;
 
@@ -31,8 +32,28 @@ namespace EventHandler
 		MmbMove(MainWindow* parent, const QPoint& globalPos);
 		std::pair<bool, T*> operator()(QEvent* evt) override;
 	private:
-		const QPoint m_parentStartPos;
 		const QPoint m_mouseStartPos;
+		const QPoint m_parentStartPos;
+	};
+
+	struct LmbMove
+	: public T
+	{
+		LmbMove(MainWindow* parent, const QPoint& globalPos);
+		std::pair<bool, T*> operator()(QEvent* evt) override;
+	private:
+		const QPoint m_mouseStartPos;
+		const QPoint m_parentStartPos;
+	};
+
+	struct RmbResize
+	: public T
+	{
+		RmbResize(MainWindow* parent, const QPoint& globalPos);
+		std::pair<bool, T*> operator()(QEvent* evt) override;
+	private:
+		const QPoint m_mouseStartPos;
+		const QSize m_parentStartSize;
 	};
 }
 using event_handler_t = EventHandler::T;

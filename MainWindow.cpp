@@ -5,9 +5,6 @@
 
 #include "Mainwindow.h"
 
-// TBD
-#include "MouseEvent.h"
-#include "EvtType.h"
 #include "EventHandler.h"
 
 #include "StyleSheet.h"
@@ -336,27 +333,6 @@ bool MainWindow::eventFilter(QObject* obj, QEvent* evt)
 
 
     /*
-    static QPoint startPos;
-    static QSize startSize;
-    static QPoint mouseStartPos;
-    static MouseEvent::ActionE action{ MouseEvent::ActionE::None };
-
-    const auto type = EvtType::get(evt);
-
-    switch (type)
-    {
-		case EvtType::E::MouseMove:
-		{
-            if (action == MouseEvent::ActionE::None)
-            {
-				if(m_buttonBar->Contains(static_cast<QMouseEvent*>(evt)->globalPos()))
-					m_buttonBar->Show();
-				else
-					m_buttonBar->Hide();
-                return false;
-            }
-		}
-    }
 
     if (evt->type() == QEvent::MouseMove && action == MouseEvent::ActionE::None)
     {
@@ -394,18 +370,6 @@ bool MainWindow::eventFilter(QObject* obj, QEvent* evt)
         }
     }
 
-    // Exit early on plain mouse-move
-    if (evt->type() == QEvent::MouseMove && action == MouseEvent::ActionE::None)
-    {
-		QMouseEvent* mouseEvent = static_cast<QMouseEvent*> (evt);
-        if(m_buttonBar->Contains(mouseEvent->globalPos()))
-            m_buttonBar->Show();
-        else
-            m_buttonBar->Hide();
-
-        return false;
-    }
-
     if (MouseEvent::is_ctrl_lmb_press(evt) && action == MouseEvent::ActionE::None)
     {
         QMouseEvent* mouseEvent = static_cast<QMouseEvent*> (evt);
@@ -422,149 +386,6 @@ bool MainWindow::eventFilter(QObject* obj, QEvent* evt)
         return false;
     }
 
-    // let QT emit context-menu-requested
-    if (MouseEvent::is_rmb_release(evt) && action == MouseEvent::ActionE::None)
-        return false;
-
-    if (evt->type() == QEvent::WindowActivate)
-    {
-        m_state.Set(State::Tag::HasDialogContext);
-        return false;
-    }
-
-    if (evt->type() == QEvent::WindowDeactivate)
-    {
-        m_state.Clear(State::Tag::HasDialogContext);
-        return false;
-    }
-
-    if (evt->type() == QEvent::Enter)
-    {
-        m_state.Set(State::Tag::HasMouseContext);
-        return false;
-    }
-
-    if (evt->type() == QEvent::Leave)
-    {
-        m_state.Clear(State::Tag::HasMouseContext);
-        return false;
-    }
-
-    if (MouseEvent::is_ctrl_wheel_up(evt))
-    {
-        IncreaseFontSize();
-		return true;
-    }
-
-    if (MouseEvent::is_ctrl_wheel_down(evt))
-    {
-        DecreaseFontSize();
-		return true;
-    }
-
-
-    // Do not process any of the following events in fullscreen mode
-    if (m_state.Get(State::Tag::Fullscreen))
-        return false;
-
-    if (MouseEvent::is_mmb_press(evt))
-    {
-        QMouseEvent* mouseEvent = static_cast<QMouseEvent*>(evt);
-        mouseStartPos = mouseEvent->globalPos();
-        startPos = pos();
-        action = MouseEvent::ActionE::MoveMmb;
-        return false;
-    }
-
-    if (MouseEvent::is_alt_lmb_press(evt))
-    {
-        QMouseEvent* mouseEvent = static_cast<QMouseEvent*>(evt);
-        mouseStartPos = mouseEvent->globalPos();
-        startPos = pos();
-        action = MouseEvent::ActionE::MoveLmb;
-        return true;
-    }
-
-    if (MouseEvent::is_alt_rmb_press(evt))
-    {
-        QMouseEvent* mouseEvent = static_cast<QMouseEvent*>(evt);
-        mouseStartPos = mouseEvent->globalPos();
-        startSize = size();
-        action = MouseEvent::ActionE::ResizeAltRmb;
-        return true;
-    }
-
-    if (MouseEvent::is_lmb_press(evt))
-    {
-        QMouseEvent* mouseEvent = static_cast<QMouseEvent*>(evt);
-        QRect grabArea(statusBar()->frameGeometry());
-        // leave space for size-grip
-        grabArea.setWidth(grabArea.width() - grabArea.height());
-        if (grabArea.contains(mouseEvent->pos()))
-        {
-			mouseStartPos = mouseEvent->globalPos();
-			startPos = pos();
-			action = MouseEvent::ActionE::MoveLmb;
-			return true;
-        }
-    }
-
-    if (evt->type() == QEvent::MouseMove)
-    {
-        switch (action)
-        {
-            case MouseEvent::ActionE::None:
-                break;
-
-            case MouseEvent::ActionE::MoveMmb:
-            case MouseEvent::ActionE::MoveLmb:
-            {
-                QMouseEvent* mouseEvent = static_cast<QMouseEvent*> (evt);
-                move(startPos + (mouseEvent->globalPos() - mouseStartPos));
-                return false;
-            }
-
-            case MouseEvent::ActionE::ResizeAltRmb:
-            {
-                QMouseEvent* mouseEvent = static_cast<QMouseEvent*> (evt);
-                const auto sizeChange = mouseEvent->globalPos() - mouseStartPos;
-                resize(startSize.width() + sizeChange.x(), startSize.height() + sizeChange.y());
-                return false;
-            }
-        }
-    }
-
-    if (MouseEvent::is_lmb_release(evt) && action == MouseEvent::ActionE::MoveLmb)
-    {
-        action = MouseEvent::ActionE::None;
-        return false; // return false to unblock updating mouse cursor
-    }
-
-    if (MouseEvent::is_mmb_release(evt) && action == MouseEvent::ActionE::MoveMmb)
-    {
-        action = MouseEvent::ActionE::None;
-        return false; // return false to unblock updating mouse cursor
-    }
-
-    if (MouseEvent::is_rmb_release(evt) && action == MouseEvent::ActionE::ResizeAltRmb)
-    {
-        action = MouseEvent::ActionE::None;
-        return false; // return false to unblock updating mouse cursor
-    }
-
-    if (MouseEvent::is_alt_wheel_down(evt))
-    {
-        DecreaseOpacity();
-        return true;
-    }
-
-    if (MouseEvent::is_alt_wheel_up(evt))
-    {
-        IncreaseOpacity();
-        return true;
-    }
-
-    return false;
     */
 }
 

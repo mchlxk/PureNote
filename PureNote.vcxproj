@@ -99,7 +99,6 @@
     <ClCompile Include="EvtType.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="MainWindow.cpp" />
-    <ClCompile Include="MouseEvent.cpp" />
     <ClCompile Include="TextBlockTracker.cpp" />
     <ClCompile Include="PostProcessExecutor.cpp" />
     <ClCompile Include="PunParser.cpp" />
@@ -127,7 +126,6 @@
     <ClInclude Include="EvtType.h" />
     <ClInclude Include="EvenParser.h" />
     <ClInclude Include="HashQString.h" />
-    <ClInclude Include="MouseEvent.h" />
     <QtMoc Include="TextBlockTracker.h" />
     <ClInclude Include="PostProcessExecutor.h" />
     <ClInclude Include="PostProcessPass.h" />
