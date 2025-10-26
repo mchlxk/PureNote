@@ -21,6 +21,8 @@
 #include "PostProcessExecutor.h"
 #include "UrlCache.h"
 
+#include "EventHandler.h"
+
 
 class MainWindow : public QMainWindow
 {
@@ -30,6 +32,10 @@ public:
     MainWindow();
 
     void LoadFile(const QString &fileName);
+
+    friend struct EventHandler::T;
+    friend struct EventHandler::Idle;
+    friend struct EventHandler::MmbMove;
 
 protected:
     bool eventFilter(QObject* obj, QEvent* e) override;

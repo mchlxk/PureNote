@@ -79,6 +79,12 @@
     <ClCompile Include="TextEdit.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="EvtType.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="EventHandler.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <QtMoc Include="MainWindow.h">
@@ -151,6 +157,13 @@
       <Filter>Source Files</Filter>
     </ClInclude>
     <ClInclude Include="TextEdit.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="EvenParser.h" />
+    <ClInclude Include="EvtType.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="EventHandler.h">
       <Filter>Source Files</Filter>
     </ClInclude>
   </ItemGroup>

@@ -4,7 +4,11 @@
 #include <QGuiApplication>
 
 #include "Mainwindow.h"
+
+// TBD
 #include "MouseEvent.h"
+#include "EvtType.h"
+#include "EventHandler.h"
 
 #include "StyleSheet.h"
 #include "ColorScheme.h"
@@ -322,10 +326,37 @@ void MainWindow::moveEvent(QMoveEvent* event)
 
 bool MainWindow::eventFilter(QObject* obj, QEvent* evt)
 {
+    static std::unique_ptr<event_handler_t> eventHandler{ new EventHandler::Idle(this) };
+    bool rv;
+    event_handler_t* newHandler;
+    std::tie(rv, newHandler) = (*eventHandler)(evt);
+    if (newHandler)
+        eventHandler = std::unique_ptr<event_handler_t>(newHandler);
+    return rv;
+
+
+    /*
     static QPoint startPos;
     static QSize startSize;
     static QPoint mouseStartPos;
     static MouseEvent::ActionE action{ MouseEvent::ActionE::None };
+
+    const auto type = EvtType::get(evt);
+
+    switch (type)
+    {
+		case EvtType::E::MouseMove:
+		{
+            if (action == MouseEvent::ActionE::None)
+            {
+				if(m_buttonBar->Contains(static_cast<QMouseEvent*>(evt)->globalPos()))
+					m_buttonBar->Show();
+				else
+					m_buttonBar->Hide();
+                return false;
+            }
+		}
+    }
 
     if (evt->type() == QEvent::MouseMove && action == MouseEvent::ActionE::None)
     {
@@ -534,6 +565,7 @@ bool MainWindow::eventFilter(QObject* obj, QEvent* evt)
     }
 
     return false;
+    */
 }
 
 
