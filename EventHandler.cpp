@@ -67,18 +67,6 @@ std::pair<bool, EventHandler::T*> EventHandler::Idle::operator()(QEvent* evt)
 		case EvtType::E::RmbPressAlt:
 			return { false, new EventHandler::RmbResize(m_parent, static_cast<QMouseEvent*>(evt)->globalPos()) };
 
-		case EvtType::E::WheelUpCtrl:
-		{
-			m_parent->IncreaseFontSize();
-			return { true, nullptr };
-		}
-
-		case EvtType::E::WheelDownCtrl:
-		{
-			m_parent->DecreaseFontSize();
-			return { true, nullptr };
-		}
-
 		case EvtType::E::WheelUpAlt:
 		{
 			m_parent->IncreaseOpacity();
@@ -130,6 +118,18 @@ std::pair<bool, EventHandler::T*> EventHandler::Ctrl::operator()(QEvent* evt)
 			if(!url.isEmpty())
 				QDesktopServices::openUrl(QUrl(url));
 			break;
+		}
+
+		case EvtType::E::WheelUpCtrl:
+		{
+			m_parent->IncreaseFontSize();
+			return { true, nullptr };
+		}
+
+		case EvtType::E::WheelDownCtrl:
+		{
+			m_parent->DecreaseFontSize();
+			return { true, nullptr };
 		}
 
 		case EvtType::E::CtrlRelease: //fallthrough
