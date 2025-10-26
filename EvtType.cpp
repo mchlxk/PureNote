@@ -71,6 +71,20 @@ EvtType::E EvtType::get(QEvent* evt)
     if (evt->type() == QEvent::Leave)
         return EvtType::E::Leave;
 
+    if (evt->type() == QEvent::KeyPress)
+    {
+        const QKeyEvent* keyEvent = static_cast<QKeyEvent*>(evt);
+        if (keyEvent->key() == Qt::Key_Control)
+            return EvtType::E::CtrlPress;
+    }
+
+    if (evt->type() == QEvent::KeyRelease)
+    {
+        const QKeyEvent* keyEvent = static_cast<QKeyEvent*>(evt);
+        if (keyEvent->key() == Qt::Key_Control)
+            return EvtType::E::CtrlRelease;
+    }
+
     return EvtType::E::None;
 }
 

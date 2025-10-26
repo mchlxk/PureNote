@@ -1,8 +1,11 @@
 #include <QStatusBar>
+#include <QGuiApplication>
+#include <QDesktopServices>
 
 #include "EventHandler.h"
 
 #include "EvtType.h"
+#include "UrlCache.h"
 
 #include "MainWindow.h"
 
@@ -87,11 +90,68 @@ std::pair<bool, EventHandler::T*> EventHandler::Idle::operator()(QEvent* evt)
 			m_parent->DecreaseOpacity();
 			return { true, nullptr };
 		}
+
+		case EvtType::E::CtrlPress: //fallthrough
+		case EvtType::E::MouseMoveCtrl:
+			return { false, new EventHandler::Ctrl(m_parent) };
 	}
 
 	return { false, nullptr };
 }
 
+
+EventHandler::Ctrl::~Ctrl()
+{
+	SetHandCursor(false);
+}
+
+std::pair<bool, EventHandler::T*> EventHandler::Ctrl::operator()(QEvent* evt)
+{
+	switch (EvtType::get(evt))
+	{
+		case EvtType::E::MouseMoveCtrl:
+		{
+			const QMouseEvent* mouseEvent = static_cast<QMouseEvent*> (evt);
+			const auto blockPos = m_parent->m_textEdit->GetBlockPosition(mouseEvent->globalPos());
+			const bool hasUrl = (blockPos)
+				? UrlCache::has_url(m_parent->m_urlCache, blockPos->first, blockPos->second)
+				: false;
+			SetHandCursor(hasUrl);
+			break;
+		}
+
+		case EvtType::E::LmbPressCtrl:
+		{
+			const QMouseEvent* mouseEvent = static_cast<QMouseEvent*> (evt);
+			const auto blockPos = m_parent->m_textEdit->GetBlockPosition(mouseEvent->globalPos());
+			const QString url = (blockPos)
+				? UrlCache::get_url(m_parent->m_urlCache, blockPos->first, blockPos->second)
+				: QString();
+			if(!url.isEmpty())
+				QDesktopServices::openUrl(QUrl(url));
+			break;
+		}
+
+		case EvtType::E::CtrlRelease: //fallthrough
+		case EvtType::E::Leave: //fallthrough
+		case EvtType::E::MouseMove:
+			return { true, new EventHandler::Idle(m_parent) };
+	}
+
+	return { false, nullptr };
+}
+
+void EventHandler::Ctrl::SetHandCursor(bool on)
+{
+	static bool hasHandCursor{ false };
+	if (hasHandCursor == on)
+		return;
+	if(on)
+		QGuiApplication::setOverrideCursor(Qt::PointingHandCursor);
+	else
+		QGuiApplication::restoreOverrideCursor();
+	hasHandCursor = on;
+}
 
 
 EventHandler::MmbMove::MmbMove(MainWindow* parent, const QPoint& globalPos)

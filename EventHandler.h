@@ -26,6 +26,16 @@ namespace EventHandler
 		std::pair<bool, T*> operator()(QEvent* evt) override;
 	};
 
+	struct Ctrl
+	: public T
+	{
+		Ctrl(MainWindow* parent) : T(parent) {}
+		~Ctrl();
+		std::pair<bool, T*> operator()(QEvent* evt) override;
+	private:
+		void SetHandCursor(bool on);
+	};
+
 	struct MmbMove
 	: public T
 	{

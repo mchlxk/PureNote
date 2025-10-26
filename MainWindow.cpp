@@ -330,66 +330,7 @@ bool MainWindow::eventFilter(QObject* obj, QEvent* evt)
     if (newHandler)
         eventHandler = std::unique_ptr<event_handler_t>(newHandler);
     return rv;
-
-
-    /*
-
-    if (evt->type() == QEvent::MouseMove && action == MouseEvent::ActionE::None)
-    {
-		QMouseEvent* mouseEvent = static_cast<QMouseEvent*> (evt);
-        if (mouseEvent->modifiers() == Qt::ControlModifier)
-        {
-			//QTextCursor cursor = m_textEdit->cursorForPosition(m_textEdit->mapFromGlobal(mouseEvent->globalPos()));
-            //const bool hasUrl = m_urlDetector->HasUrl(cursor.blockNumber(), cursor.positionInBlock());
-
-            const bool hasUrl = false;
-
-			//const QPoint p = mouseEvent->pos();
-			//const QPoint pp = mouseEvent->globalPos();
-
-			//QTextCursor cursor = m_textEdit->cursorForPosition(m_textEdit->mapFromGlobal(mouseEvent->globalPos()));
-			//QTextCursor cursor = m_textEdit->cursorForPosition(QPoint(200, 200));
-			//const QTextCharFormat fmt = cursor.charFormat();
-
-            //const auto fmt = m_urlHighlighter->GetFormat(10);
-            
-			//if (fmt.isAnchor())
-			if (hasUrl)
-			{
-				QGuiApplication::setOverrideCursor(Qt::PointingHandCursor);
-				//setCursor(Qt::PointingHandCursor);
-				//QTextCharFormat fmtActive(fmt);
-				//fmtActive.setUnderlineStyle(QTextCharFormat::SingleUnderline);
-				//cursor.mergeCharFormat(fmtActive);
-			}
-			else
-				QGuiApplication::restoreOverrideCursor();
-				//QGuiApplication::setOverrideCursor(Qt::PointingHandCursor);
-				//m_textEdit->setCursor(Qt::IBeamCursor);
-
-        }
-    }
-
-    if (MouseEvent::is_ctrl_lmb_press(evt) && action == MouseEvent::ActionE::None)
-    {
-        QMouseEvent* mouseEvent = static_cast<QMouseEvent*> (evt);
-        const auto blockPos = m_textEdit->GetBlockPosition(mouseEvent->globalPos());
-        if (blockPos)
-        {
-            const QString url = UrlCache::get_url(m_urlCache, blockPos->first, blockPos->second);
-            if (!url.isEmpty())
-            {
-                QDesktopServices::openUrl(QUrl(url));
-                return true;
-            }
-        }
-        return false;
-    }
-
-    */
 }
-
-
 
 void MainWindow::at_textEdit_customContextMenuRequested(const QPoint& pos)
 {

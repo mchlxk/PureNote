@@ -29,6 +29,8 @@ namespace EvtType
 		WheelDownCtrl,
 		WheelUpAlt,
 		WheelDownAlt,
+		CtrlPress,
+		CtrlRelease
 	};
 
 	E get(QEvent* evt);

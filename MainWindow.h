@@ -35,7 +35,10 @@ public:
 
     friend struct EventHandler::T;
     friend struct EventHandler::Idle;
+    friend struct EventHandler::Ctrl;
     friend struct EventHandler::MmbMove;
+    friend struct EventHandler::LmbMove;
+    friend struct EventHandler::RmbResize;
 
 protected:
     bool eventFilter(QObject* obj, QEvent* e) override;
